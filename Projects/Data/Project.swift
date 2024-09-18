@@ -6,7 +6,7 @@ let project = Project(
         .target(
             name: "Data",
             destinations: .iOS,
-            product: .staticFramework,
+            product: .framework,
             bundleId: "com.CoinViewer.Data",
             sources: ["DataSource/**", "DTO/**", "Repository/**"],
             dependencies: [

@@ -6,7 +6,7 @@ let project = Project(
         .target(
             name: "Domain",
             destinations: .iOS,
-            product: .staticFramework,
+            product: .framework,
             bundleId: "com.CoinViewer.Domain",
             sources: ["RepositoryInterface/**", "VO/**"],
             dependencies: []

@@ -6,7 +6,7 @@ let project = Project(
         .target(
             name: "BaseFeature",
             destinations: .iOS,
-            product: .staticFramework,
+            product: .framework,
             bundleId: "com.CoinViewer.BaseFeature",
             sources: ["Sources/**"],
             resources: ["Resources/**"],
