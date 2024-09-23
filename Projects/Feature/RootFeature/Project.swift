@@ -1,26 +1,28 @@
 import ProjectDescription
 
 let project = Project(
-    name: "Domain",
+    name: "RootFeature",
     targets: [
         .target(
-            name: "Domain",
+            name: "RootFeature",
             destinations: .iOS,
             product: .framework,
-            bundleId: "com.CoinViewer.Domain",
+            bundleId: "com.CoinViewer.Feature.RootFeature",
             sources: ["Sources/**"],
             resources: ["Resources/**"],
-            dependencies: []
+            dependencies: [
+                .project(target: "BaseFeature", path: "../BaseFeature")
+            ]
         ),
         .target(
-            name: "DomainTests",
+            name: "RootFeatureTests",
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "io.tuist.DomainTests",
+            bundleId: "io.tuist.Feature.RootFeatureTests",
             infoPlist: .default,
             sources: ["Tests/**"],
             resources: [],
-            dependencies: [.target(name: "Domain")]
+            dependencies: [.target(name: "RootFeature")]
         ),
     ]
 )

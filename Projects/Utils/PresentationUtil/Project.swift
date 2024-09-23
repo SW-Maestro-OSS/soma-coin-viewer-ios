@@ -1,19 +1,20 @@
 import ProjectDescription
 
 let project = Project(
-    name: "RootFeature",
+    name: "PresentationUtil",
     targets: [
         .target(
-            name: "RootFeature",
+            name: "PresentationUtil",
             destinations: .iOS,
             product: .framework,
-            bundleId: "com.CoinViewer.RootFeature",
+            bundleId: "com.CoinViewer.Utils.PresentationUtil",
             sources: ["Sources/**"],
             resources: ["Resources/**"],
             dependencies: [
-                .project(target: "BaseFeature", path: "../BaseFeature")
+                .project(target: "CoreUtil", path: "../CoreUtil")
             ]
-        )
+        ),
     ]
 )
+
 

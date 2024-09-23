@@ -1,5 +1,4 @@
 import XCTest
-@testable import App  // 테스트하려는 모듈을 가져오기
 
 class AppTests: XCTestCase {
 
