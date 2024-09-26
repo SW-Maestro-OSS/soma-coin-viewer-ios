@@ -68,7 +68,7 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
     }
     
     public func disconnect() {
-        task?.cancel()
+        task?.cancel(with: .normalClosure, reason: nil)
     }
     
     private func receive() {
@@ -81,7 +81,12 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
                 self?.callback?(message)
                 
             case .failure(let failure):
-                printIfDebug(failure.localizedDescription)
+                
+                if let urlError = failure as? URLError, urlError.code == .cancelled {
+                    
+                    // 테스크 연결해제시(disconnect) 수신을 재개하지 않고 종료
+                    return
+                }
             }
             
             // 재귀호출
@@ -95,6 +100,9 @@ extension DefaultWebSocketService: URLSessionWebSocketDelegate {
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         
         printIfDebug("✅ 웹소캣 열림")
+        
+        // 메세지 수신 시작
+        receive()
     }
     
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
