@@ -15,8 +15,8 @@ import PackageDescription
 let package = Package(
     name: "CoinViewer",
     dependencies: [
-        // Add your own dependencies here:
-        // .package(url: "https://github.com/Alamofire/Alamofire", from: "5.0.0"),
-        // You can read more about dependencies here: https://docs.tuist.io/documentation/tuist/dependencies
+        
+        // [Service locator] - Swinject
+        .package(url: "https://github.com/Swinject/Swinject.git", from: "2.9.1"),
     ]
 )

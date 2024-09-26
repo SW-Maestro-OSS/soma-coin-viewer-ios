@@ -1,4 +1,5 @@
 import ProjectDescription
+import DependencyPlugin
 
 let project = Project(
     name: "PresentationUtil",
@@ -10,7 +11,11 @@ let project = Project(
             bundleId: "com.CoinViewer.Utils.PresentationUtil",
             sources: ["/**"],
             dependencies: [
-                .project(target: "CoreUtil", path: "../CoreUtil")
+                // Modules in app
+                .project(target: "CoreUtil", path: "../CoreUtil"),
+                
+                // Third Party
+                D.ThirdParty.Swinject,
             ]
         ),
     ]
