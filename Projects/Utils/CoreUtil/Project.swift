@@ -8,8 +8,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.CoinViewer.Utils.CoreUtil",
-            sources: ["Sources/**"],
-            resources: ["Resources/**"],
+            sources: ["/**"],
             dependencies: [
                 
             ]
