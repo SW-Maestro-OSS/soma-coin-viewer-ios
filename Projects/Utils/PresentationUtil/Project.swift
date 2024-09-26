@@ -9,7 +9,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.CoinViewer.Utils.PresentationUtil",
-            sources: ["/**"],
+            sources: ["Sources/**"],
             dependencies: [
                 // Modules in app
                 .project(target: "CoreUtil", path: "../CoreUtil"),

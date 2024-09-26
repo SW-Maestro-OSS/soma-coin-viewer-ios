@@ -10,7 +10,9 @@ let project = Project(
             bundleId: "com.CoinViewer.Domain",
             sources: ["Sources/**"],
             resources: ["Resources/**"],
-            dependencies: []
+            dependencies: [
+                .project(target: "CoreUtil", path: "../Utils/CoreUtil"),
+            ]
         ),
         .target(
             name: "DomainTests",
