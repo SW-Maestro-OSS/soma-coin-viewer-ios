@@ -115,8 +115,6 @@ class WebSocketServiceTests: XCTestCase {
             }
         }
         
-        
-        
         // 2초 후에 연결 해제 테스트
         DispatchQueue.main.asyncAfter(deadline: .now() + 12) { [webSocketService] in
             
