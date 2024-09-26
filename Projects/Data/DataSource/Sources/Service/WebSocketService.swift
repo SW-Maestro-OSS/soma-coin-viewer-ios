@@ -37,6 +37,8 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
     private let jsonDecoder = JSONDecoder()
     private let jsonEncoder = JSONEncoder()
     
+    private var pingPingTimer: Timer?
+    
     public override init() {
         
         super.init()
@@ -44,6 +46,30 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         // URLSession
         let sessionQueue = OperationQueue()
         self.session = URLSession(configuration: .default, delegate: self, delegateQueue: sessionQueue)
+    }
+    
+    private func startTimer() {
+        
+        pingPingTimer?.invalidate()
+        
+        pingPingTimer = Timer.scheduledTimer(withTimeInterval: 180, repeats: true, block: { [weak self] _ in
+            guard let self else { return }
+            
+            sendPing()
+        })
+        
+        RunLoop.current.add(pingPingTimer!, forMode: .common)
+    }
+    
+    private func sendPing() {
+        
+        task?.sendPing(pongReceiveHandler: { error in
+            if let error {
+                printIfDebug("Pong수신 실패 \(error.localizedDescription)")
+            } else {
+                printIfDebug("Pong 수신")
+            }
+        })
     }
     
     public func connect(to baseURL: URL, streams: [String] = [], completion: (Callback)?) {
@@ -60,6 +86,9 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         self.callback = completion
         self.task = session.webSocketTask(with: urlWithStream)
         self.task?.resume()
+        
+        // start ping pong
+        startTimer()
     }
     
     public func subsribe(id: Int64 = 1, to streams: [String], completion: ((Error) -> ())?) {
@@ -111,6 +140,7 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
     }
     
     public func disconnect() {
+        pingPingTimer?.invalidate()
         task?.cancel(with: .normalClosure, reason: nil)
     }
     
