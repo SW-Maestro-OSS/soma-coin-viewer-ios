@@ -11,7 +11,8 @@ let project = Project(
             sources: ["./CommonUI/Sources/**"],
             resources: ["./CommonUI/Resources/**"],
             dependencies: [
-                .target(name: "I18N")
+                .target(name: "I18N"),
+                .project(target: "PresentationUtil", path: "../Utils/PresentationUtil"),
             ]
         ),
         .target(

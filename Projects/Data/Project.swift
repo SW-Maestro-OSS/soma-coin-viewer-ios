@@ -22,8 +22,10 @@ let project = Project(
             sources: ["Repository/Sources/**"],
             resources: ["Repository/Resources/**"],
             dependencies: [
+                .target(name: "DataSource"),
+                
                 .project(target: "Domain", path: "../Domain"),
-                .target(name: "DataSource")
+                .project(target: "CoreUtil", path: "../Utils/CoreUtil"),
             ]
         ),
         .target(
