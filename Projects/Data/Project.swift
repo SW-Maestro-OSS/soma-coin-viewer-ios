@@ -3,17 +3,7 @@ import ProjectDescription
 let project = Project(
     name: "Data",
     targets: [
-        .target(
-            name: "DataSource",
-            destinations: .iOS,
-            product: .framework,
-            bundleId: "com.CoinViewer.Data.DataSource",
-            sources: ["DataSource/Sources/**"],
-            resources: ["DataSource/Resources/**"],
-            dependencies: [
-                
-            ]
-        ),
+        
         .target(
             name: "Repository",
             destinations: .iOS,
@@ -25,9 +15,21 @@ let project = Project(
                 .target(name: "DataSource"),
                 
                 .project(target: "Domain", path: "../Domain"),
+            ]
+        ),
+        
+        .target(
+            name: "DataSource",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.CoinViewer.Data.DataSource",
+            sources: ["DataSource/Sources/**"],
+            resources: ["DataSource/Resources/**"],
+            dependencies: [
                 .project(target: "CoreUtil", path: "../Utils/CoreUtil"),
             ]
         ),
+        
         .target(
             name: "DataTests",
             destinations: .iOS,
