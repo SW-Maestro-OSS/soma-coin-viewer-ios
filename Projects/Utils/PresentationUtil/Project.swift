@@ -1,5 +1,4 @@
 import ProjectDescription
-import DependencyPlugin
 
 let project = Project(
     name: "PresentationUtil",
@@ -13,9 +12,6 @@ let project = Project(
             dependencies: [
                 // Modules in app
                 .project(target: "CoreUtil", path: "../CoreUtil"),
-                
-                // Third Party
-                D.ThirdParty.Swinject,
             ]
         ),
     ]
