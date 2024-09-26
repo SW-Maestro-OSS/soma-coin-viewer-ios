@@ -11,8 +11,10 @@ import CoreUtil
 // MARK: Interface
 public protocol WebSocketService {
     
+    typealias Callback = (URLSessionWebSocketTask.Message) -> Void
+    
     /// 웹소켓을 연결합니다.
-    func connect(to: URL, streams: [String], completion: ((Data) -> Void)?)
+    func connect(to: URL, streams: [String], completion: (Callback)?)
     
     /// 특정 스트림들을 구독합니다.
     func subsribe(to: [String])
@@ -21,29 +23,70 @@ public protocol WebSocketService {
     func unsubscribe(from: [String])
     
     /// 연결을 해제합니다.
-    func disconnect(from: URL)
+    func disconnect()
 }
 
 // MARK: Concrete
 public class DefaultWebSocketService: NSObject, WebSocketService {
     
-    var task: URLSessionWebSocketTask?
+    private(set) var session: URLSession!
     
-    public func connect(to: URL, streams: [String], completion: ((Data) -> Void)?) {
+    public private(set) var task: URLSessionWebSocketTask?
+    public private(set) var callback: Callback?
+    
+    public override init() {
+        
+        super.init()
+        
+        // URLSession
+        let sessionQueue = OperationQueue()
+        self.session = URLSession(configuration: .default, delegate: self, delegateQueue: sessionQueue)
+    }
+    
+    public func connect(to baseURL: URL, streams: [String], completion: (Callback)?) {
         
         if task != nil { return }
+        
+        var urlWithStream = baseURL
+        let streamQueryValue = streams.joined(separator: "/")
+        
+        urlWithStream.append(queryItems: [
+            .init(name: "streams", value: streamQueryValue)
+        ])
+        
+        self.callback = completion
+        self.task = session.webSocketTask(with: urlWithStream)
+        self.task?.resume()
     }
     
-    public func subsribe(to: [String]) {
+    public func subsribe(to streams: [String]) {
         
     }
     
-    public func unsubscribe(from: [String]) {
+    public func unsubscribe(from streams: [String]) {
         
     }
     
-    public func disconnect(from: URL) {
+    public func disconnect() {
+        task?.cancel()
+    }
+    
+    private func receive() {
         
+        task?.receive(completionHandler: { [weak self] result in
+            
+            switch result {
+            case .success(let message):
+                
+                self?.callback?(message)
+                
+            case .failure(let failure):
+                printIfDebug(failure.localizedDescription)
+            }
+            
+            // 재귀호출
+            self?.receive()
+        })
     }
 }
 
