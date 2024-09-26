@@ -1,6 +1,6 @@
 import UIKit
 import SwiftUI
-import PresentationUtil
+import CoreUtil
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?

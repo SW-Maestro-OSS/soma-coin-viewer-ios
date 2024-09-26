@@ -1,6 +1,6 @@
 import SwiftUI
 import Domain
-import PresentationUtil
+import CoreUtil
 
 struct ContentView: View {
     
