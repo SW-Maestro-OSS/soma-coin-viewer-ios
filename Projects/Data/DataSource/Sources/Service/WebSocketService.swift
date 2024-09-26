@@ -17,10 +17,10 @@ public protocol WebSocketService {
     func connect(to: URL, streams: [String], completion: (Callback)?)
     
     /// 특정 스트림들을 구독합니다.
-    func subsribe(to: [String])
+    func subsribe(id: Int64, to: [String], completion: ((Error) -> ())?)
     
     /// 특정 스트림들로 부터 구독을 해제합니다.
-    func unsubscribe(from: [String])
+    func unsubscribe(id: Int64, from: [String], completion: ((Error) -> ())?)
     
     /// 연결을 해제합니다.
     func disconnect()
@@ -34,6 +34,9 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
     public private(set) var task: URLSessionWebSocketTask?
     public private(set) var callback: Callback?
     
+    private let jsonDecoder = JSONDecoder()
+    private let jsonEncoder = JSONEncoder()
+    
     public override init() {
         
         super.init()
@@ -43,7 +46,7 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         self.session = URLSession(configuration: .default, delegate: self, delegateQueue: sessionQueue)
     }
     
-    public func connect(to baseURL: URL, streams: [String], completion: (Callback)?) {
+    public func connect(to baseURL: URL, streams: [String] = [], completion: (Callback)?) {
         
         if task != nil { return }
         
@@ -59,12 +62,52 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         self.task?.resume()
     }
     
-    public func subsribe(to streams: [String]) {
+    public func subsribe(id: Int64 = 1, to streams: [String], completion: ((Error) -> ())?) {
         
+        guard let task else { return }
+        
+        let dto = StreamSubDTO(
+            method: .SUBSCRIBE,
+            params: streams,
+            id: id
+        )
+        
+        let jsonData = try! jsonEncoder.encode(dto)
+        let stringMessage = String(data: jsonData, encoding: .utf8)!
+        
+        task.send(.string(stringMessage)) { error in
+            
+            if let error {
+                
+                completion?(error)
+                
+                printIfDebug("웹소켓 메세지 수신 실패 \(error.localizedDescription)")
+            }
+        }
     }
     
-    public func unsubscribe(from streams: [String]) {
+    public func unsubscribe(id: Int64 = 1, from streams: [String], completion: ((Error) -> ())?) {
         
+        guard let task else { return }
+        
+        let dto = StreamSubDTO(
+            method: .UNSUBSCRIBE,
+            params: streams,
+            id: id
+        )
+        
+        let jsonData = try! jsonEncoder.encode(dto)
+        let stringMessage = String(data: jsonData, encoding: .utf8)!
+        
+        task.send(.string(stringMessage)) { error in
+            
+            if let error {
+                
+                completion?(error)
+                
+                printIfDebug("웹소켓 메세지 수신 실패 \(error.localizedDescription)")
+            }
+        }
     }
     
     public func disconnect() {
