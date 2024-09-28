@@ -37,7 +37,7 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
     private let jsonDecoder = JSONDecoder()
     private let jsonEncoder = JSONEncoder()
     
-    private var pingPingTimer: Timer?
+    private var pingPongTimer: Timer?
     
     public override init() {
         
@@ -50,15 +50,15 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
     
     private func startTimer() {
         
-        pingPingTimer?.invalidate()
+        pingPongTimer?.invalidate()
         
-        pingPingTimer = Timer.scheduledTimer(withTimeInterval: 180, repeats: true, block: { [weak self] _ in
+        pingPongTimer = Timer.scheduledTimer(withTimeInterval: 180, repeats: true, block: { [weak self] _ in
             guard let self else { return }
             
             sendPing()
         })
         
-        RunLoop.current.add(pingPingTimer!, forMode: .common)
+        RunLoop.current.add(pingPongTimer!, forMode: .common)
     }
     
     private func sendPing() {
@@ -140,7 +140,7 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
     }
     
     public func disconnect() {
-        pingPingTimer?.invalidate()
+        pingPongTimer?.invalidate()
         task?.cancel(with: .normalClosure, reason: nil)
     }
     
