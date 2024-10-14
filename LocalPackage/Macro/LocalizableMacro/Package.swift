@@ -5,14 +5,15 @@ import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
-    name: "Localizable",
-    platforms: [.macOS(.v10_15), .iOS(.v15), .tvOS(.v13), .watchOS(.v6), .macCatalyst(.v13)],
+    name: "LocalizableMacro",
+    platforms: [ .iOS(.v15), .macOS(.v10_15) ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "Localizable",
+            name: "LocalizableMacro",
             targets: ["Localizable"]
         ),
+        
         .executable(
             name: "LocalizableClient",
             targets: ["LocalizableClient"]

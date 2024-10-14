@@ -41,10 +41,11 @@ public struct I18NRepresentable: MemberMacro {
             // case first, second, third 구조 때문에 2중 for문
             for element in caseElement.elements {
                 let varName = element.name.text
-
+                
+                
                 cases.append("""
                 case .\(raw: varName):
-                    String(localized: \"\(raw: varName)\", table: \(tableArgument), bundle: Bundle(for: \(raw: bundleClassExpression.description)))
+                    NSLocalizedString(\"\(raw: varName)\", tableName:\(tableArgument), bundle: Bundle(for: \(raw: bundleClassExpression)), comment: "")
                 """)
             }
         }
@@ -56,7 +57,6 @@ public struct I18NRepresentable: MemberMacro {
         """)
 
         return members
-        
     }
 }
 

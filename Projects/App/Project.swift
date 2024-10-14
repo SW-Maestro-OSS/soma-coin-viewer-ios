@@ -2,6 +2,11 @@ import ProjectDescription
 
 let project = Project(
     name: "App",
+    options: .options(
+        // Localization
+        defaultKnownRegions: ["en", "ko"],
+        developmentRegion: "ko"
+    ),
     targets: [
         .target(
             name: "CoinViewer",
@@ -42,3 +47,4 @@ let project = Project(
         ),
     ]
 )
+
