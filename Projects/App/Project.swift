@@ -5,7 +5,9 @@ let project = Project(
     options: .options(
         // Localization
         defaultKnownRegions: ["en", "ko"],
-        developmentRegion: "ko"
+        
+        // Default lan
+        developmentRegion: "en"
     ),
     targets: [
         .target(
