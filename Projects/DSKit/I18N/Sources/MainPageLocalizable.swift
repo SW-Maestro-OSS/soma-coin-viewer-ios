@@ -13,6 +13,7 @@ public extension LS {
     @I18NRepresentable(table: "LSMainPage", bundleClass: I18NClass.self)
     enum MainPage {
         case Title
+        case Description
     }
 }
 

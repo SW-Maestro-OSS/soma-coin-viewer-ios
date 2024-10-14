@@ -12,7 +12,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
             Spacer()
-            Text(LS.MainPage.Title.str)
+            Text(LS.MainPage.Description.str)
                 .font(.largeTitle)
                 .padding()
             Spacer()
@@ -21,6 +21,7 @@ struct ContentView: View {
         .background(Color.white)
         .onAppear(perform: {
             text = testPepository.getSayHelloText()
+            
         })
     }
 }

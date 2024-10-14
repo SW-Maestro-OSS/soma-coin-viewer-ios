@@ -45,7 +45,7 @@ public struct I18NRepresentable: MemberMacro {
                 
                 cases.append("""
                 case .\(raw: varName):
-                    NSLocalizedString(\"\(raw: varName)\", tableName:\(tableArgument), bundle: Bundle(for: \(raw: bundleClassExpression)), comment: "")
+                    String(localized: "\(raw: varName)\", table: \(tableArgument), bundle: Bundle(for: \(raw: bundleClassExpression)))
                 """)
             }
         }
