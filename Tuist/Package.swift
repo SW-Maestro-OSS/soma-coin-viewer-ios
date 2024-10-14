@@ -12,6 +12,8 @@ import PackageDescription
     )
 #endif
 
+let packagePath: String = "LocalPackage"
+
 let package = Package(
     name: "CoinViewer",
     dependencies: [

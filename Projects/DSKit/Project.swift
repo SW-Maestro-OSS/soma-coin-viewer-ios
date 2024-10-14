@@ -1,7 +1,16 @@
 import ProjectDescription
+import DependencyPlugin
 
 let project = Project(
     name: "DSKit",
+    options: .options(
+        // Localization
+        defaultKnownRegions: ["en", "ko"],
+        developmentRegion: "ko"
+    ),
+    packages: [
+        .local(path: .relativeToRoot("LocalPackage/Macro/LocalizableMacro"))
+    ],
     targets: [
         .target(
             name: "CommonUI",
@@ -23,8 +32,9 @@ let project = Project(
             sources: ["./I18N/Sources/**"],
             resources: ["./I18N/Resources/**"],
             dependencies: [
-               
+                .package(product: "LocalizableMacro", type: .macro),
             ]
         )
     ]
 )
+

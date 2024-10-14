@@ -1,6 +1,7 @@
 import SwiftUI
 import Domain
 import CoreUtil
+import I18N
 
 struct ContentView: View {
     
@@ -11,7 +12,7 @@ struct ContentView: View {
     var body: some View {
         VStack {
             Spacer()
-            Text(text)
+            Text(LS.MainPage.Title.str)
                 .font(.largeTitle)
                 .padding()
             Spacer()
