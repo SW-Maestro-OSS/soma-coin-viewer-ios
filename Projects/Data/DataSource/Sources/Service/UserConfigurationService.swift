@@ -21,6 +21,8 @@ public class DefaultUserConfigurationService: UserConfigurationService {
     
     private let source: UserDefaults = .standard
     
+    public init() { }
+    
     public func getConfiguration(key: String) -> String? {
         source.string(forKey: key)
     }
