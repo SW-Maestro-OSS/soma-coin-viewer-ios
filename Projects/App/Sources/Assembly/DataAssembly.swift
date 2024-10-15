@@ -7,6 +7,7 @@
 
 import Foundation
 import Repository
+import DataSource
 import Domain
 import PresentationUtil
 
@@ -21,6 +22,19 @@ public class DataAssembly: Assembly {
         container.register(TestRepository.self) { _ in
             DefaultTestRepository()
         }
+        
+        
+        
+        container.register(UserConfigurationRepository.self) { _ in
+            DefaultUserConfigurationRepository()
+        }
+        .inObjectScope(.container)
+        
+        
+        
+        // MARK: DataSource
+        container.register(UserConfigurationService.self) { _ in
+            DefaultUserConfigurationService()
+        }
     }
-    
 }
