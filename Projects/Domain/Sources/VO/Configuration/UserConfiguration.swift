@@ -7,10 +7,14 @@
 
 import Foundation
 
-public enum UserConfiguration {
+public enum UserConfiguration: String {
     
     case currency
     case gridType
+    
+    public var savingKey: String {
+        "configuration_\(self.rawValue)"
+    }
 }
 
 // MARK: Grid type
@@ -18,7 +22,11 @@ public enum GridType: String {
     case list="LIST"
     case twoByTwo="2X2"
     
-    static let defaultValue: GridType = .list
+    public static let defaultValue: GridType = .list
+    
+    public var savingValue: String {
+        self.rawValue
+    }
 }
 
 // MARK: Currency
@@ -26,5 +34,9 @@ public enum CurrencyType: String {
     case won="WON"
     case dollar="DOLLAR"
     
-    static let defaultValue: CurrencyType = .won
+    public static let defaultValue: CurrencyType = .won
+    
+    public var savingValue: String {
+        self.rawValue
+    }
 }
