@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "swiftstructures",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/J0onYEong/SwiftStructures.git",
+      "state" : {
+        "revision" : "bc698e9b24d09476b6e55b61ce61d866bbe52c17",
+        "version" : "1.0.2"
+      }
+    },
+    {
       "identity" : "swinject",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Swinject/Swinject.git",

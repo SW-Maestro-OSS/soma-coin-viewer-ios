@@ -10,10 +10,16 @@ import DataSource
 import Domain
 import CoreUtil
 
+
+import SwiftStructures
+
 public class DefaultUserConfigurationRepository: UserConfigurationRepository {
     
     // DI
     @Injected var userConfigurationService: UserConfigurationService
+    
+    // Cache configuration
+    
     
     public init() { }
     

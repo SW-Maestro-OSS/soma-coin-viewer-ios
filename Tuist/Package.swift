@@ -20,5 +20,7 @@ let package = Package(
         
         // [Service locator] - Swinject
         .package(url: "https://github.com/Swinject/Swinject.git", from: "2.9.1"),
+        
+        .package(url: "https://github.com/J0onYEong/SwiftStructures.git", from: "1.0.2"),
     ]
 )

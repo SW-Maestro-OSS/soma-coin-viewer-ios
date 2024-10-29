@@ -30,6 +30,7 @@ public extension ModuleDependency {
     
     enum ThirdParty {
         public static let Swinject: TargetDependency = .external(name: "Swinject")
+        public static let SwiftStructures: TargetDependency = .external(name: "SwiftStructures")
     }
 }
 
