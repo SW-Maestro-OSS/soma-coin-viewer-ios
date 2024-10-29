@@ -1,4 +1,5 @@
 import ProjectDescription
+import DependencyPlugin
 
 let project = Project(
     name: "Data",
@@ -12,9 +13,12 @@ let project = Project(
             sources: ["Repository/Sources/**"],
             resources: ["Repository/Resources/**"],
             dependencies: [
+                // internal
                 .target(name: "DataSource"),
-                
                 .project(target: "Domain", path: "../Domain"),
+                
+                // external
+                ModuleDependency.ThirdParty.SwiftStructures,
             ]
         ),
         
