@@ -10,11 +10,11 @@ import Foundation
 public protocol UserConfigurationService {
     
     /// Configuration정보를 획득합니다.
-    func getConfiguration(key: String) -> String?
+    func getStringValue(key: String) -> String?
     
     
     /// Configuration정보를 설정합니다.
-    func setConfiguration(key: String, value: String)
+    func setConfiguration<T>(key: String, value: T)
 }
 
 public class DefaultUserConfigurationService: UserConfigurationService {
@@ -23,11 +23,11 @@ public class DefaultUserConfigurationService: UserConfigurationService {
     
     public init() { }
     
-    public func getConfiguration(key: String) -> String? {
+    public func getStringValue(key: String) -> String? {
         source.string(forKey: key)
     }
     
-    public func setConfiguration(key: String, value: String) {
+    public func setConfiguration<T>(key: String, value: T) {
         source.set(value, forKey: key)
     }
 }
