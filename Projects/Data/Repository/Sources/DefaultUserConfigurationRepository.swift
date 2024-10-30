@@ -31,11 +31,11 @@ public class DefaultUserConfigurationRepository: UserConfigurationRepository {
             return .init(rawValue: memoryCached)!
         }
         
-        if let diskCached = userConfigurationService.getConfiguration(key: config.savingKey) {
+        if let diskCached = userConfigurationService.getStringValue(key: config.savingKey) {
             // 로컬에 저장된 정보를 확인합니다.
             
             // 정보를 메모리에 캐싱
-            cachedConfiguration[config.savingKey] = diskCached
+            caching(key: config.savingKey, value: diskCached)
             
             return .init(rawValue: diskCached)!
         }
@@ -51,8 +51,8 @@ public class DefaultUserConfigurationRepository: UserConfigurationRepository {
         // 디스크 저장
         userConfigurationService.setConfiguration(key: config.savingKey, value: type.savingValue)
         
-        // 메모리 저장
-        cachedConfiguration[config.savingKey] = type.savingValue
+        // 정보를 메모리에 캐싱
+        caching(key: config.savingKey, value: type.savingValue)
     }
     
     
@@ -65,11 +65,11 @@ public class DefaultUserConfigurationRepository: UserConfigurationRepository {
             return .init(rawValue: memoryCached)!
         }
         
-        if let diskCached = userConfigurationService.getConfiguration(key: config.savingKey) {
+        if let diskCached = userConfigurationService.getStringValue(key: config.savingKey) {
             // 로컬에 저장된 정보를 확인합니다.
             
             // 정보를 메모리에 캐싱
-            cachedConfiguration[config.savingKey] = diskCached
+            caching(key: config.savingKey, value: diskCached)
             
             return .init(rawValue: diskCached)!
         }
@@ -90,12 +90,16 @@ public class DefaultUserConfigurationRepository: UserConfigurationRepository {
     }
     
     
-    
     // MARK: check cache
     private func checkMemoryCache<T>(key: String) -> T? {
-        if Thread.isMainThread {
-            printIfDebug("메인쓰레드에서 LockedDictionary에 접근하고 있다, 해당동작은 메인쓰레드를 블로킹(NSLock)할 수 있다.")
+        cachedConfiguration[key] as? T
+    }
+    
+    private func caching(key: String, value: Any) {
+        
+        DispatchQueue.global().async { [weak self] in
+            // 정보를 메모리에 캐싱
+            self?.cachedConfiguration[key] = value
         }
-        return cachedConfiguration[key] as? T
     }
 }
