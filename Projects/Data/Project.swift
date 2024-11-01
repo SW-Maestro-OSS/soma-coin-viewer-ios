@@ -16,9 +16,6 @@ let project = Project(
                 // internal
                 .target(name: "DataSource"),
                 D.Domain.interface,
-                
-                // external
-                ModuleDependency.ThirdParty.SwiftStructures,
             ]
         ),
         
@@ -31,6 +28,9 @@ let project = Project(
             resources: ["DataSource/Resources/**"],
             dependencies: [
                 D.Util.CoreUtil,
+                
+                // external
+                ModuleDependency.ThirdParty.SwiftStructures,
             ]
         ),
         
