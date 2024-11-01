@@ -16,7 +16,7 @@ let project = Project(
         .target(
             name: "{{ featureName }}FeatureExample",
             destinations: .iOS,
-            product: .exampleApp,
+            product: .example_app,
             bundleId: "com.{{ author }}.feature.{{ featureName }}.example",
             infoPlist: TargetInfoPlist.microapp,
             sources: ["FeatureExample/Sources/**"],
