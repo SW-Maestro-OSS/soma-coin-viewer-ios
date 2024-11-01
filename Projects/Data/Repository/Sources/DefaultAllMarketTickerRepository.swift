@@ -22,7 +22,12 @@ public class DefaultAllMarketTickerRepository: AllMarketTickerRepository {
     
     private let streamName: String = "!ticker@arr"
     
-    public init() { }
+    public init() { 
+        webSocketService.connect(
+            to: URL(string: "wss://stream.binance.com:443/ws")!,
+            onError: nil
+        )
+    }
     
     public func subscribeToStream() -> AnyPublisher<[DomainInterface.Symbol24hTickerVO], Never> {
         
@@ -34,7 +39,7 @@ public class DefaultAllMarketTickerRepository: AllMarketTickerRepository {
             to: streamName,
             onError: nil) { [jsonDecoder] message in
                 
-                if case .data(let data) = message {
+                if case .string(let string) = message, let data = string.data(using: .utf8){
                     
                     do {
                         let dtos = try jsonDecoder.decode([SymbolTickerDTO].self, from: data)
