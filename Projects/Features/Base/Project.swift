@@ -54,6 +54,7 @@ let project = Project(
             dependencies: [
                 .target(name: "BaseFeatureInterface"),
                 
+                D.DSKit.CommonUI,
                 D.Util.PresentationUtil,
             ]
         ),
