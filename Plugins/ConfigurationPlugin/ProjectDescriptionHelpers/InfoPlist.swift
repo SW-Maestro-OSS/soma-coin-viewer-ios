@@ -6,11 +6,11 @@
 
 import ProjectDescription
 
-public enum TargetInfoPlist {
+public extension InfoPlist {
     
-    public static let main_app: InfoPlist = .extended_app_plist(with: [:])
+    static let main_app: InfoPlist = .extended_app_plist(with: [:])
     
-    public static let example_app: InfoPlist = .extended_app_plist(with: [:])
+    static let example_app: InfoPlist = .extended_app_plist(with: [:])
 }
 
 extension InfoPlist {

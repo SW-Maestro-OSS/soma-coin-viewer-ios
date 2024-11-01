@@ -1,8 +1,11 @@
 import ProjectDescription
+import DependencyPlugin
+import ConfigurationPlugin
 
 let project = Project(
     name: "App",
     options: .options(
+        
         // Localization
         defaultKnownRegions: ["en", "ko"],
         
@@ -15,37 +18,42 @@ let project = Project(
             destinations: .iOS,
             product: .app,
             bundleId: "io.tuist.CoinViewer",
-            infoPlist: .extendingDefault(
-                with: [
-                    "UILaunchStoryboardName": "LaunchScreen.storyboard",
-                    "UIApplicationSceneManifest": [
-                        "UIApplicationSupportsMultipleScenes": false,
-                        "UISceneConfigurations": [
-                            "UIWindowSceneSessionRoleApplication": [
-                                [
-                                    "UISceneConfigurationName": "Default Configuration",
-                                    "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate"
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ),
+            infoPlist: .main_app,
             sources: ["Sources/**"],
             resources: ["Resources/**"],
             dependencies: [
-                .project(target: "RootFeature", path: "../Feature/RootFeature")
+                
+                // Features
+                
+                D.Feature.RootFeature,
+                D.Feature.RootFeatureInterface,
+                
+                D.Feature.AllMarketTickerFeature,
+                D.Feature.AllMarketTickerFeatureInterface,
+                
+                D.Feature.SettingFeature,
+                D.Feature.SettingFeatureInterface,
+                
+                D.Feature.BaseFeature,
+                D.Feature.BaseFeatureInterface,
+                
+                
+                // Domain
+                
+                D.Domain.concrete,
+                D.Domain.interface,
+                
+                
+                // Data
+                
+                D.Data.dataSource,
+                D.Data.repository,
+                
+                
+                // Util
+                
+                D.Util.PresentationUtil,
             ]
-        ),
-        .target(
-            name: "CoinViewerTests",
-            destinations: .iOS,
-            product: .unitTests,
-            bundleId: "io.tuist.CoinViewerTests",
-            infoPlist: .default,
-            sources: ["Tests/**"],
-            resources: [],
-            dependencies: [.target(name: "CoinViewer")]
         ),
     ]
 )
