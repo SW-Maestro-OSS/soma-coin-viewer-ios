@@ -16,6 +16,9 @@ public class DefaultAllMarketTickerRepository {
     
     @Injected var webSocketService: WebSocketService
     
-    public init() {  }
+    public init() {  
+        
+        webSocketService.
+    }
     
 }

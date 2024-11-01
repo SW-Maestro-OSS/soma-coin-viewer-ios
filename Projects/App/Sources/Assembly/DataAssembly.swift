@@ -24,18 +24,21 @@ public class DataAssembly: Assembly {
     
     public func assemble(container: Swinject.Container) {
         
+        // MARK: DataSource
+        container.register(UserConfigurationService.self) { _ in
+            DefaultUserConfigurationService()
+        }
+        
+        container.register(WebSocketService.self) { _ in
+            DefaultWebSocketService()
+        }
+        .inObjectScope(.container)
+        
         
         // MARK: Repository
         container.register(UserConfigurationRepository.self) { _ in
             DefaultUserConfigurationRepository()
         }
         .inObjectScope(.container)
-        
-        
-        
-        // MARK: DataSource
-        container.register(UserConfigurationService.self) { _ in
-            DefaultUserConfigurationService()
-        }
     }
 }
