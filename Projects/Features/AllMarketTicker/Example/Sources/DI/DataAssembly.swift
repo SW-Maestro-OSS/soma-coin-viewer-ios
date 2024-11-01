@@ -1,21 +1,15 @@
 //
 //  DataAssembly.swift
-//  CoinViewer
+//  AllMarketTickerFeatureExample
 //
-//  Created by choijunios on 9/26/24.
+//  Created by choijunios on 11/1/24.
 //
 
 import Foundation
 
-// Domain
-import Domain
-import DomainInterface
-
-// Data
-import Repository
 import DataSource
-
-// Utils
+import Repository
+import DomainInterface
 
 
 import Swinject
@@ -25,10 +19,6 @@ public class DataAssembly: Assembly {
     public func assemble(container: Swinject.Container) {
         
         // MARK: DataSource
-        container.register(UserConfigurationService.self) { _ in
-            DefaultUserConfigurationService()
-        }
-        
         container.register(WebSocketService.self) { _ in
             DefaultWebSocketService()
         }
@@ -36,11 +26,6 @@ public class DataAssembly: Assembly {
         
         
         // MARK: Repository
-        container.register(UserConfigurationRepository.self) { _ in
-            DefaultUserConfigurationRepository()
-        }
-        .inObjectScope(.container)
-        
         container.register(AllMarketTickerRepository.self) { _ in
             DefaultAllMarketTickerRepository()
         }

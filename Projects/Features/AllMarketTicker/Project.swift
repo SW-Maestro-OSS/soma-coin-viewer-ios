@@ -25,6 +25,10 @@ let project = Project(
             dependencies: [
                 .target(name: "AllMarketTickerFeature"),
                 .target(name: "AllMarketTickerFeatureTesting"),
+                
+                D.Domain.interface,
+                D.Data.repository,
+                D.Data.dataSource,
             ]
         ),
 
@@ -54,7 +58,7 @@ let project = Project(
             dependencies: [
                 .target(name: "AllMarketTickerFeatureInterface"),
                 
-                D.DSKit.CommonUI,
+//                D.DSKit.CommonUI,
                 D.Util.PresentationUtil,
             ]
         ),
