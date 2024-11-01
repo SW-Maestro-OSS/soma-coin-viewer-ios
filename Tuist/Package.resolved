@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/J0onYEong/SwiftStructures.git",
       "state" : {
-        "revision" : "b56738319525d2e9abb243ffb80fe9f85d7fb92c",
-        "version" : "1.0.3"
+        "revision" : "6ecad4c566b84b609545af015028ac31305224db",
+        "version" : "1.0.4"
       }
     },
     {

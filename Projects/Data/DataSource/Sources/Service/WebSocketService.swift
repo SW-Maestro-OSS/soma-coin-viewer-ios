@@ -6,21 +6,26 @@
 //
 
 import Foundation
+
 import CoreUtil
+
+
+import SwiftStructures
 
 // MARK: Interface
 public protocol WebSocketService {
     
-    typealias Callback = (URLSessionWebSocketTask.Message) -> Void
+    typealias MessageCallback = (URLSessionWebSocketTask.Message) -> Void
+    typealias ErrorCallback = (Error) -> Void
     
     /// 웹소켓을 연결합니다.
-    func connect(to: URL, streams: [String], completion: (Callback)?)
+    func connect(to: URL, onError: ErrorCallback?)
     
-    /// 특정 스트림들을 구독합니다.
-    func subsribe(id: Int64, to: [String], completion: ((Error) -> ())?)
+    /// 특정 스트림을 구독합니다.
+    func subsribe(id: Int64, to: String, onError: ErrorCallback?, onReceive: (MessageCallback)?)
     
-    /// 특정 스트림들로 부터 구독을 해제합니다.
-    func unsubscribe(id: Int64, from: [String], completion: ((Error) -> ())?)
+    /// 특정 스트림으로 부터 구독을 해제합니다.
+    func unsubscribe(id: Int64, from: [String], onError: ErrorCallback?)
     
     /// 연결을 해제합니다.
     func disconnect()
@@ -32,7 +37,8 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
     private(set) var session: URLSession!
     
     public private(set) var task: URLSessionWebSocketTask?
-    public private(set) var callback: Callback?
+    public private(set) var messageCallbacks: LockedDictionary<String, MessageCallback> = .init()
+    public private(set) var onConnectionError: ErrorCallback?
     
     private let jsonDecoder = JSONDecoder()
     private let jsonEncoder = JSONEncoder()
@@ -72,18 +78,12 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         })
     }
     
-    public func connect(to baseURL: URL, streams: [String] = [], completion: (Callback)?) {
+    public func connect(to baseURL: URL, onError: ErrorCallback?) {
         
         if task != nil { return }
         
         var urlWithStream = baseURL
-        let streamQueryValue = streams.joined(separator: "/")
         
-        urlWithStream.append(queryItems: [
-            .init(name: "streams", value: streamQueryValue)
-        ])
-        
-        self.callback = completion
         self.task = session.webSocketTask(with: urlWithStream)
         self.task?.resume()
         
@@ -91,31 +91,36 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         startTimer()
     }
     
-    public func subsribe(id: Int64 = 1, to streams: [String], completion: ((Error) -> ())?) {
+    public func subsribe(id: Int64 = 1, to stream: String, onError: ErrorCallback?, onReceive: (MessageCallback)?) {
         
         guard let task else { return }
         
         let dto = StreamSubDTO(
             method: .SUBSCRIBE,
-            params: streams,
+            params: [stream],
             id: id
         )
         
         let jsonData = try! jsonEncoder.encode(dto)
         let stringMessage = String(data: jsonData, encoding: .utf8)!
         
-        task.send(.string(stringMessage)) { error in
+        task.send(.string(stringMessage)) { [weak self] error in
             
             if let error {
                 
-                completion?(error)
+                onError?(error)
                 
                 printIfDebug("웹소켓 메세지 수신 실패 \(error.localizedDescription)")
+                
+            } else {
+                
+                // 매세지 수신 성공 후 컬백등록
+                self?.messageCallbacks[stream] = onReceive
             }
         }
     }
     
-    public func unsubscribe(id: Int64 = 1, from streams: [String], completion: ((Error) -> ())?) {
+    public func unsubscribe(id: Int64 = 1, from streams: [String], onError: ErrorCallback?) {
         
         guard let task else { return }
         
@@ -128,13 +133,19 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         let jsonData = try! jsonEncoder.encode(dto)
         let stringMessage = String(data: jsonData, encoding: .utf8)!
         
-        task.send(.string(stringMessage)) { error in
+        task.send(.string(stringMessage)) { [weak self] error in
             
             if let error {
                 
-                completion?(error)
+                onError?(error)
                 
                 printIfDebug("웹소켓 메세지 수신 실패 \(error.localizedDescription)")
+                
+            } else {
+                
+                for stream in streams {
+                    self?.messageCallbacks.remove(key: stream)
+                }
             }
         }
     }
@@ -148,22 +159,31 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         
         task?.receive(completionHandler: { [weak self] result in
             
+            guard let self else { return }
+            
             switch result {
             case .success(let message):
                 
-                self?.callback?(message)
+                // callback함수들을 순차적으로 실행
+                for callback in self.messageCallbacks.values {
+                    
+                    callback(message)
+                }
                 
-            case .failure(let failure):
+            case .failure(let error):
                 
-                if let urlError = failure as? URLError, urlError.code == .cancelled {
+                self.onConnectionError?(error)
+                
+                if let urlError = error as? URLError, urlError.code == .cancelled {
                     
                     // 테스크 연결해제시(disconnect) 수신을 재개하지 않고 종료
+                    
                     return
                 }
             }
             
             // 재귀호출
-            self?.receive()
+            self.receive()
         })
     }
 }
