@@ -54,6 +54,7 @@ let project = Project(
             dependencies: [
                 .target(name: "AllMarketTickerFeatureInterface"),
                 
+                D.DSKit.CommonUI,
                 D.Util.PresentationUtil,
             ]
         ),

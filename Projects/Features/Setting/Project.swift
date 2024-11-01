@@ -52,7 +52,11 @@ let project = Project(
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
             dependencies: [
+                
                 .target(name: "SettingFeatureInterface"),
+                
+                D.DSKit.CommonUI,
+                D.Util.PresentationUtil,
             ]
         ),
 

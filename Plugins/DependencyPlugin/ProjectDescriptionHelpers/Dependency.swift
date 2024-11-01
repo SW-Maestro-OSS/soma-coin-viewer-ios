@@ -41,6 +41,10 @@ public enum ModuleDependency {
         public static let SettingFeature: TargetDependency = .project(target: "SettingFeature", path: .relativeToRoot("Projects/Features/Setting"))
     }
     
+    public enum DSKit {
+        public static let CommonUI: TargetDependency = .project(target: "CommonUI", path: .relativeToRoot("Projects/DSKit"))
+    }
+    
     public enum Util {
         public static let CoreUtil: TargetDependency = .project(target: "CoreUtil", path: .relativeToRoot("Projects/Utils/CoreUtil"))
         
