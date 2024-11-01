@@ -1,13 +1,13 @@
 //
 //  SymbolTickerDTO.swift
-//  Repository
+//  DataSource
 //
 //  Created by choijunios on 11/1/24.
 //
 
 import Foundation
 
-public struct SymbolTickerDTO: Codable {
+public struct SymbolTickerDTO: Decodable {
     
     public let eventType: String
     public let eventTime: Int
