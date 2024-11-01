@@ -12,7 +12,7 @@ let project = Project(
             sources: ["./CommonUI/Sources/**"],
             resources: ["./CommonUI/Resources/**"],
             dependencies: [
-                .project(target: "PresentationUtil", path: "../Utils/PresentationUtil"),
+                D.Util.PresentationUtil,
                 .project(target: "I18N", path: "../I18N"),
             ]
         ),

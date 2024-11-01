@@ -16,12 +16,35 @@ public enum ModuleDependency {
     }
     
     public enum Domain {
+        public static let interface: TargetDependency = .project(target: "DomainInterface", path: .relativeToRoot("Projects/Domain"))
+        public static let concrete: TargetDependency = .project(target: "Domain", path: .relativeToRoot("Projects/Domain"))
     }
     
     public enum Data {
+        public static let repository: TargetDependency = .project(target: "Repository", path: .relativeToRoot("Projects/Data"))
+        public static let dataSource: TargetDependency = .project(target: "DataSource", path: .relativeToRoot("Projects/Data"))
     }
     
-    public enum Presentation {
+    public enum Feature {
+        public static let AllMarketTickerFeatureInterface: TargetDependency = .project(target: "AllMarketTickerFeatureInterface", path: .relativeToRoot("Projects/Features/AllMarketTicker"))
+        public static let AllMarketTickerFeature: TargetDependency = .project(target: "AllMarketTickerFeature", path: .relativeToRoot("Projects/Features/AllMarketTicker"))
+        
+        
+        public static let BaseFeatureInterface: TargetDependency = .project(target: "BaseFeatureInterface", path: .relativeToRoot("Projects/Features/Base"))
+        public static let BaseFeature: TargetDependency = .project(target: "BaseFeature", path: .relativeToRoot("Projects/Features/Base"))
+        
+        
+        public static let RootFeatureInterface: TargetDependency = .project(target: "RootFeatureInterface", path: .relativeToRoot("Projects/Features/Root"))
+        public static let RootFeature: TargetDependency = .project(target: "RootFeature", path: .relativeToRoot("Projects/Features/Root"))
+        
+        public static let SettingFeatureInterface: TargetDependency = .project(target: "SettingFeatureInterface", path: .relativeToRoot("Projects/Features/Setting"))
+        public static let SettingFeature: TargetDependency = .project(target: "SettingFeature", path: .relativeToRoot("Projects/Features/Setting"))
+    }
+    
+    public enum Util {
+        public static let CoreUtil: TargetDependency = .project(target: "CoreUtil", path: .relativeToRoot("Projects/Utils/CoreUtil"))
+        
+        public static let PresentationUtil: TargetDependency = .project(target: "PresentationUtil", path: .relativeToRoot("Projects/Utils/PresentationUtil"))
     }
 }
 

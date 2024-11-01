@@ -23,31 +23,31 @@ let featureTemplate = Template(
         
         // Example
         
-        .item(path: "\(projectPath)/\(name)Example", contents: .directory(.relativeToRoot("Scaffold/TMA/Example/Sources"))),
+        .item(path: "\(projectPath)/Example", contents: .directory(.relativeToRoot("Scaffold/TMA/Example/Sources"))),
         
-        .item(path: "\(projectPath)/\(name)Example", contents: .directory(.relativeToRoot("Scaffold/TMA/Example/Resources"))),
+        .item(path: "\(projectPath)/Example", contents: .directory(.relativeToRoot("Scaffold/TMA/Example/Resources"))),
         
         
         // Tests
         
-        .item(path: "\(projectPath)/\(name)Tests/Tests.swift", contents: .file(.relativeToRoot("Scaffold/TMA/Tests/Tests.swift"))),
+        .item(path: "\(projectPath)/Tests/Tests.swift", contents: .file(.relativeToRoot("Scaffold/TMA/Tests/Tests.swift"))),
         
         
         // Feature
         
-        .item(path: "\(projectPath)/\(name)Feature", contents: .directory(.relativeToRoot("Scaffold/TMA/Feature/Sources"))),
+        .item(path: "\(projectPath)/Feature", contents: .directory(.relativeToRoot("Scaffold/TMA/Feature/Sources"))),
             
-        .item(path: "\(projectPath)/\(name)Feature", contents: .directory(.relativeToRoot("Scaffold/TMA/Feature/Resources"))),
+        .item(path: "\(projectPath)/Feature", contents: .directory(.relativeToRoot("Scaffold/TMA/Feature/Resources"))),
         
         
         // Testing
         
-        .item(path: "\(projectPath)/\(name)Testing/Testing.swift", contents: .file(.relativeToRoot("Scaffold/TMA/Testing/Testing.swift"))),
+        .item(path: "\(projectPath)/Testing/Testing.swift", contents: .file(.relativeToRoot("Scaffold/TMA/Testing/Testing.swift"))),
         
         
         // Interface
         
-        .item(path: "\(projectPath)/\(name)Interface/Interface.swift", contents: .file(.relativeToRoot("Scaffold/TMA/Interface/Interface.swift"))),
+        .item(path: "\(projectPath)/Interface/Interface.swift", contents: .file(.relativeToRoot("Scaffold/TMA/Interface/Interface.swift"))),
         
         
         // Project.swift

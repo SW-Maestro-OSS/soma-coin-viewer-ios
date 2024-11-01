@@ -6,8 +6,9 @@
 //
 
 import Foundation
+
 import DataSource
-import Domain
+import DomainInterface
 import CoreUtil
 
 
@@ -45,7 +46,7 @@ public class DefaultUserConfigurationRepository: UserConfigurationRepository {
     
     
     
-    public func setCurrencyType(type: Domain.CurrencyType) {
+    public func setCurrencyType(type: CurrencyType) {
         let config: UserConfiguration = .currency
         
         // 디스크 저장
@@ -57,7 +58,7 @@ public class DefaultUserConfigurationRepository: UserConfigurationRepository {
     
     
     
-    public func getGridType() -> Domain.GridType {
+    public func getGridType() -> GridType {
         let config: UserConfiguration = .gridType
         
         if let memoryCached: String = checkMemoryCache(key: config.savingKey) {
@@ -79,7 +80,7 @@ public class DefaultUserConfigurationRepository: UserConfigurationRepository {
     
     
     
-    public func setGrideType(type: Domain.GridType) {
+    public func setGrideType(type: GridType) {
         let config: UserConfiguration = .gridType
         
         // 디스크 저장

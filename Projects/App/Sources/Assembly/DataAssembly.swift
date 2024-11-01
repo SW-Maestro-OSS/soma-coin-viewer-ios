@@ -7,10 +7,15 @@
 
 import Foundation
 
+// Domain
+import Domain
+import DomainInterface
+
+// Data
 import Repository
 import DataSource
-import PresentationUtil
-import Domain
+
+// Utils
 
 
 import Swinject
@@ -19,13 +24,8 @@ public class DataAssembly: Assembly {
     
     public func assemble(container: Swinject.Container) {
         
+        
         // MARK: Repository
-        container.register(TestRepository.self) { _ in
-            DefaultTestRepository()
-        }
-        
-        
-        
         container.register(UserConfigurationRepository.self) { _ in
             DefaultUserConfigurationRepository()
         }

@@ -6,6 +6,7 @@
 
 import ProjectDescription
 import ConfigurationPlugin
+import DependencyPlugin
 
 let project = Project(
     name: "{{ name }}Module",
@@ -16,11 +17,11 @@ let project = Project(
         .target(
             name: "{{ name }}FeatureExample",
             destinations: .iOS,
-            product: .example_app,
+            product: .app,
             bundleId: "com.{{ author }}.feature.{{ name }}.example",
-            infoPlist: TargetInfoPlist.microapp,
-            sources: ["FeatureExample/Sources/**"],
-            resources: ["FeatureExample/Resources/**"],
+            infoPlist: .example_app,
+            sources: ["Example/Sources/**"],
+            resources: ["Example/Resources/**"],
             dependencies: [
                 .target(name: "{{ name }}Feature"),
                 .target(name: "{{ name }}FeatureTesting"),
@@ -39,7 +40,7 @@ let project = Project(
                 .target(name: "{{ name }}Feature"),
                 .target(name: "{{ name }}FeatureTesting"),
             ]
-        )
+        ),
 
 
         // Feature
@@ -62,7 +63,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.{{ author }}.feature.{{ name }}.testing",
-            sources: ["Feature/**"],
+            sources: ["Testing/**"],
             dependencies: [
                 .target(name: "{{ name }}FeatureInterface"),
             ]
@@ -75,7 +76,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.{{ author }}.feature.{{ name }}.interface",
-            sources: ["FeatureInterface/**"],
+            sources: ["Interface/**"],
             dependencies: [
                 
             ]

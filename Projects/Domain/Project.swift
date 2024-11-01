@@ -1,19 +1,48 @@
 import ProjectDescription
+import DependencyPlugin
 
 let project = Project(
     name: "Domain",
     targets: [
+        
         .target(
             name: "Domain",
             destinations: .iOS,
             product: .framework,
             bundleId: "com.CoinViewer.Domain",
-            sources: ["Sources/**"],
-            resources: ["Resources/**"],
+            sources: ["Concrete/**"],
             dependencies: [
-                .project(target: "CoreUtil", path: "../Utils/CoreUtil"),
+                .target(name: "DomainInterface"),
+                
+                D.Util.CoreUtil,
             ]
         ),
+        
+        
+        .target(
+            name: "DomainInterface",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.CoinViewer.Domain",
+            sources: ["Interface/**"],
+            dependencies: [
+                
+            ]
+        ),
+        
+        
+        .target(
+            name: "DomainTesting",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.CoinViewer.Domain",
+            sources: ["Interface/**"],
+            dependencies: [
+                .target(name: "DomainInterface"),
+            ]
+        ),
+        
+        
         .target(
             name: "DomainTests",
             destinations: .iOS,
@@ -22,7 +51,10 @@ let project = Project(
             infoPlist: .default,
             sources: ["Tests/**"],
             resources: [],
-            dependencies: [.target(name: "Domain")]
+            dependencies: [
+                .target(name: "Domain"),
+                .target(name: "DomainTesting"),
+            ]
         ),
     ]
 )

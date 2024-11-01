@@ -15,7 +15,7 @@ let project = Project(
             dependencies: [
                 // internal
                 .target(name: "DataSource"),
-                .project(target: "Domain", path: "../Domain"),
+                D.Domain.interface,
                 
                 // external
                 ModuleDependency.ThirdParty.SwiftStructures,
@@ -30,7 +30,7 @@ let project = Project(
             sources: ["DataSource/Sources/**"],
             resources: ["DataSource/Resources/**"],
             dependencies: [
-                .project(target: "CoreUtil", path: "../Utils/CoreUtil"),
+                D.Util.CoreUtil,
             ]
         ),
         
@@ -42,7 +42,9 @@ let project = Project(
             infoPlist: .default,
             sources: ["Tests/**"],
             resources: [],
-            dependencies: [.target(name: "Repository")]
+            dependencies: [
+                .target(name: "Repository"),
+            ]
         ),
     ]
 )
