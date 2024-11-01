@@ -8,73 +8,73 @@ import ProjectDescription
 import ConfigurationPlugin
 
 let project = Project(
-    name: "{{ featureName }}Module",
+    name: "{{ name }}Module",
     targets: [
         
 
         // Example
         .target(
-            name: "{{ featureName }}FeatureExample",
+            name: "{{ name }}FeatureExample",
             destinations: .iOS,
             product: .example_app,
-            bundleId: "com.{{ author }}.feature.{{ featureName }}.example",
+            bundleId: "com.{{ author }}.feature.{{ name }}.example",
             infoPlist: TargetInfoPlist.microapp,
             sources: ["FeatureExample/Sources/**"],
             resources: ["FeatureExample/Resources/**"],
             dependencies: [
-                .target(name: "{{ featureName }}Feature"),
-                .target(name: "{{ featureName }}FeatureTesting"),
+                .target(name: "{{ name }}Feature"),
+                .target(name: "{{ name }}FeatureTesting"),
             ]
         ),
 
 
         // Tests
         .target(
-            name: "{{ featureName }}FeatureTests",
+            name: "{{ name }}FeatureTests",
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "com.{{ author }}.feature.{{ featureName }}.tests",
+            bundleId: "com.{{ author }}.feature.{{ name }}.tests",
             sources: ["Tests/**"],
             dependencies: [
-                .target(name: "{{ featureName }}Feature"),
-                .target(name: "{{ featureName }}FeatureTesting"),
+                .target(name: "{{ name }}Feature"),
+                .target(name: "{{ name }}FeatureTesting"),
             ]
         )
 
 
         // Feature
         .target(
-            name: "{{ featureName }}Feature",
+            name: "{{ name }}Feature",
             destinations: .iOS,
             product: .framework,
-            bundleId: "com.{{ author }}.feature.{{ featureName }}",
+            bundleId: "com.{{ author }}.feature.{{ name }}",
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
             dependencies: [
-                .target(name: "{{ featureName }}FeatureInterface"),
+                .target(name: "{{ name }}FeatureInterface"),
             ]
         ),
 
 
         // Testing
         .target(
-            name: "{{ featureName }}FeatureTesting",
+            name: "{{ name }}FeatureTesting",
             destinations: .iOS,
             product: .framework,
-            bundleId: "com.{{ author }}.feature.{{ featureName }}.testing",
+            bundleId: "com.{{ author }}.feature.{{ name }}.testing",
             sources: ["Feature/**"],
             dependencies: [
-                .target(name: "{{ featureName }}FeatureInterface"),
+                .target(name: "{{ name }}FeatureInterface"),
             ]
         ),
 
 
         // FeatureInterface
         .target(
-            name: "{{ featureName }}FeatureInterface",
+            name: "{{ name }}FeatureInterface",
             destinations: .iOS,
             product: .framework,
-            bundleId: "com.{{ author }}.feature.{{ featureName }}.interface",
+            bundleId: "com.{{ author }}.feature.{{ name }}.interface",
             sources: ["FeatureInterface/**"],
             dependencies: [
                 
