@@ -8,9 +8,9 @@ import ProjectDescription
 
 public enum TargetInfoPlist {
     
-    public static let main_app: InfoPlist = .extended_app_plist(with: [])
+    public static let main_app: InfoPlist = .extended_app_plist(with: [:])
     
-    public static let example_app: InfoPlist = .extended_app_plist(with: [])
+    public static let example_app: InfoPlist = .extended_app_plist(with: [:])
 }
 
 extension InfoPlist {
