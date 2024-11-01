@@ -1,0 +1,84 @@
+//
+//  Project.swift
+//
+//  Created by {{ author }} on {{ currentDate }}
+//
+
+import ProjectDescription
+import ConfigurationPlugin
+
+let project = Project(
+    name: "{{ featureName }}Module",
+    targets: [
+        
+
+        // Example
+        .target(
+            name: "{{ featureName }}FeatureExample",
+            destinations: .iOS,
+            product: .exampleApp,
+            bundleId: "com.{{ author }}.feature.{{ featureName }}.example",
+            infoPlist: TargetInfoPlist.microapp,
+            sources: ["FeatureExample/Sources/**"],
+            resources: ["FeatureExample/Resources/**"],
+            dependencies: [
+                .target(name: "{{ featureName }}Feature"),
+                .target(name: "{{ featureName }}FeatureTesting"),
+            ]
+        ),
+
+
+        // Tests
+        .target(
+            name: "{{ featureName }}FeatureTests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.{{ author }}.feature.{{ featureName }}.tests",
+            sources: ["Tests/**"],
+            dependencies: [
+                .target(name: "{{ featureName }}Feature"),
+                .target(name: "{{ featureName }}FeatureTesting"),
+            ]
+        )
+
+
+        // Feature
+        .target(
+            name: "{{ featureName }}Feature",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.{{ author }}.feature.{{ featureName }}",
+            sources: ["Feature/Sources/**"],
+            resources: ["Feature/Resources/**"],
+            dependencies: [
+                .target(name: "{{ featureName }}FeatureInterface"),
+            ]
+        ),
+
+
+        // Testing
+        .target(
+            name: "{{ featureName }}FeatureTesting",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.{{ author }}.feature.{{ featureName }}.testing",
+            sources: ["Feature/**"],
+            dependencies: [
+                .target(name: "{{ featureName }}FeatureInterface"),
+            ]
+        ),
+
+
+        // FeatureInterface
+        .target(
+            name: "{{ featureName }}FeatureInterface",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.{{ author }}.feature.{{ featureName }}.interface",
+            sources: ["FeatureInterface/**"],
+            dependencies: [
+                
+            ]
+        ),
+    ]
+)
