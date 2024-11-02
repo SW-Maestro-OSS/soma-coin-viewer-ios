@@ -15,22 +15,17 @@ import CoreUtil
 public class DefaultAllMarketTickerRepository: AllMarketTickerRepository {
     
     @Injected var webSocketService: WebSocketService
+    @Injected var webSocketConfig: WebSocketConfiguable
     
     private var tickerPublisher: PassthroughSubject<[Symbol24hTickerVO], Error>?
     
     private let jsonDecoder: JSONDecoder = .init()
     
-    private let streamName: String = "!ticker@arr"
+    private var streamName: String {
+        webSocketConfig.streamName[.allMarketTickers]!
+    }
     
     public init() { }
-    
-    public func connect(completion: ((any Error)?) -> ()) {
-        
-    }
-    
-    public func disconnect() {
-        
-    }
     
     public func subscribe() -> AnyPublisher<[Symbol24hTickerVO], Error> {
         
