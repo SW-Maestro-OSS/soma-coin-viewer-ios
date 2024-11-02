@@ -6,6 +6,7 @@
 //
 
 import Combine
+import Foundation
 
 import DomainInterface
 
@@ -15,21 +16,24 @@ public class MockAllMarketTickersRepository: AllMarketTickerRepository {
     
     public func subscribe() -> AnyPublisher<Array<Symbol24hTickerVO>, any Error> {
         
-        Future { promise in
+        let list = (0..<100).map { index in
             
-            let list = (0..<100).map { index in
-                
-                Symbol24hTickerVO(
-                    symbol: "test_symbol\(index)",
-                    price: 0.0,
-                    totalTradedQuoteAssetVolume: 100.0 * Double(index),
-                    changedPercent: 0.0
-                )
-            }
-            
-            promise(.success(list))
+            Symbol24hTickerVO(
+                symbol: "test_symbol\(index)",
+                price: 0.0,
+                totalTradedQuoteAssetVolume: 100.0 * Double(index),
+                changedPercent: 0.0
+            )
         }
-        .eraseToAnyPublisher()
+        
+        let pub = CurrentValueSubject<[Symbol24hTickerVO], Error>(list)
+        
+        DispatchQueue.global().asyncAfter(deadline: .now()+1) {
+            
+            pub.send(completion: .finished)
+        }
+        
+        return pub.eraseToAnyPublisher()
     }
     
     public func unsubscribe() {
