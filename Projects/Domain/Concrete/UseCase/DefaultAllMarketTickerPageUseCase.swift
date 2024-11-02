@@ -21,7 +21,6 @@ public class DefaultAllMarketTickerPageUseCase: AllMarketTickerPageUseCase {
         
         allMarketTickerRepository
             .subscribe()
-            .throttle(for: 0.35, scheduler: DispatchQueue.main, latest: true)
             .catch { error in
                 
                 // 에러 처리
@@ -36,7 +35,11 @@ public class DefaultAllMarketTickerPageUseCase: AllMarketTickerPageUseCase {
                 }
                 
                 // 상위 30개만 전달
-                return Array(sortedTickers[0..<30])
+                if sortedTickers.count > 30 {
+                    return Array(sortedTickers[0..<30])
+                }
+                
+                return sortedTickers
             }
             .eraseToAnyPublisher()
     }
