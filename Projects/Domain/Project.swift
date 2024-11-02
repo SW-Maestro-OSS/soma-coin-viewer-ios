@@ -6,6 +6,21 @@ let project = Project(
     targets: [
         
         .target(
+            name: "DomainTests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.CoinViewer.Domain.tests",
+            infoPlist: .default,
+            sources: ["Tests/**"],
+            resources: [],
+            dependencies: [
+                .target(name: "Domain"),
+                .target(name: "DomainTesting"),
+            ]
+        ),
+        
+        
+        .target(
             name: "Domain",
             destinations: .iOS,
             product: .framework,
@@ -23,7 +38,7 @@ let project = Project(
             name: "DomainInterface",
             destinations: .iOS,
             product: .framework,
-            bundleId: "com.CoinViewer.Domain",
+            bundleId: "com.CoinViewer.Domain.interface",
             sources: ["Interface/**"],
             dependencies: [
                 
@@ -35,27 +50,13 @@ let project = Project(
             name: "DomainTesting",
             destinations: .iOS,
             product: .framework,
-            bundleId: "com.CoinViewer.Domain",
-            sources: ["Interface/**"],
+            bundleId: "com.CoinViewer.Domain.testing",
+            sources: ["Testing/**"],
             dependencies: [
                 .target(name: "DomainInterface"),
             ]
         ),
         
-        
-        .target(
-            name: "DomainTests",
-            destinations: .iOS,
-            product: .unitTests,
-            bundleId: "io.tuist.DomainTests",
-            infoPlist: .default,
-            sources: ["Tests/**"],
-            resources: [],
-            dependencies: [
-                .target(name: "Domain"),
-                .target(name: "DomainTesting"),
-            ]
-        ),
     ]
 )
 
