@@ -12,7 +12,6 @@ let project = Project(
             bundleId: "com.CoinViewer.Domain.tests",
             infoPlist: .default,
             sources: ["Tests/**"],
-            resources: [],
             dependencies: [
                 .target(name: "Domain"),
                 .target(name: "DomainTesting"),
