@@ -22,12 +22,7 @@ public class DefaultAllMarketTickerRepository: AllMarketTickerRepository {
     
     private let streamName: String = "!ticker@arr"
     
-    public init() { 
-        webSocketService.connect(
-            to: URL(string: "wss://stream.binance.com:443/ws")!,
-            onError: nil
-        )
-    }
+    public init() { }
     
     public func subscribeToStream() -> AnyPublisher<[DomainInterface.Symbol24hTickerVO], Never> {
         
@@ -37,7 +32,7 @@ public class DefaultAllMarketTickerRepository: AllMarketTickerRepository {
         webSocketService.subsribe(
             id: 1,
             to: streamName,
-            onError: nil) { [jsonDecoder] message in
+            subCallback: nil) { [jsonDecoder] message in
                 
                 if case .string(let string) = message, let data = string.data(using: .utf8){
                     
@@ -60,6 +55,8 @@ public class DefaultAllMarketTickerRepository: AllMarketTickerRepository {
     public func unsubscribeFromStream() {
         
         webSocketService.unsubscribe(id: 1, from: [streamName]) { error in
+            
+            guard let error else { return }
             
             printIfDebug("스트림 해제 실패, \(error.localizedDescription)")
         }

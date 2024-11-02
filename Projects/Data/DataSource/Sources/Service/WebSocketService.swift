@@ -16,16 +16,16 @@ import SwiftStructures
 public protocol WebSocketService {
     
     typealias MessageCallback = (URLSessionWebSocketTask.Message) -> Void
-    typealias ErrorCallback = (Error) -> Void
+    typealias Callback = (Error?) -> Void
     
     /// 웹소켓을 연결합니다.
-    func connect(to: URL, onConnectionError: ErrorCallback?)
+    func connect(to: URL, connectionCallback: Callback?)
     
     /// 특정 스트림을 구독합니다.
-    func subsribe(id: Int64, to: String, onError: ErrorCallback?, onReceive: (MessageCallback)?)
+    func subsribe(id: Int64, to: String, subCallback: Callback?, onReceive: (MessageCallback)?)
     
     /// 특정 스트림으로 부터 구독을 해제합니다.
-    func unsubscribe(id: Int64, from: [String], onError: ErrorCallback?)
+    func unsubscribe(id: Int64, from: [String], unsubCallback: Callback?)
     
     /// 연결을 해제합니다.
     func disconnect()
@@ -38,7 +38,7 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
     
     public private(set) var task: URLSessionWebSocketTask?
     public private(set) var messageCallbacks: LockedDictionary<String, MessageCallback> = .init()
-    public private(set) var onConnectionError: ErrorCallback?
+    public private(set) var connectionCallback: Callback?
     
     private let jsonDecoder = JSONDecoder()
     private let jsonEncoder = JSONEncoder()
@@ -78,11 +78,11 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         })
     }
     
-    public func connect(to baseURL: URL, onConnectionError: ErrorCallback?) {
+    public func connect(to baseURL: URL, connectionCallback: Callback?) {
         
         if task != nil { return }
         
-        self.onConnectionError = onConnectionError
+        self.connectionCallback = connectionCallback
         
         self.task = session.webSocketTask(with: baseURL)
         self.task?.resume()
@@ -91,7 +91,7 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         startTimer()
     }
     
-    public func subsribe(id: Int64 = 1, to stream: String, onError: ErrorCallback?, onReceive: (MessageCallback)?) {
+    public func subsribe(id: Int64 = 1, to stream: String, subCallback: Callback?, onReceive: (MessageCallback)?) {
         
         guard let task else { return }
         
@@ -106,13 +106,9 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         
         task.send(.string(stringMessage)) { [weak self] error in
             
-            if let error {
-                
-                onError?(error)
-                
-                printIfDebug("웹소켓 메세지 수신 실패 \(error.localizedDescription)")
-                
-            } else {
+            subCallback?(error)
+            
+            if error == nil {
                 
                 // 매세지 수신 성공 후 컬백등록
                 self?.messageCallbacks[stream] = onReceive
@@ -120,7 +116,7 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         }
     }
     
-    public func unsubscribe(id: Int64 = 1, from streams: [String], onError: ErrorCallback?) {
+    public func unsubscribe(id: Int64 = 1, from streams: [String], unsubCallback: Callback?) {
         
         guard let task else { return }
         
@@ -135,13 +131,9 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         
         task.send(.string(stringMessage)) { [weak self] error in
             
-            if let error {
-                
-                onError?(error)
-                
-                printIfDebug("웹소켓 메세지 수신 실패 \(error.localizedDescription)")
-                
-            } else {
+            unsubCallback?(error)
+            
+            if error == nil {
                 
                 for stream in streams {
                     self?.messageCallbacks.remove(key: stream)
@@ -172,7 +164,7 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
                 
             case .failure(let error):
                 
-                self.onConnectionError?(error)
+                self.connectionCallback?(error)
                 
                 if let urlError = error as? URLError, urlError.code == .cancelled {
                     
