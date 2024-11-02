@@ -8,4 +8,5 @@
 import Foundation
 import Combine
 
-public protocol AllMarketTickerRepository: StreamConnectable { }
+public protocol AllMarketTickerRepository:
+    StreamConnectable where Element == [Symbol24hTickerVO] { }
