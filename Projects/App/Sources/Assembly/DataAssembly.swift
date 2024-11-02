@@ -36,12 +36,17 @@ public class DataAssembly: Assembly {
         
         
         // MARK: Repository
+        container.register(WebSocketConfiguable.self) { _ in
+            WebSocketConfiguration()
+        }
+        .inObjectScope(.container)
+        
         container.register(UserConfigurationRepository.self) { _ in
             DefaultUserConfigurationRepository()
         }
         .inObjectScope(.container)
         
-        container.register(AllMarketTickerRepository.self) { _ in
+        container.register((any AllMarketTickerRepository).self) { _ in
             DefaultAllMarketTickerRepository()
         }
     }
