@@ -16,7 +16,7 @@ public class DefaultAllMarketTickerRepository: AllMarketTickerRepository {
     
     @Injected var webSocketService: WebSocketService
     
-    private var tickerPublisher: PassthroughSubject<[Symbol24hTickerVO], Never>?
+    private var tickerPublisher: PassthroughSubject<[Symbol24hTickerVO], Error>?
     
     private let jsonDecoder: JSONDecoder = .init()
     
@@ -24,9 +24,17 @@ public class DefaultAllMarketTickerRepository: AllMarketTickerRepository {
     
     public init() { }
     
-    public func subscribeToStream() -> AnyPublisher<[DomainInterface.Symbol24hTickerVO], Never> {
+    public func connect(completion: ((any Error)?) -> ()) {
         
-        let publisher: PassthroughSubject<[Symbol24hTickerVO], Never> = .init()
+    }
+    
+    public func disconnect() {
+        
+    }
+    
+    public func subscribe() -> AnyPublisher<[Symbol24hTickerVO], Error> {
+        
+        let publisher: PassthroughSubject<[Symbol24hTickerVO], Error> = .init()
         self.tickerPublisher = publisher
         
         webSocketService.subsribe(
@@ -52,8 +60,12 @@ public class DefaultAllMarketTickerRepository: AllMarketTickerRepository {
         return publisher.eraseToAnyPublisher()
     }
     
-    public func unsubscribeFromStream() {
+    public func unsubscribe() {
         
+        // 퍼블리셔 메모리해제
+        tickerPublisher = nil
+        
+        // 스트림 구독 취소
         webSocketService.unsubscribe(id: 1, from: [streamName]) { error in
             
             guard let error else { return }
