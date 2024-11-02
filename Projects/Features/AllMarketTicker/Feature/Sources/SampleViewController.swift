@@ -12,7 +12,7 @@ import CoreUtil
 
 public class SampleViewController: UIViewController {
     
-    @Injected var repo: AllMarketTickerRepository
+    @Injected var repo: any AllMarketTickerRepository
     
     var bag: Set<AnyCancellable> = .init()
     
@@ -20,16 +20,19 @@ public class SampleViewController: UIViewController {
         super.viewDidLoad()
         
         repo
-            .subscribeToStream()
-            .sink { list in
+            .subscribe()
+            .sink(receiveCompletion: { error in
+                
+            }, receiveValue: { list in
+                
                 print(list)
-            }
+            })
             .store(in: &bag)
         
         
         DispatchQueue.main.asyncAfter(deadline: .now()+3) { [repo] in
             
-            repo.unsubscribeFromStream()
+            repo.unsubscribe()
         }
     }
 }
