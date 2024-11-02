@@ -21,6 +21,7 @@ public class DefaultAllMarketTickerPageUseCase: AllMarketTickerPageUseCase {
         
         allMarketTickerRepository
             .subscribe()
+            .throttle(for: 0.35, scheduler: DispatchQueue.global(), latest: true)
             .catch { error in
                 
                 // 에러 처리
