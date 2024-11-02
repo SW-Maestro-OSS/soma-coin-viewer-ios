@@ -19,7 +19,7 @@ public protocol WebSocketService {
     typealias ErrorCallback = (Error) -> Void
     
     /// 웹소켓을 연결합니다.
-    func connect(to: URL, onError: ErrorCallback?)
+    func connect(to: URL, onConnectionError: ErrorCallback?)
     
     /// 특정 스트림을 구독합니다.
     func subsribe(id: Int64, to: String, onError: ErrorCallback?, onReceive: (MessageCallback)?)
@@ -78,13 +78,13 @@ public class DefaultWebSocketService: NSObject, WebSocketService {
         })
     }
     
-    public func connect(to baseURL: URL, onError: ErrorCallback?) {
+    public func connect(to baseURL: URL, onConnectionError: ErrorCallback?) {
         
         if task != nil { return }
         
-        var urlWithStream = baseURL
+        self.onConnectionError = onConnectionError
         
-        self.task = session.webSocketTask(with: urlWithStream)
+        self.task = session.webSocketTask(with: baseURL)
         self.task?.resume()
         
         // start ping pong
