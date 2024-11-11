@@ -1,5 +1,5 @@
 //
-//  SymbolTickerDTO.swift
+//  TickerForSymbolDTO.swift
 //  DataSource
 //
 //  Created by choijunios on 11/1/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct SymbolTickerDTO: Decodable {
+public struct TickerForSymbolDTO: Decodable {
     
     public let eventType: String
     public let eventTime: Int

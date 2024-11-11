@@ -15,7 +15,7 @@ public protocol WebSocketService {
     typealias Response = Result<Message, Error>
     
     /// 웹소켓 메세지 상태입니다.
-    var message: PassthroughSubject<Response, Never> { get }
+    var message: AnyPublisher<Response, Never> { get }
     
     
     /// 소켓을 연결할 것을 요청합니다.

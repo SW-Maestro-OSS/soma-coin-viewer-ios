@@ -42,9 +42,3 @@ struct AllMarketTickerPageUseCase {
         }
     }
 }
-
-extension Symbol24hTickerVO: @retroactive Equatable {
-    public static func == (lhs: Symbol24hTickerVO, rhs: Symbol24hTickerVO) -> Bool {
-        lhs.symbol == rhs.symbol
-    }
-}
