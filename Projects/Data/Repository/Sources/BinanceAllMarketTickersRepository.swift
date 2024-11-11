@@ -36,7 +36,12 @@ public class BinanceAllMarketTickersRepository: AllMarketTickersRepository {
                 case .success(let message):
                     if case .string(let string) = message, let data = string.data(using: .utf8){
                         
-                        let tickerDTOs = try! repository.decoder.decode([TickerForSymbolDTO].self, from: data)
+                        guard let tickerDTOs = try? repository.decoder.decode([TickerForSymbolDTO].self, from: data) else {
+                            
+                            return
+                        }
+                        
+                        // 디코딩 성공한 메세지일 경우에먼 스트림 전달
                         
                         let entities = tickerDTOs.map { $0.toEntity() }
                         
