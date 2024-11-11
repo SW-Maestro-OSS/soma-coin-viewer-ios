@@ -1,5 +1,5 @@
 //
-//  BinanceAllMarketTickerRepository.swift
+//  BinanceAllMarketTickersRepository.swift
 //  Repository
 //
 //  Created by choijunios on 11/1/24.
@@ -12,7 +12,7 @@ import DataSource
 import DomainInterface
 import CoreUtil
 
-public class BinanceAllMarketTickerRepository: AllMarketTickerRepository {
+public class BinanceAllMarketTickersRepository: AllMarketTickersRepository {
     
     @Injected var webSocketService: WebSocketService
     
