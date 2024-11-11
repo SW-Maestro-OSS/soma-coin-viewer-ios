@@ -3,18 +3,6 @@ import XCTest
 
 class WebSocketServiceTests: XCTestCase {
 
-    var webSocketService: DefaultWebSocketService!
-    
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        webSocketService = DefaultWebSocketService()
-    }
-
-    override func tearDownWithError() throws {
-        webSocketService = nil
-        try super.tearDownWithError()
-    }
-
     // MARK: 웹소켓 연결/해제 테스트
 //    func testWebSocketConnectAndDisconnect() throws {
 //        

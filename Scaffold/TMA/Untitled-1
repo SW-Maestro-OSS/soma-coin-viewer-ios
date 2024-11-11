@@ -1,0 +1,48 @@
+
+protocol PathFinder {
+
+    func path(elements: [Element]) -> [Element]
+}
+
+
+class ViewModel {
+
+    let useCase: MainPageUseCase
+
+
+
+    이벤트 -> useCase.findBestPath ... 
+
+
+}
+
+
+protocol MainPageUseCase {
+
+    func findBestPath(elements: [Element]) -> [Element]
+}
+
+
+class DefaultMainPageUseCase: MainPageUseCase {
+
+    let pathFinder: PathFinder
+
+
+    func findBestPath(elements: [Element]) -> [Element] {
+
+        switch elements.count {
+
+            case 0..<100:
+
+                pathFinder = Injector.resolve(PathFinder.self, name="해벌싸인")
+
+            case 1100..<200:
+
+                pathFinder = Injector.resolve(PathFinder.self, name="다익스트라")
+            ...
+
+        }
+
+    }
+
+}
