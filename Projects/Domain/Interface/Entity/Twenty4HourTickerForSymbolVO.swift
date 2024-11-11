@@ -1,5 +1,5 @@
 //
-//  Symbol24hTickerVO.swift
+//  Twenty4HourTickerForSymbolVO.swift
 //  DomainInterface
 //
 //  Created by choijunios on 11/1/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Symbol24hTickerVO {
+public struct Twenty4HourTickerForSymbolVO {
     
     public let symbol: String
     public let price: Double
