@@ -15,11 +15,9 @@ class DomainAssembly: Assembly {
     
     func assemble(container: Swinject.Container) {
         
-        // 구현자체는 데이터 레이에 구현되어 있다. 추후 별도의 모듈로 분리 예정
-        container.register(WebSocketHelper.self) { _ in
-            DefaultWebSockerHelper()
-        }
-        
         // UseCase
+        container.register(AllMarketTickersUseCase.self) { _ in
+            DefaultAllMarketTickersUseCase()
+        }
     }
 }

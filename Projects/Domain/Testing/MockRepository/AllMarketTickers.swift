@@ -10,12 +10,31 @@ import Foundation
 
 import DomainInterface
 
-public class MockAllMarketTickersRepository: AllMarketTickerRepository {
+public class MockAllMarketTickersRepository: AllMarketTickersRepository {
     
     public init() { }
     
-    public func request24hTickerForAllSymbols() -> AnyPublisher<[DomainInterface.Twenty4HourTickerForSymbolVO], Never> {
+    public func request24hTickerForAllSymbols() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> {
         
-        Just([]).eraseToAnyPublisher()
+        let list = (0..<100).shuffled().map { index in
+            
+            Twenty4HourTickerForSymbolVO.createMock(index: index)
+        }
+        
+        return Just(list).eraseToAnyPublisher()
     }
 }
+
+fileprivate extension Twenty4HourTickerForSymbolVO {
+    
+    static func createMock(index: Int) -> Twenty4HourTickerForSymbolVO {
+        
+        Twenty4HourTickerForSymbolVO(
+            symbol: "symbol\(index)",
+            price: 100.0 * Double(index),
+            totalTradedQuoteAssetVolume: 100.0 * Double(index),
+            changedPercent: Double(index % 100)
+        )
+    }
+}
+

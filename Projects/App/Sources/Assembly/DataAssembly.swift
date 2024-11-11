@@ -30,24 +30,19 @@ public class DataAssembly: Assembly {
         }
         
         container.register(WebSocketService.self) { _ in
-            DefaultWebSocketService()
+            BinanceWebSocketService()
         }
         .inObjectScope(.container)
         
         
         // MARK: Repository
-        container.register(WebSocketConfiguable.self) { _ in
-            WebSocketConfiguration()
-        }
-        .inObjectScope(.container)
-        
         container.register(UserConfigurationRepository.self) { _ in
             DefaultUserConfigurationRepository()
         }
         .inObjectScope(.container)
         
-        container.register((any AllMarketTickerRepository).self) { _ in
-            DefaultAllMarketTickerRepository()
+        container.register(AllMarketTickersRepository.self) { _ in
+            BinanceAllMarketTickersRepository()
         }
     }
 }
