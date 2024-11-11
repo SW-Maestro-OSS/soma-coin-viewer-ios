@@ -20,28 +20,15 @@ public class DataAssembly: Assembly {
         
         // MARK: DataSource
         container.register(WebSocketService.self) { _ in
-            DefaultWebSocketService()
+            BinanceWebSocketService()
         }
         .inObjectScope(.container)
         
         
         // MARK: Repository
-        container.register(WebSocketConfiguable.self) { _ in
-            WebSocketConfiguration()
-        }
-        .inObjectScope(.container)
-        
-        container.register((any AllMarketTickerRepository).self) { _ in
-            DefaultAllMarketTickerRepository()
+
+        container.register(AllMarketTickersRepository.self) { _ in
+            BinanceAllMarketTickersRepository()
         }
     }
-}
-
-public class WebSocketConfiguration: WebSocketConfiguable {
-    
-    public let baseURL: String = "wss://stream.binance.com:443/ws"
-    
-    public let streamName: [WebSocketStream : String] = [
-        .allMarketTickers : "!ticker@arr"
-    ]
 }
