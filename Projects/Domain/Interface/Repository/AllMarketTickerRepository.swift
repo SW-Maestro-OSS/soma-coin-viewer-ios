@@ -9,5 +9,5 @@ import Combine
 
 public protocol AllMarketTickerRepository {
     
-    func request24hTickerForAllSymbols() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Error>
+    func request24hTickerForAllSymbols() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never>
 }

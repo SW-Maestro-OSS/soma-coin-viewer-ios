@@ -14,7 +14,9 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
     
     static let baseURL: URL = .init(string: "wss://stream.binance.com:443/ws")!
     
-    public let message: PassthroughSubject<Response, Never> = .init()
+    private let socketMessagePublisher: PassthroughSubject<Response, Never> = .init()
+    
+    public let message: AnyPublisher<Response, Never>
     
     
     // Network
@@ -27,6 +29,10 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
     private let jsonEncoder = JSONEncoder()
     
     public override init() {
+        
+        self.message = socketMessagePublisher
+            .share()
+            .eraseToAnyPublisher()
         
         super.init()
         
@@ -127,7 +133,7 @@ extension BinanceWebSocketService: URLSessionWebSocketDelegate {
             
             guard let self else { return }
             
-            message.send(result)
+            socketMessagePublisher.send(result)
             
             // 재귀호출
             listenToMessage()

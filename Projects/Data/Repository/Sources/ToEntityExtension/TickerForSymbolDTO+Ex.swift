@@ -1,5 +1,5 @@
 //
-//  SymbolTickerDTO+Ex.swift
+//  TickerForSymbolDTO+Ex.swift
 //  Repository
 //
 //  Created by choijunios on 11/1/24.
@@ -10,9 +10,9 @@ import Foundation
 import DataSource
 import DomainInterface
 
-extension SymbolTickerDTO {
+extension TickerForSymbolDTO {
     
-    func toEntity() -> Symbol24hTickerVO {
+    func toEntity() -> Twenty4HourTickerForSymbolVO {
         
         return .init(
             symbol: symbol,
