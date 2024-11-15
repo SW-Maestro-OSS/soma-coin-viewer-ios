@@ -1,5 +1,5 @@
 //
-//  NPathController.swift
+//  Router.swift
 //  BaseFeatureInterface
 //
 //  Created by choijunios on 11/15/24.
@@ -7,13 +7,13 @@
 
 import SwiftUI
 
-open class NPathController<Destination>: ObservableObject where Destination: Hashable {
+public class Router: ObservableObject  {
     
     @Published public var path: NavigationPath = .init()
     
     public init() { }
     
-    public func present(destination: Destination) {
+    public func present<Destination: Hashable>(destination: Destination) {
         
         path.append(destination)
     }
