@@ -14,7 +14,7 @@ public protocol Coordinator: AnyObject {
     
     var present: ((OutsideDestination) -> ())? { get set }
     
-    var delegate: CoordinatorFinishDelegate { get set }
+    var delegate: CoordinatorFinishDelegate? { get set }
     
     func start() -> Content
 }
