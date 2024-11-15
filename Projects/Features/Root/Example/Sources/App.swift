@@ -30,9 +30,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        DependencyInjector.shared.register(Router.self, Router())
         
-        self.rootCoordinator = .init()
+        self.rootCoordinator = .init(router: Router())
         
         return true
     }
