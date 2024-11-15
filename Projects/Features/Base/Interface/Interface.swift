@@ -1,6 +1,0 @@
-//
-//  Interface.swift
-//
-//
-
-import Foundation
