@@ -18,7 +18,7 @@ enum RootDestination: Hashable {
 
 public class RootCoordinator: Coordinator {
     
-    private let nPathController: NPathController<RootDestination> = .init()
+    @Injected private var router: Router
     
     
     public init() { }
@@ -31,12 +31,12 @@ public class RootCoordinator: Coordinator {
             // Test
             DispatchQueue.main.asyncAfter(deadline: .now()+3) { [weak self] in
                 
-                self?.nPathController.present(destination: .mainTabBarPage)
+                self?.router.present(destination: RootDestination.mainTabBarPage)
             }
         }
         
         return RootView(
-            nPathController: nPathController,
+            router: router,
             destinationView: present
         )
     }

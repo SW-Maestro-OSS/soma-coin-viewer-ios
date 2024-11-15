@@ -11,12 +11,12 @@ import BaseFeatureInterface
 
 public struct RootView: View {
     
-    @ObservedObject var nPathController: NPathController<RootDestination>
+    @ObservedObject var router: Router
     @ViewBuilder var destinationView: (RootDestination) -> any View
     
     public var body: some View {
         
-        NavigationStack(path: $nPathController.path) {
+        NavigationStack(path: $router.path) {
             
             Text("This is root view")
                 .navigationDestination(for: RootDestination.self) { destination in
