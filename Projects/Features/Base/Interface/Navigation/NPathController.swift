@@ -7,7 +7,11 @@
 
 import SwiftUI
 
-open class NPathController<Destination> where Destination: Hashable {
+open class NPathController<Destination>: ObservableObject where Destination: Hashable {
     
-    func present(destination: Destination) { }
+    @Published public var path: NavigationPath = .init()
+    
+    public init() { }
+    
+    public func present(destination: Destination) { }
 }
