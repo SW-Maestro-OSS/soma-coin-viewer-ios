@@ -20,10 +20,9 @@ public class RootCoordinator: Coordinator {
     
     private let nPathController: NPathController<RootDestination> = .init()
     
-    public var present: ((OutsideDestination) -> ())? = nil
-    public weak var delegate: CoordinatorFinishDelegate? = nil
     
     public init() { }
+    
     
     public func start() -> RootView {
     
@@ -41,6 +40,10 @@ public class RootCoordinator: Coordinator {
             destinationView: present
         )
     }
+    
+    
+    public var present: ((OutsideDestination) -> ())? = nil
+    public weak var delegate: CoordinatorFinishDelegate? = nil
 }
 
 extension RootCoordinator {
