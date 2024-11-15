@@ -1,6 +1,6 @@
 //
 //  StreamController.swift
-//  StreamControllerModule
+//  StreamControllerFeatureInterface
 //
 //  Created by choijunios on 11/15/24.
 //

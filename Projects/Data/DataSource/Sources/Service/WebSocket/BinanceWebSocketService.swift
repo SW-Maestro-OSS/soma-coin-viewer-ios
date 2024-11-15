@@ -81,7 +81,7 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
         
         webSocketManagementQueue.async { [weak self] in
             
-            guard let self else { return }
+            guard let self, !messageParameters.isEmpty else { return }
             
             let messageDTO = BinanceWebSocketStreamMessageDTO(
                 method: .SUBSCRIBE,
@@ -97,7 +97,7 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
         
         webSocketManagementQueue.async { [weak self] in
             
-            guard let self else { return }
+            guard let self, !messageParameters.isEmpty else { return }
             
             let messageDTO = BinanceWebSocketStreamMessageDTO(
                 method: .UNSUBSCRIBE,
