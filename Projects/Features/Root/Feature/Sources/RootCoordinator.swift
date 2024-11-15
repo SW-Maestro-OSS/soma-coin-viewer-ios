@@ -18,10 +18,12 @@ enum RootDestination: Hashable {
 
 public class RootCoordinator: Coordinator {
     
-    @Injected private var router: Router
+    let router: Router
     
     
-    public init() { }
+    public init(router: Router) {
+        self.router = router
+    }
     
     
     public func start() -> RootView {
