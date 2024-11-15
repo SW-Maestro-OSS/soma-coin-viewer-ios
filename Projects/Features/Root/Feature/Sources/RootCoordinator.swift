@@ -18,14 +18,48 @@ enum RootDestination: Hashable {
 
 public class RootCoordinator: Coordinator {
     
-    @Injected var nPathController: NPathController<RootDestination>
+    private let nPathController: NPathController<RootDestination> = .init()
     
     public var present: ((OutsideDestination) -> ())? = nil
     public weak var delegate: CoordinatorFinishDelegate? = nil
     
+    public init() { }
+    
     public func start() -> RootView {
     
-        return RootView()
+        defer {
+            
+            // Test
+            DispatchQueue.main.asyncAfter(deadline: .now()+3) { [weak self] in
+                
+                self?.nPathController.present(destination: .mainTabBarPage)
+            }
+        }
+        
+        return RootView(
+            nPathController: nPathController,
+            destinationView: present
+        )
+    }
+}
+
+extension RootCoordinator {
+    
+    @ViewBuilder
+    func present(destination: RootDestination) -> any View {
+        
+        switch destination {
+        case .mainTabBarPage:
+            
+            // start coordinator
+            
+            Text("mainTabBarPage")
+        case .coinDetailPage:
+            
+            // start coordinator
+            
+            Text("coinDetailPage")
+        }
     }
 }
 
