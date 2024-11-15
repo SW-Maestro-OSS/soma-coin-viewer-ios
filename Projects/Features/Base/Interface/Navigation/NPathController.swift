@@ -13,5 +13,13 @@ open class NPathController<Destination>: ObservableObject where Destination: Has
     
     public init() { }
     
-    public func present(destination: Destination) { }
+    public func present(destination: Destination) {
+        
+        path.append(destination)
+    }
+    
+    public func pop() {
+        
+        path.removeLast()
+    }
 }
