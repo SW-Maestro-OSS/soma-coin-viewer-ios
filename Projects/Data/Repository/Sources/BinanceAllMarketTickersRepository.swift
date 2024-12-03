@@ -36,7 +36,7 @@ public class BinanceAllMarketTickersRepository: AllMarketTickersRepository {
                 case .success(let message):
                     if case .string(let string) = message, let data = string.data(using: .utf8){
                         
-                        guard let tickerDTOs = try? repository.decoder.decode([TickerForSymbolDTO].self, from: data) else {
+                        guard let tickerDTOs = try? repository.decoder.decode([BinanceTickerForSymbolDTO].self, from: data) else {
                             
                             return
                         }

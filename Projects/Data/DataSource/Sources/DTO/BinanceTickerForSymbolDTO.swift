@@ -1,5 +1,5 @@
 //
-//  TickerForSymbolDTO.swift
+//  BinanceTickerForSymbolDTO.swift
 //  DataSource
 //
 //  Created by choijunios on 11/1/24.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct TickerForSymbolDTO: Decodable {
+public struct BinanceTickerForSymbolDTO: Decodable {
     
     public let eventType: String
     public let eventTime: Int
