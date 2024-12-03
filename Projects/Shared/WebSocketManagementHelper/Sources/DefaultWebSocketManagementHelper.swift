@@ -14,14 +14,12 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     @Injected var webSocketService: WebSocketService
     
     private var subscribtions: Set<String> = []
-    private let subscribedStreamManageQueue: DispatchQueue = .init(
-        label: "com.WebSocketManagementHelper",
-        attributes: .concurrent
-    )
+    
+    private let subscribedStreamManageQueue: DispatchQueue = .init(label: "com.WebSocketManagementHelper")
     
     public func requestSubscribeToStream(streams: [String]) {
         
-        subscribedStreamManageQueue.async(flags: .barrier) { [weak self] in
+        subscribedStreamManageQueue.async { [weak self] in
             
             guard let self else { return }
             
@@ -43,29 +41,31 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
         }
     }
     
-    public func requestUnsubscribeToStream(streams: [String]) {
+    public func requestUnsubscribeToStream(streams willRemoveStreams: [String]) {
         
-        webSocketService.unsubscribeTo(messageParameters: streams)
+        // 특정스트림에 대해 구독을 해제
+        webSocketService.unsubscribeTo(messageParameters: willRemoveStreams)
         
-        subscribedStreamManageQueue.async(flags: .barrier) { [weak self] in
+        
+        // 리커버리 리스트에서 해당 스트림을 제거
+        subscribedStreamManageQueue.async { [weak self] in
             
             guard let self else { return }
             
-            for stream in streams {
+            self.subscribtions = subscribtions.filter { stream in
                 
-                if let index = subscribtions.firstIndex(where: { $0 == stream }) {
-                    
-                    subscribtions.remove(at: index)
-                }
+                !willRemoveStreams.contains(stream)
             }
         }
     }
     
     public func requestDisconnection() {
         
+        webSocketService.disconnect()
     }
     
     public func requestConnection(connectionType: StreamControllerInterface.ConnectionType) {
         
+        webSocketService.connect()
     }
 }
