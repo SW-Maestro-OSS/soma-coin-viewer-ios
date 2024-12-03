@@ -41,8 +41,12 @@ public enum ModuleDependency {
         public static let SettingFeature: TargetDependency = .project(target: "SettingFeature", path: .relativeToRoot("Projects/Features/Setting"))
     }
     
-    public enum DSKit {
-        public static let CommonUI: TargetDependency = .project(target: "CommonUI", path: .relativeToRoot("Projects/DSKit"))
+    public enum Shared {
+        
+        public static let CommonUI: TargetDependency = .project(target: "CommonUI", path: .relativeToRoot("Projects/Shared/DSKit"))
+        
+        public static let StreamController: TargetDependency = .project(target: "StreamController", path: .relativeToRoot("Projects/Shared/StreamController"))
+        public static let StreamControllerInterface: TargetDependency = .project(target: "StreamControllerInterface", path: .relativeToRoot("Projects/Shared/StreamController"))
     }
     
     public enum Util {

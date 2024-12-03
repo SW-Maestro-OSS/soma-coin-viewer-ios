@@ -54,7 +54,6 @@ let project = Project(
             dependencies: [
                 .target(name: "BaseFeatureInterface"),
                 
-                D.DSKit.CommonUI,
                 D.Util.PresentationUtil,
             ]
         ),
@@ -81,6 +80,8 @@ let project = Project(
             bundleId: "com.choijunios.feature.Base.interface",
             sources: ["Interface/**"],
             dependencies: [
+                
+                D.Shared.CommonUI,
                 D.Domain.interface,
             ]
         ),

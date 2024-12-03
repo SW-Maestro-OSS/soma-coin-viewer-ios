@@ -25,10 +25,6 @@ let project = Project(
             dependencies: [
                 .target(name: "AllMarketTickerFeature"),
                 .target(name: "AllMarketTickerFeatureTesting"),
-                
-                D.Domain.interface,
-                D.Data.repository,
-                D.Data.dataSource,
             ]
         ),
 
@@ -57,9 +53,6 @@ let project = Project(
             resources: ["Feature/Resources/**"],
             dependencies: [
                 .target(name: "AllMarketTickerFeatureInterface"),
-                
-//                D.DSKit.CommonUI,
-                D.Util.PresentationUtil,
             ]
         ),
 
@@ -85,6 +78,7 @@ let project = Project(
             bundleId: "com.choijunios.feature.AllMarketTicker.interface",
             sources: ["Interface/**"],
             dependencies: [
+                
                 D.Feature.BaseFeatureInterface,
             ]
         ),

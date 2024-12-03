@@ -63,3 +63,10 @@ public class DefaultStreamController: StreamController {
         }
     }
 }
+
+
+// MARK: 어플리케이션 상태에 따른 연결 비연결 설정
+extension DefaultStreamController {
+    
+    
+}

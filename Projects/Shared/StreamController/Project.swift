@@ -14,51 +14,50 @@ let project = Project(
 
         // Tests
         .target(
-            name: "StreamControllerFeatureTests",
+            name: "StreamControllerTests",
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "com.choijunios.feature.StreamController.tests",
+            bundleId: "com.choijunios.shared.StreamController.tests",
             sources: ["Tests/**"],
             dependencies: [
-                .target(name: "StreamControllerFeature"),
-                .target(name: "StreamControllerFeatureTesting"),
+                .target(name: "StreamController"),
+                .target(name: "StreamControllerTesting"),
             ]
         ),
 
 
-        // Feature
+        // Implements
         .target(
-            name: "StreamControllerFeature",
+            name: "StreamController",
             destinations: .iOS,
             product: .framework,
-            bundleId: "com.choijunios.feature.StreamController",
-            sources: ["Feature/Sources/**"],
-            resources: ["Feature/Resources/**"],
+            bundleId: "com.choijunios.shared.StreamController",
+            sources: ["Sources/**"],
             dependencies: [
-                .target(name: "StreamControllerFeatureInterface"),
+                .target(name: "StreamControllerInterface"),
             ]
         ),
 
 
         // Testing
         .target(
-            name: "StreamControllerFeatureTesting",
+            name: "StreamControllerTesting",
             destinations: .iOS,
             product: .framework,
-            bundleId: "com.choijunios.feature.StreamController.testing",
+            bundleId: "com.choijunios.shared.StreamController.testing",
             sources: ["Testing/**"],
             dependencies: [
-                .target(name: "StreamControllerFeatureInterface"),
+                .target(name: "StreamControllerInterface"),
             ]
         ),
 
 
-        // FeatureInterface
+        // Interface
         .target(
-            name: "StreamControllerFeatureInterface",
+            name: "StreamControllerInterface",
             destinations: .iOS,
             product: .framework,
-            bundleId: "com.choijunios.feature.StreamController.interface",
+            bundleId: "com.choijunios.shared.StreamController.interface",
             sources: ["Interface/**"],
             dependencies: [
                 
