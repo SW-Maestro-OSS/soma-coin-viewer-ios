@@ -1,23 +1,21 @@
 //
-//  DefaultStreamController.swift
-//  StreamControllerModule
+//  DefaultWebSocketManagementHelper.swift
 //
-//  Created by choijunios on 11/15/24.
 //
 
 import Foundation
 
-import StreamControllerFeatureInterface
+import StreamControllerInterface
 import DataSource
 import CoreUtil
 
-public class DefaultStreamController: StreamController {
+public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     
     @Injected var webSocketService: WebSocketService
     
     private var subscribtions: Set<String> = []
     private let subscribedStreamManageQueue: DispatchQueue = .init(
-        label: "com.DefaultStreamController",
+        label: "com.WebSocketManagementHelper",
         attributes: .concurrent
     )
     
@@ -62,11 +60,12 @@ public class DefaultStreamController: StreamController {
             }
         }
     }
-}
-
-
-// MARK: 어플리케이션 상태에 따른 연결 비연결 설정
-extension DefaultStreamController {
     
+    public func requestDisconnection() {
+        
+    }
     
+    public func requestConnection(connectionType: StreamControllerInterface.ConnectionType) {
+        
+    }
 }
