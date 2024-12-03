@@ -1,5 +1,5 @@
 //
-//  TickerForSymbolDTO+Ex.swift
+//  BinanceTickerForSymbolDTO+toEntity.swift
 //  Repository
 //
 //  Created by choijunios on 11/1/24.
@@ -10,7 +10,9 @@ import Foundation
 import DataSource
 import DomainInterface
 
-extension TickerForSymbolDTO {
+// MARK: Binance API
+
+extension BinanceTickerForSymbolDTO {
     
     func toEntity() -> Twenty4HourTickerForSymbolVO {
         
