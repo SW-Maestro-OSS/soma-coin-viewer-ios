@@ -33,6 +33,8 @@ let project = Project(
             sources: ["Interface/**"],
             dependencies: [
                 
+                D.Data.dataSource,
+                D.Util.CoreUtil,
             ]
         ),
     ]

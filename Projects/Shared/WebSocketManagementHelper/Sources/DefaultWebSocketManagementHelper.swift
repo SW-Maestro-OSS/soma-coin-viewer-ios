@@ -134,7 +134,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
         webSocketService.disconnect()
     }
     
-    public func requestConnection(connectionType: StreamControllerInterface.ConnectionType) {
+    public func requestConnection(connectionType: ConnectionType) {
         
         webSocketService.connect { [weak self] result in
             
