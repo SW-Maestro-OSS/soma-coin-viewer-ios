@@ -12,12 +12,14 @@ import CoreUtil
 
 public class BinanceWebSocketService: NSObject, WebSocketService {
     
-    static let baseURL: URL = .init(string: "wss://stream.binance.com:443/ws")!
-    
-    private let webSocketMessagePublisher: PassthroughSubject<Response, Never> = .init()
-    
     // Public message interface
     public let message: AnyPublisher<Response, Never>
+    public let state: AnyPublisher<WebSocketState, Never>
+    
+    
+    // Internal publishers
+    private let webSocketMessagePublisher: PassthroughSubject<Response, Never> = .init()
+    private let webSocketStatePublisher: CurrentValueSubject<WebSocketState, Never> = .init(.disconnected)
     
     
     // Network
@@ -31,14 +33,22 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
     // callbacks
     private var connectionCallback: WebsocketCompletion?
     
-    
     private let jsonEncoder = JSONEncoder()
     
+    static let baseURL: URL = .init(string: "wss://stream.binance.com:443/ws")!
+    
     public override init() {
+        
         
         self.message = webSocketMessagePublisher
             .share()
             .eraseToAnyPublisher()
+        
+        
+        self.state = webSocketStatePublisher
+            .share()
+            .eraseToAnyPublisher()
+        
         
         super.init()
         
@@ -212,12 +222,20 @@ extension BinanceWebSocketService: URLSessionWebSocketDelegate {
         
         // 성공결과전송
         connectionCallback?(.success(()))
+        
+        
+        // 웹소켓 상태 퍼블리싱
+        webSocketStatePublisher.send(.connected)
     }
     
     
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         
         printIfDebug("☑️ 웹소캣 연결 끊김")
+        
+        
+        // 웹소켓 상태 퍼블리싱
+        webSocketStatePublisher.send(.disconnected)
     }
     
 }

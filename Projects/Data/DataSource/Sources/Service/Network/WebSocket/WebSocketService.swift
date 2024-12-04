@@ -17,6 +17,7 @@ public protocol WebSocketService {
     
     /// 웹소켓 메세지 상태입니다.
     var message: AnyPublisher<Response, Never> { get }
+    var state: AnyPublisher<WebSocketState, Never> { get }
     
     
     /// 소켓을 연결할 것을 요청합니다.
