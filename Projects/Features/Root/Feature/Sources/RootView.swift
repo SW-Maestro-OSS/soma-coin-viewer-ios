@@ -11,6 +11,8 @@ import BaseFeatureInterface
 
 public struct RootView: View {
     
+    @StateObject private var viewModel: RootViewModel = .init()
+    
     @ObservedObject var router: Router
     @ViewBuilder var destinationView: (RootDestination) -> any View
     
@@ -18,7 +20,7 @@ public struct RootView: View {
         
         NavigationStack(path: $router.path) {
             
-            Text("This is root view")
+            Text("This is root view\nWebSocket is connected: \(viewModel.state.isWebSocketConnected)")
                 .navigationDestination(for: RootDestination.self) { destination in
                     
                     AnyView(destinationView(destination))

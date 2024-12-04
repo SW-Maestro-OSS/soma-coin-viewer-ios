@@ -3,13 +3,14 @@
 //
 //
 
-public enum ConnectionType {
-    
-    case freshStart
-    case recoverPreviousStreams
-}
+import Combine
+
 
 public protocol WebSocketManagementHelper {
+    
+    /// 웹소켓 연결 상태를 퍼블리싱 합니다.
+    var isWebSocketConnected: AnyPublisher<Bool, Never> { get }
+    
     
     /// 스트림 연결을 요청합니다.
     func requestSubscribeToStream(streams: [String])
