@@ -53,6 +53,12 @@ let project = Project(
                 // Util
                 
                 D.Util.PresentationUtil,
+                
+                
+                // Shared
+                
+                D.Shared.WebSocketManagementHelper,
+                D.Shared.WebSocketManagementHelperInterface,
             ]
         ),
     ]

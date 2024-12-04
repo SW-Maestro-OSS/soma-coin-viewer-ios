@@ -45,8 +45,8 @@ public enum ModuleDependency {
         
         public static let CommonUI: TargetDependency = .project(target: "CommonUI", path: .relativeToRoot("Projects/Shared/DSKit"))
         
-        public static let StreamController: TargetDependency = .project(target: "StreamController", path: .relativeToRoot("Projects/Shared/StreamController"))
-        public static let StreamControllerInterface: TargetDependency = .project(target: "StreamControllerInterface", path: .relativeToRoot("Projects/Shared/StreamController"))
+        public static let WebSocketManagementHelper: TargetDependency = .project(target: "WebSocketManagementHelper", path: .relativeToRoot("Projects/Shared/WebSocketManagementHelper"))
+        public static let WebSocketManagementHelperInterface: TargetDependency = .project(target: "WebSocketManagementHelperInterface", path: .relativeToRoot("Projects/Shared/WebSocketManagementHelper"))
     }
     
     public enum Util {

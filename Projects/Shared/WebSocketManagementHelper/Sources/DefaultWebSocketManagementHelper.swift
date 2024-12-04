@@ -54,9 +54,17 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
                     
                     printIfDebug("WebSocketManagementHelper: ✅ 웹소켓 연결됨")
                     
-                case .disconnected:
+                case .intentionalDisconnection:
                     
-                    printIfDebug("WebSocketManagementHelper: ❌ 웹소켓 연결 끊어짐")
+                    // 의도된 연결 해제
+                    printIfDebug("WebSocketManagementHelper: ☑️ 웹소켓 연결 해제됨")
+                    
+                    
+                case .unexpectedDisconnection:
+                    
+                    // 의도되지 않은 끊어짐
+                    
+                    printIfDebug("WebSocketManagementHelper: ❌ 웹소켓 연결 끊어짐, 🔁 복구실행")
                     
                     // 연결재시도 및 스트림 복구 실행
                     requestConnection(connectionType: .recoverPreviousStreams)

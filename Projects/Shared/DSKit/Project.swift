@@ -13,7 +13,6 @@ let project = Project(
             resources: ["./CommonUI/Resources/**"],
             dependencies: [
                 D.Util.PresentationUtil,
-                .project(target: "I18N", path: "../I18N"),
             ]
         ),
     ]

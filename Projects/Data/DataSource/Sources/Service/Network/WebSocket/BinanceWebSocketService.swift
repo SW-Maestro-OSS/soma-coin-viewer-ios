@@ -209,7 +209,7 @@ extension BinanceWebSocketService: URLSessionWebSocketDelegate {
     
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         
-        printIfDebug("✅ 웹소캣 연결됨")
+        printIfDebug("BinanceWebSocketService: ✅ 웹소캣 연결됨")
         
         
         // 메서지 수신 시작
@@ -231,11 +231,24 @@ extension BinanceWebSocketService: URLSessionWebSocketDelegate {
     
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         
-        printIfDebug("☑️ 웹소캣 연결 끊김")
+        printIfDebug("BinanceWebSocketService: ☑️ 웹소캣 연결 끊김")
         
         
         // 웹소켓 상태 퍼블리싱
-        webSocketStatePublisher.send(.disconnected)
+        switch closeCode {
+        case .normalClosure:
+            
+            // 정상종료
+            webSocketStatePublisher.send(.intentionalDisconnection)
+            
+        default:
+            
+            // 비정상종료
+            webSocketStatePublisher.send(.unexpectedDisconnection)
+            
+        }
+        
+        
     }
     
 }
