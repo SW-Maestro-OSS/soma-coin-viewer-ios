@@ -5,7 +5,7 @@
 
 import Foundation
 
-import StreamControllerInterface
+import WebSocketManagementHelperInterface
 import DataSource
 import CoreUtil
 
