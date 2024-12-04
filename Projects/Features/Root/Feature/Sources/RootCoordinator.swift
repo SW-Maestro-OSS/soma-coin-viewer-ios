@@ -18,24 +18,15 @@ enum RootDestination: Hashable {
 
 public class RootCoordinator: Coordinator {
     
-    let router: Router
+    private let router: Router
     
     
-    public init(router: Router) {
+    public init(router: Router = .init()) {
         self.router = router
     }
     
     
     public func start() -> RootView {
-    
-        defer {
-            
-            // Test
-            DispatchQueue.main.asyncAfter(deadline: .now()+3) { [weak self] in
-                
-                self?.router.present(destination: RootDestination.mainTabBarPage)
-            }
-        }
         
         return RootView(
             router: router,

@@ -80,8 +80,11 @@ let project = Project(
             bundleId: "com.choijunios.feature.Root.interface",
             sources: ["Interface/**"],
             dependencies: [
+                
                 D.Feature.AllMarketTickerFeatureInterface,
                 D.Feature.SettingFeatureInterface,
+                
+                D.Shared.WebSocketManagementHelperInterface,
             ]
         ),
     ]

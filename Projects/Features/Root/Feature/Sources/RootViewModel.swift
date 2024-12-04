@@ -48,6 +48,10 @@ class RootViewModel: ObservableObject {
                 viewModel.state = viewModel.reduce(action, state: currentState)
             }
             .store(in: &store)
+        
+        
+        // Subscribe to notifications
+        setAppLifeCycleNotification()
     }
     
     
@@ -156,6 +160,6 @@ extension RootViewModel {
     }
     
     struct State {
-        var isWebSocketConnected: Bool = false
+        var isWebSocketConnected: Bool?
     }
 }

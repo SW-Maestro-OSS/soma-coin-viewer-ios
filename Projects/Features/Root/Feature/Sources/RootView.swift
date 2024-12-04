@@ -20,7 +20,15 @@ public struct RootView: View {
         
         NavigationStack(path: $router.path) {
             
-            Text("This is root view\nWebSocket is connected: \(viewModel.state.isWebSocketConnected)")
+            VStack {
+                
+                Text("This is root view")
+                
+                if let socketState = viewModel.state.isWebSocketConnected {
+                    Text("WebSocket is connected: \(socketState)")
+                }
+                
+            }
                 .navigationDestination(for: RootDestination.self) { destination in
                     
                     AnyView(destinationView(destination))

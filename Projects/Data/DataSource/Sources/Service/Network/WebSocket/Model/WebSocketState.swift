@@ -9,6 +9,7 @@ public enum WebSocketState {
     
     case initial
     case connected
-    case disconnected
+    case intentionalDisconnection
+    case unexpectedDisconnection
 }
 
