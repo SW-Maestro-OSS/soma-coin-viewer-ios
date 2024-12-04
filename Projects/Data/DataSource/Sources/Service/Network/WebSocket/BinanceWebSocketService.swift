@@ -14,8 +14,9 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
     
     static let baseURL: URL = .init(string: "wss://stream.binance.com:443/ws")!
     
-    private let socketMessagePublisher: PassthroughSubject<Response, Never> = .init()
+    private let webSocketMessagePublisher: PassthroughSubject<Response, Never> = .init()
     
+    // Public message interface
     public let message: AnyPublisher<Response, Never>
     
     
@@ -26,11 +27,16 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
     private var timerForHeartbeat: DispatchSourceTimer?
     private let heartbeatTimerQueue: DispatchQueue = .init(label: "com.heartbeat")
     
+    
+    // callbacks
+    private var connectionCallback: WebsocketCompletion?
+    
+    
     private let jsonEncoder = JSONEncoder()
     
     public override init() {
         
-        self.message = socketMessagePublisher
+        self.message = webSocketMessagePublisher
             .share()
             .eraseToAnyPublisher()
         
@@ -45,7 +51,9 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
         webSocketTask != nil && webSocketTask?.state == .running
     }
     
-    public func connect() {
+    public func connect(completion: @escaping WebsocketCompletion) {
+        
+        self.connectionCallback = completion
         
         webSocketManagementQueue.async { [weak self] in
             
@@ -56,8 +64,6 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
             
             self.webSocketTask = webSocketSession.webSocketTask(with: Self.baseURL)
             self.webSocketTask?.resume()
-            
-            startHeartbeating()
         }
     }
     
@@ -77,39 +83,65 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
         }
     }
     
-    public func subscribeTo(messageParameters: [String]) {
+    public func subscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
         
         webSocketManagementQueue.async { [weak self] in
             
-            guard let self, !messageParameters.isEmpty else { return }
+            guard let self, !message.isEmpty else { return }
             
             let messageDTO = BinanceWebSocketStreamMessageDTO(
                 method: .SUBSCRIBE,
-                params: messageParameters,
+                params: message,
                 id: 1
             )
             
-            sendMessage(messageDTO)
+            sendMessage(messageDTO) { result in
+                
+                switch result {
+                    
+                case .success:
+                    
+                    completion(.success(()))
+                    
+                case .failure(_):
+                    
+                    completion(.failure(.messageTransferFailure(message: message)))
+                    
+                }
+            }
         }
     }
     
-    public func unsubscribeTo(messageParameters: [String]) {
+    public func unsubscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
         
         webSocketManagementQueue.async { [weak self] in
             
-            guard let self, !messageParameters.isEmpty else { return }
+            guard let self, !message.isEmpty else { return }
             
             let messageDTO = BinanceWebSocketStreamMessageDTO(
                 method: .UNSUBSCRIBE,
-                params: messageParameters,
+                params: message,
                 id: 1
             )
             
-            sendMessage(messageDTO)
+            sendMessage(messageDTO) { result in
+                
+                switch result {
+                    
+                case .success:
+                    
+                    completion(.success(()))
+                    
+                case .failure(_):
+                    
+                    completion(.failure(.messageTransferFailure(message: message)))
+                    
+                }
+            }
         }
     }
     
-    private func sendMessage(_ message: BinanceWebSocketStreamMessageDTO) {
+    private func sendMessage(_ message: BinanceWebSocketStreamMessageDTO, completion: @escaping (Result<Void, Error>) -> Void) {
         
         let jsonData = try! jsonEncoder.encode(message)
         let stringedMessage = String(data: jsonData, encoding: .utf8)!
@@ -119,6 +151,13 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
             if let error {
                 
                 printIfDebug("웹소켓 메시지 전송실패 \(error.localizedDescription)")
+                
+                completion(.failure(error))
+                
+            } else {
+                
+                completion(.success(()))
+                
             }
         }
     }
@@ -133,24 +172,54 @@ extension BinanceWebSocketService: URLSessionWebSocketDelegate {
             
             guard let self else { return }
             
-            socketMessagePublisher.send(result)
+            webSocketMessagePublisher.send(result)
             
             // 재귀호출
             listenToMessage()
         })
     }
     
+    
+    // Task완료시 호출된다.
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
+        
+        if task is URLSessionWebSocketTask, let error {
+        
+            if !isConnected {
+                
+                // 웹소켓 연결시도 에러
+                connectionCallback?(.failure(.connectionRequestFailure))
+                
+            }
+            
+        }
+        
+    }
+    
+    
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         
         printIfDebug("✅ 웹소캣 연결됨")
         
+        
+        // 메서지 수신 시작
         listenToMessage()
+        
+        
+        // Ping-pong 시작
+        startHeartbeating()
+        
+        
+        // 성공결과전송
+        connectionCallback?(.success(()))
     }
+    
     
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         
         printIfDebug("☑️ 웹소캣 연결 끊김")
     }
+    
 }
 
 
