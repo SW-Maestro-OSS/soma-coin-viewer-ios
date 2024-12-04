@@ -9,52 +9,118 @@ import StreamControllerInterface
 import DataSource
 import CoreUtil
 
+import Combine
+
 public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
+    
+    public typealias Stream = String
     
     @Injected var webSocketService: WebSocketService
     
-    private var subscribtions: Set<String> = []
+    private var subscribtions: Set<Stream> = []
     
     private let subscribedStreamManageQueue: DispatchQueue = .init(label: "com.WebSocketManagementHelper")
     
-    public func requestSubscribeToStream(streams: [String]) {
+    private var store: Set<AnyCancellable> = .init()
+    
+    public init() {
+        
+        webSocketService
+            .state
+            .sink { [weak self] state in
+                
+                guard let self else { return }
+                
+                switch state {
+                case .connected:
+                    
+                    printIfDebug("WebSocketManagementHelper: ✅ 웹소켓 연결됨")
+                    
+                case .disconnected:
+                    
+                    printIfDebug("WebSocketManagementHelper: ❌ 웹소켓 연결 끊어짐")
+                    
+                    // 연결재시도 및 스트림 복구 실행
+                    requestConnection(connectionType: .recoverPreviousStreams)
+                }
+                
+            }
+            .store(in: &store)
+    }
+    
+    
+    public func requestSubscribeToStream(streams: [Stream]) {
         
         subscribedStreamManageQueue.async { [weak self] in
             
             guard let self else { return }
             
-            var notConnectedStreams: Set<String> = []
-            
-            for stream in streams {
+            let newStreams = streams.filter { stream in
                 
-                if !subscribtions.contains(where: { $0 == stream }) {
-                    
-                    // 기존에 연결되지 않은 스트림인 경우
-                    
-                    subscribtions.insert(stream)
-                    
-                    notConnectedStreams.insert(stream)
-                }
+                !self.subscribtions.contains(stream)
             }
             
-            webSocketService.subscribeTo(messageParameters: Array(notConnectedStreams))
+            // 스트림 구독 메세지 전송
+            webSocketService.subscribeTo(message: newStreams) { [weak self] result in
+                
+                guard let self else { return }
+                
+                switch result {
+                case .success:
+                    
+                    // 리커버리 리스트에 구독된 리스트들을 추가합니다.
+                    addSubscriptionsToRecoveryList(streams: newStreams)
+                    
+                case .failure(let webSocketError):
+                    
+                    switch webSocketError {
+                    case .messageTransferFailure(let message):
+                        
+                        // MARK: 매세지 전송 실패 대처
+                        printIfDebug("WebSocketManagementHelper: 스트림 구독 메세지 전송 실패")
+                        
+                        return
+                    default:
+                        return
+                    }
+                }
+            }
         }
     }
     
-    public func requestUnsubscribeToStream(streams willRemoveStreams: [String]) {
+    public func requestUnsubscribeToStream(streams willRemoveStreams: [Stream]) {
         
-        // 특정스트림에 대해 구독을 해제
-        webSocketService.unsubscribeTo(messageParameters: willRemoveStreams)
-        
-        
-        // 리커버리 리스트에서 해당 스트림을 제거
-        subscribedStreamManageQueue.async { [weak self] in
-            
+        // 특정스트림에 대해 구독을 해제 메세지 전송
+        webSocketService.unsubscribeTo(message: willRemoveStreams) { [weak self] result in
+                       
             guard let self else { return }
             
-            self.subscribtions = subscribtions.filter { stream in
+            switch result {
+            case .success:
                 
-                !willRemoveStreams.contains(stream)
+                // 리커버리 리스트에서 해당 스트림을 제거
+                subscribedStreamManageQueue.async { [weak self] in
+                    
+                    guard let self else { return }
+                    
+                    self.subscribtions = subscribtions.filter { stream in
+                        
+                        !willRemoveStreams.contains(stream)
+                    }
+                }
+                
+            case .failure(let webSocketError):
+                
+                switch webSocketError {
+                case .messageTransferFailure(let message):
+                    
+                    // MARK: 매세지 전송 실패 대처
+                    printIfDebug("WebSocketManagementHelper: 스트림 구독 해제 메세지 전송 실패")
+                    
+                    return
+                default:
+                    return
+                }
             }
         }
     }
@@ -66,6 +132,51 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     
     public func requestConnection(connectionType: StreamControllerInterface.ConnectionType) {
         
-        webSocketService.connect()
+        webSocketService.connect { [weak self] result in
+            
+            guard let self else { return }
+            
+            switch result {
+            case .success:
+                
+                if case .recoverPreviousStreams = connectionType {
+                    
+                    // 구독됬던 스트림 복구 실행
+                    recoverPreviouslySubscribedStreams()
+                }
+                
+            case .failure(let error):
+                
+                // MARK: 웹소켓 연결 실패 대처
+                
+                return
+            }
+        }
+    }
+}
+
+private extension DefaultWebSocketManagementHelper {
+    
+    func addSubscriptionsToRecoveryList(streams: [Stream]) {
+        
+        subscribedStreamManageQueue.async(flags: .barrier) { [weak self] in
+            
+            streams.forEach { stream in
+                
+                self?.subscribtions.insert(stream)
+            }
+        }
+    }
+    
+    func recoverPreviouslySubscribedStreams() {
+        
+        subscribedStreamManageQueue.async { [weak self] in
+            
+            guard let self else { return }
+            
+            let recoveringStreamList = Array(subscribtions)
+            
+            self.requestSubscribeToStream(streams: recoveringStreamList)
+        }
     }
 }
