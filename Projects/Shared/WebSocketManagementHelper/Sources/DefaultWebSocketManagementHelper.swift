@@ -15,16 +15,30 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     
     public typealias Stream = String
     
-    @Injected var webSocketService: WebSocketService
+    @Injected private var webSocketService: WebSocketService
+    
+    
+    // Pulbic interface
+    public private(set) var isWebSocketConnected: AnyPublisher<Bool, Never> = Empty().eraseToAnyPublisher()
+    
     
     private var subscribtions: Set<Stream> = []
-    
     private let subscribedStreamManageQueue: DispatchQueue = .init(label: "com.WebSocketManagementHelper")
-    
     private var store: Set<AnyCancellable> = .init()
     
     public init() {
         
+        
+        // 외부에 상태전파
+        self.isWebSocketConnected = webSocketService
+            .state
+            .map { state in
+                state == .connected
+            }
+            .eraseToAnyPublisher()
+        
+        
+        // 웹소켓 상태 수신 및 회복처리
         webSocketService
             .state
             .sink { [weak self] state in
