@@ -32,6 +32,10 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
                 guard let self else { return }
                 
                 switch state {
+                case .initial:
+                    
+                    return
+                    
                 case .connected:
                     
                     printIfDebug("WebSocketManagementHelper: ✅ 웹소켓 연결됨")

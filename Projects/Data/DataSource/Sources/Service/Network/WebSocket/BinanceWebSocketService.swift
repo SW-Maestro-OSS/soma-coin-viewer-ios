@@ -19,7 +19,7 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
     
     // Internal publishers
     private let webSocketMessagePublisher: PassthroughSubject<Response, Never> = .init()
-    private let webSocketStatePublisher: CurrentValueSubject<WebSocketState, Never> = .init(.disconnected)
+    private let webSocketStatePublisher: CurrentValueSubject<WebSocketState, Never> = .init(.initial)
     
     
     // Network
