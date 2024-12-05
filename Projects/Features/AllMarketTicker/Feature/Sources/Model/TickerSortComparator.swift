@@ -7,7 +7,7 @@
 
 import DomainInterface
 
-protocol TickerSortComparator {
+protocol TickerSortComparator: Identifiable {
     
     typealias TickerVO = Twenty4HourTickerForSymbolVO
     
