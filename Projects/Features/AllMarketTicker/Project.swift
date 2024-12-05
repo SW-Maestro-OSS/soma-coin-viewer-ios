@@ -25,6 +25,12 @@ let project = Project(
             dependencies: [
                 .target(name: "AllMarketTickerFeature"),
                 .target(name: "AllMarketTickerFeatureTesting"),
+                
+                // Implements for demo app
+                D.Shared.WebSocketManagementHelper,
+                D.Data.dataSource,
+                D.Data.repository,
+                D.Domain.concrete,
             ]
         ),
 

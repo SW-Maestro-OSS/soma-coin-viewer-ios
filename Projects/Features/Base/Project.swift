@@ -82,6 +82,7 @@ let project = Project(
             dependencies: [
                 
                 D.Shared.CommonUI,
+                D.Shared.WebSocketManagementHelperInterface,
                 D.Domain.interface,
             ]
         ),

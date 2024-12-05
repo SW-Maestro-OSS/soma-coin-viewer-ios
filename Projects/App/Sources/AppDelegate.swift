@@ -36,8 +36,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         DependencyInjector.shared.assemble([
             
-            SharedAssembly(),
             DataAssembly(),
+            SharedAssembly(),
             DomainAssembly()
         ])
     }

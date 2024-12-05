@@ -5,14 +5,29 @@
 //
 
 import UIKit
+import SwiftUI
 
-@main
+import AllMarketTickerFeature
+import WebSocketManagementHelperInterface
+import CoreUtil
+
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        DependencyInjector.shared.assemble([
+            Assemblies()
+        ])
+        
+        // 웹소켓 연결
+        let helper = DependencyInjector.shared.resolve(WebSocketManagementHelper.self)
+        helper.requestConnection(connectionType: .freshStart)
+        
+        sleep(2)
+        
         return true
     }
 

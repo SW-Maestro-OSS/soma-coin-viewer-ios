@@ -7,11 +7,13 @@
 
 import SwiftUI
 
-struct AllMarketTickerView: View {
+public struct AllMarketTickerView: View {
     
     @StateObject private var viewModel: AllMarketTickerViewModel = .init()
     
-    var body: some View {
+    public init() { }
+    
+    public var body: some View {
         
         ScrollView {
             
