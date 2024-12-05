@@ -50,4 +50,14 @@ public extension UDFViewModel {
             .store(in: &store)
         
     }
+    
+    func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
+        
+        return Just(action).eraseToAnyPublisher()
+    }
+    
+    func reduce(_ action: Action, state: State) -> State {
+        
+        return state
+    }
 }
