@@ -8,54 +8,38 @@
 import SwiftUI
 import Combine
 
+import BaseFeatureInterface
+
 import CoreUtil
 import WebSocketManagementHelperInterface
 
-class RootViewModel: ObservableObject {
+class RootViewModel: UDFObservableObject {
     
     @Injected private var webSocketHelper: WebSocketManagementHelper
     
     
     // Public state interface
-    @Published private(set) var state: State = .init()
+    @Published var state: State = .init()
     
     
     
     // Publishers
     public let action: PassthroughSubject<Action, Never> = .init()
     
-    private var store: Set<AnyCancellable> = .init()
+    var store: Set<AnyCancellable> = .init()
     
     
     init() {
         
-        action
-            .unretained(self)
-            .flatMap { viewModel, action in
-                
-                // #1. Mutation for side effect
-                
-                return viewModel.mutate(action)
-            }
-            .receive(on: DispatchQueue.main)
-            .unretained(self)
-            .sink { viewModel, action in
-                
-                // #2. Update current state
-                
-                let currentState = viewModel.state
-                
-                viewModel.state = viewModel.reduce(action, state: currentState)
-            }
-            .store(in: &store)
-        
+        // Create state stream
+        createStateStream()
         
         // Subscribe to notifications
         setAppLifeCycleNotification()
     }
     
     
-    private func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
+    func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
         
         switch action {
         case .app_cycle_will_foreground:
@@ -104,7 +88,7 @@ class RootViewModel: ObservableObject {
     }
     
     
-    private func reduce(_ action: Action, state: State) -> State {
+    func reduce(_ action: Action, state: State) -> State {
         
         switch action {
         case .isWebSocketConnected(let isConnected):
