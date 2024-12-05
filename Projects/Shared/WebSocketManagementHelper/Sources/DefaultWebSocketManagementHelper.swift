@@ -94,6 +94,8 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
                 switch result {
                 case .success:
                     
+                    printIfDebug("WebSocketManagementHelper: 구독 메세지 전송 성공")
+                    
                     // 리커버리 리스트에 구독된 리스트들을 추가합니다.
                     addSubscriptionsToRecoveryList(streams: newStreams)
                     
