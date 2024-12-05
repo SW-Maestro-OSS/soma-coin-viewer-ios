@@ -12,5 +12,5 @@ public protocol AllMarketTickersUseCase {
     typealias SortOperator = (Twenty4HourTickerForSymbolVO, Twenty4HourTickerForSymbolVO) -> Bool
     
     /// AllMarketTicker리스트를 획득합니다.
-    func requestTickers(maxCount: Int, cuttingStyle: CuttingStyle, sortOperator: @escaping SortOperator) -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never>
+    func requestTickers() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never>
 }
