@@ -9,8 +9,30 @@ import SwiftUI
 
 struct AllMarketTickerView: View {
     
+    @StateObject private var viewModel: AllMarketTickerViewModel = .init()
+    
     var body: some View {
         
-        Text("AllMarketTickerView")
+        ScrollView {
+            
+            LazyVStack {
+                
+                ForEach(viewModel.state.tickerList, id: \.symbol) { tickerVO in
+                    
+                    HStack {
+                        
+                        Text("\(tickerVO.symbol)")
+                            .font(.title3)
+                            .foregroundStyle(.black)
+                        
+                        Spacer()
+                    }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 20)
+                    
+                }
+            }
+            
+        }
     }
 }
