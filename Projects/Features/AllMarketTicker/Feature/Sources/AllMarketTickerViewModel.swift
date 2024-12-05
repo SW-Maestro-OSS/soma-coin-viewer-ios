@@ -49,10 +49,10 @@ class AllMarketTickerViewModel: UDFObservableObject {
     
     func reduce(_ action: Action, state: State) -> State {
         
-        var newState = state
-        
         switch action {
         case .changeSortingCriteria(let comparator):
+            
+            var newState = state
             
             newState.currentSortComparator = comparator
             newState.tickerList = state.tickerList.sorted(by: comparator)
@@ -60,6 +60,8 @@ class AllMarketTickerViewModel: UDFObservableObject {
             return newState
             
         case .fetchList(let list):
+            
+            var newState = state
             
             let currentComparator = state.currentSortComparator
             

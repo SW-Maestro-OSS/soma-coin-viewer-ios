@@ -57,9 +57,7 @@ class RootViewModel: UDFObservableObject {
             
             return publisher
                 .first()
-                .map { _ in
-                    return Action.isWebSocketConnected(true)
-                }
+                .map { _ in Action.isWebSocketConnected(true) }
                 .eraseToAnyPublisher()
             
         case .app_cycle_background:
@@ -77,9 +75,7 @@ class RootViewModel: UDFObservableObject {
             
             return publisher
                 .first()
-                .map { _ in
-                    return Action.isWebSocketConnected(false)
-                }
+                .map { _ in Action.isWebSocketConnected(false) }
                 .eraseToAnyPublisher()
             
         default:
@@ -108,24 +104,16 @@ class RootViewModel: UDFObservableObject {
         // Background 상태 진입
         NotificationCenter
             .Publisher(center: .default, name: UIApplication.didEnterBackgroundNotification)
-            .unretained(self)
-            .sink { viewModel, notification in
-                
-                // After background
-                viewModel.action.send(.app_cycle_background)
-            }
+            .map { _ in Action.app_cycle_background }
+            .subscribe(action)
             .store(in: &store)
         
         
         // Foreground 상태 집입 직전
         NotificationCenter
             .Publisher(center: .default, name: UIApplication.willEnterForegroundNotification)
-            .unretained(self)
-            .sink { viewModel, notification in
-                
-                // Before foreground
-                viewModel.action.send(.app_cycle_will_foreground)
-            }
+            .map { _ in Action.app_cycle_will_foreground }
+            .subscribe(action)
             .store(in: &store)
         
     }
