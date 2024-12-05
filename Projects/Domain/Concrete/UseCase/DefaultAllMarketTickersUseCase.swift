@@ -13,7 +13,7 @@ import CoreUtil
 
 public class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     
-    @Injected var repository: AllMarketTickersRepository
+    @Injected private var repository: AllMarketTickersRepository
     
     private let throttleTimerQueue: DispatchQueue = .init(
         label: "com.AllMarketTickersUseCase",
@@ -22,35 +22,42 @@ public class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     
     public init() { }
     
-    public func requestTickers(
-        maxCount: Int,
-        cuttingStyle: CuttingStyle,
-        sortOperator: @escaping SortOperator) -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> {
+    public func requestTickers() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> {
         
         repository
             .request24hTickerForAllSymbols()
             .throttle(for: 0.3, scheduler: throttleTimerQueue, latest: true)
-            .map { tickers in
+            .map { fetchedTickers in
                 
-                let sortedTickers = tickers.sorted(by: sortOperator)
+                // MARK: #1. Filter symbols that dont cotain USDT as suffix
+                
+                fetchedTickers.filter { vo in
+                    
+                    vo.symbol.hasSuffix("USDT")
+                }
+                
+            }
+            .map { usdtTickers in
+                
+                // MARK: #2. Sort tickers
+                
+                usdtTickers.sorted { ticker1, ticker2 in
+                    
+                    ticker1.totalTradedQuoteAssetVolume > ticker2.totalTradedQuoteAssetVolume
+                }
+            }
+            .map { sortedTickers in
+                
+                // MARK: #3. Cut 30 tickes
                 
                 let listSize = sortedTickers.count
                 
-                if listSize < maxCount {
+                if listSize < 30 {
                     
                     return sortedTickers
                 }
                 
-                // 커팅
-                if case .begining = cuttingStyle {
-                    
-                    return Array(sortedTickers[0..<maxCount])
-                } else {
-                    
-                    let startPoint = listSize - maxCount
-                    
-                    return Array(sortedTickers[startPoint..<listSize])
-                }
+                return Array(sortedTickers[0..<30])
             }
             .eraseToAnyPublisher()
     }
