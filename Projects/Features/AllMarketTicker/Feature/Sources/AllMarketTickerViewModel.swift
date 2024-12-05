@@ -8,9 +8,18 @@
 import SwiftUI
 import Combine
 
+import DomainInterface
+import WebSocketManagementHelperInterface
+import DomainInterface
+import CoreUtil
+
 import BaseFeatureInterface
 
 class AllMarketTickerViewModel: UDFObservableObject {
+    
+    // Service locator
+    @Injected private var webSocketManagementHelper: WebSocketManagementHelper
+    @Injected private var allMarketTickersUseCase: AllMarketTickersUseCase
     
     @Published var state: State = .init()
     
@@ -21,6 +30,50 @@ class AllMarketTickerViewModel: UDFObservableObject {
         
         // Create state stream
         createStateStream()
+        
+        
+        // Subscribe to data stream
+        allMarketTickersUseCase
+            .requestTickers()
+            .map { tickers in
+                
+                return Action.fetchList(list: tickers)
+            }
+            .subscribe(action)
+            .store(in: &store)
+        
+        
+        // Subscribe to webSocketStream
+        webSocketManagementHelper.requestSubscribeToStream(streams: ["!ticker@arr"])
+    }
+    
+    func reduce(_ action: Action, state: State) -> State {
+        
+        var newState = state
+        
+        switch action {
+        case .changeSortingCriteria(let comparator):
+            
+            newState.currentSortComparator = comparator
+            newState.tickerList = state.tickerList.sorted(by: comparator)
+            
+            return newState
+            
+        case .fetchList(let list):
+            
+            let currentComparator = state.currentSortComparator
+            
+            if let currentComparator {
+                
+                newState.tickerList = list.sorted(by: currentComparator)
+                
+            } else {
+                
+                newState.tickerList = list
+            }
+            
+            return newState
+        }
     }
 }
 
@@ -28,24 +81,32 @@ class AllMarketTickerViewModel: UDFObservableObject {
 extension AllMarketTickerViewModel {
     
     struct State {
+        // - 저장 프로퍼티
+        var tickerList: [Twenty4HourTickerForSymbolVO] = []
+        var currentSortComparator: (any TickerSortComparator)? = nil
         
+        // - 연산 프로퍼티
+        var isLoaded: Bool {
+            !tickerList.isEmpty
+        }
     }
     
     enum Action {
         
         // Event
-        
-        
-        // Side effect
-        
+        case changeSortingCriteria(comparator: any TickerSortComparator)
+        case fetchList(list: [Twenty4HourTickerForSymbolVO])
     }
 }
 
-// MARK: Stream
-extension AllMarketTickerViewModel {
+
+extension Array where Element == Twenty4HourTickerForSymbolVO {
     
-    enum Stream {
+    func sorted(by comparator: any TickerSortComparator) -> Self {
         
-        
+        self.sorted { lhs, rhs in
+            
+            comparator.compare(lhs: lhs, rhs: rhs)
+        }
     }
 }
