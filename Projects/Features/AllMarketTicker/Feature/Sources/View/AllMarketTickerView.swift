@@ -34,8 +34,6 @@ public struct AllMarketTickerView: View {
                 }
                 
             }
-            
-            
         }
     }
 }
