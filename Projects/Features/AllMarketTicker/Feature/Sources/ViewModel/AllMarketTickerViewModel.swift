@@ -102,11 +102,13 @@ class AllMarketTickerViewModel: UDFObservableObject {
         
         let tapObservables = state.sortCompartorViewModels.map { viewModel in
             
+            // 정렬기준 버튼 선택 이벤트
             viewModel.tap
         }
         
         let mergedTapObservablesPublishers = Publishers.MergeMany(tapObservables).share()
         
+        // 정렬 버튼 UI에게 현재 선택된 정렬기준을 전파
         mergedTapObservablesPublishers
             .unretained(self)
             .sink { viewModel, comparator in
@@ -120,6 +122,8 @@ class AllMarketTickerViewModel: UDFObservableObject {
             }
             .store(in: &store)
         
+        
+        // 현재 선택된 정렬기준을 리스트에 적용하기 위해 액션으로 전달
         mergedTapObservablesPublishers
             .map { comparator in
                 Action.changeSortingCriteria(comparator: comparator)
