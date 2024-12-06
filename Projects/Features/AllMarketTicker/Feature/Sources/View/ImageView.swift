@@ -9,7 +9,7 @@ import SwiftUI
 
 import SimpleImageProvider
 
-struct ImageView: View {
+struct SymbolImageView: View {
     
     @Binding var imageURL: String
     
@@ -17,15 +17,27 @@ struct ImageView: View {
     
     var body: some View {
         
-        Image(uiImage: image)
-            .frame(width: 32, height: 32)
-            .task {
-                
-                guard let image = await SimpleImageProvider.shared
-                    .requestImage(url: imageURL, size: .init(width: 32, height: 32)) else { return }
-                
-                self.image = image
-            }
+        GeometryReader { geo in
+            Circle()
+                .background(.white)
+                .foregroundStyle(.gray.opacity(0.5))
+                .frame(width: geo.size.width, height: geo.size.height)
+                .overlay {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                }
+                .task {
+                    
+                    guard let image = await SimpleImageProvider.shared
+                        .requestImage(
+                            url: imageURL,
+                            size: .init(width: geo.size.width, height: geo.size.height)
+                        ) else { return }
+                    
+                    self.image = image
+                }
+        }
         
     }
 }

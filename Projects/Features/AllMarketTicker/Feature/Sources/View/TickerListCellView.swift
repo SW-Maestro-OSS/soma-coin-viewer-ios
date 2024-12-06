@@ -32,15 +32,9 @@ struct TickerListCellView: View {
             // MARK: Symbol image + text
             HStack(spacing: 5) {
                 
-                ZStack {
-                 
-                    Circle()
-                        .frame(width: 32, height: 32)
-                        .foregroundStyle(.gray.opacity(0.5))
-                    
-                    // First symbol image
-                    ImageView(imageURL: $viewModel.state.firstSymbolImageURL)
-                }
+                // Symbol image view
+                SymbolImageView(imageURL: $viewModel.state.firstSymbolImageURL)
+                    .frame(width: 40, height: 44)
                 
                 // Pair symbol text
                 Spacer(minLength: 0)
@@ -56,11 +50,14 @@ struct TickerListCellView: View {
             
             // MARK: Price
             GeometryReader { geo in
-                CVText(text: $viewModel.state.priceText)
-                    .font(.body)
-                    .lineLimit(1)
-                    .frame(width: geo.size.width, height: geo.size.height, alignment: .leading)
-                    .padding(.leading, geo.size.width * 0.25)
+                Spacer(minLength: 0)
+                    .overlay(alignment: .leading) {
+                        CVText(text: $viewModel.state.priceText)
+                            .font(.body)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                    }
+                    .padding(.leading, geo.size.width * 0.4)
             }
             
             
