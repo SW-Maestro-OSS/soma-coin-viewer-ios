@@ -16,7 +16,7 @@ struct TickerSortSelectorView: View {
     @ObservedObject private var viewModel: TickerSortSelectorViewModel
     
     // View state
-    @State private var backgroundColor: Color = .white
+    @State private var backgroundOpacity: CGFloat = 0.0
     
     private var store: Set<AnyCancellable> = []
     
@@ -30,7 +30,8 @@ struct TickerSortSelectorView: View {
         ZStack {
             
             Rectangle()
-                .foregroundStyle(backgroundColor)
+                .foregroundStyle(.gray.opacity(0.5))
+                .opacity(backgroundOpacity)
             
             HStack(spacing: 10) {
                 
@@ -50,9 +51,9 @@ struct TickerSortSelectorView: View {
             viewModel.action.send(.tap)
             
             // Click animation
-            backgroundColor = .gray.opacity(0.2)
+            backgroundOpacity = 1.0
             withAnimation {
-                backgroundColor = .white
+                backgroundOpacity = 0.0
             }
         }
     }
