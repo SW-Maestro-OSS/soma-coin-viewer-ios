@@ -58,6 +58,7 @@ struct TickerListCellView: View {
             GeometryReader { geo in
                 CVText(text: $viewModel.state.priceText)
                     .font(.body)
+                    .lineLimit(1)
                     .frame(width: geo.size.width, height: geo.size.height, alignment: .leading)
                     .padding(.leading, geo.size.width * 0.25)
             }
@@ -67,6 +68,7 @@ struct TickerListCellView: View {
             GeometryReader { geo in
                 CVText(text: $viewModel.state.percentText)
                     .font(.body)
+                    .lineLimit(1)
                     .frame(width: geo.size.width, height: geo.size.height, alignment: .leading)
                     .padding(.leading, geo.size.width * 0.25)
             }
