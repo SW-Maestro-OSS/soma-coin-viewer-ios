@@ -6,16 +6,19 @@
 //
 
 import SwiftUI
+import Combine
 
 import CommonUI
 
 struct TickerSortSelectorView: View {
     
     // ViewModel
-    @StateObject var viewModel: TickerSortSelectorViewModel
+    @StateObject private var viewModel: TickerSortSelectorViewModel
     
     // View state
     @State private var backgroundColor: Color = .white
+    
+    private var store: Set<AnyCancellable> = []
     
     init(viewModel: TickerSortSelectorViewModel) {
         
@@ -26,6 +29,7 @@ struct TickerSortSelectorView: View {
         
         Button {
             
+            viewModel.action.send(.tap)
             
         } label: {
             
@@ -61,7 +65,6 @@ struct TickerSortSelectorView: View {
     TickerSortSelectorView(
         viewModel: .init(
             title: "Symbol",
-            imageName: "chevron.up.chevron.down",
             ascendingComparator: TickerSymbolAscendingComparator(),
             descendingComparator: TickerSymbolDescendingComparator()
         )
