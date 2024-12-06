@@ -24,14 +24,13 @@ class TickerSortSelectorViewModel: UDFObservableObject {
     var store: Set<AnyCancellable> = []
     
     
-    init(title: String, imageName: String, ascendingComparator: any TickerSortComparator, descendingComparator: any TickerSortComparator) {
+    init(title: String, ascendingComparator: any TickerSortComparator, descendingComparator: any TickerSortComparator) {
         
         self.ascendingComparator = ascendingComparator
         self.descendingComparator = descendingComparator
         
         let initialState: State = .init(
             title: title,
-            imageName: imageName,
             sortDirection: .unselected
         )
         
@@ -115,8 +114,19 @@ extension TickerSortSelectorViewModel {
     struct State {
         
         var title: String
-        var imageName: String
         var sortDirection: SortDirection = .unselected
+        
+        var imageName: String {
+            
+            switch sortDirection {
+            case .unselected:
+                "chevron.up.chevron.down"
+            case .ascending:
+                "arrowtriangle.up.fill"
+            case .descending:
+                "arrowtriangle.down.fill"
+            }
+        }
     }
     
     enum SortDirection {
