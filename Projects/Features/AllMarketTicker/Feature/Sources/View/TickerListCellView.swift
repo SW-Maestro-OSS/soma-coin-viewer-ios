@@ -43,12 +43,14 @@ struct TickerListCellView: View {
                 }
                 
                 // Pair symbol text
-                CVText(text: $viewModel.state.pairSymbolNameText)
-                    .font(.body)
-                    .fixedSize(horizontal: true, vertical: false)
-                    .lineLimit(1)
-                
                 Spacer(minLength: 0)
+                    .overlay(alignment: .leading) {
+                        CVText(text: $viewModel.state.pairSymbolNameText)
+                            .font(.subheadline)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                    }
+                    
             }
             .padding(.leading, 10)
             
