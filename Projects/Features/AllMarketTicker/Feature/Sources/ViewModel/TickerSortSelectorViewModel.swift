@@ -17,17 +17,22 @@ class TickerSortSelectorViewModel: UDFObservableObject {
     
     @Published var state: State
     
+    private let ascendingComparator: any TickerSortComparator
+    private let descendingComparator: any TickerSortComparator
     
     private(set) var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
     
     
-    init(title: String, comparator: any TickerSortComparator, reverseComparator: any TickerSortComparator) {
+    init(title: String, imageName: String, ascendingComparator: any TickerSortComparator, descendingComparator: any TickerSortComparator) {
+        
+        self.ascendingComparator = ascendingComparator
+        self.descendingComparator = descendingComparator
         
         let initialState: State = .init(
             title: title,
-            comparator: comparator,
-            reverseComparator: reverseComparator
+            imageName: imageName,
+            sortDirection: .unselected
         )
         
         self._state = .init(initialValue: initialState)
@@ -85,9 +90,9 @@ class TickerSortSelectorViewModel: UDFObservableObject {
     private func getNextDirectionFromOutsideSelection(_ state: State, _ comparator: any TickerSortComparator) -> SortDirection {
         
         switch comparator.id {
-        case state.comparator.id:
+        case ascendingComparator.id:
             return .ascending
-        case state.reverseComparator.id:
+        case descendingComparator.id:
             return .descending
         default:
             return .unselected
@@ -110,8 +115,7 @@ extension TickerSortSelectorViewModel {
     struct State {
         
         var title: String
-        let comparator: any TickerSortComparator
-        let reverseComparator: any TickerSortComparator
+        var imageName: String
         var sortDirection: SortDirection = .unselected
     }
     
