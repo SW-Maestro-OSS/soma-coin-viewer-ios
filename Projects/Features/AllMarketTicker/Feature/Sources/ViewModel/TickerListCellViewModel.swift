@@ -32,11 +32,11 @@ class TickerListCellViewModel: UDFObservableObject {
         createStateStream()
     }
     
-    private static func fetchImageUrlFromSymbol(_ symbol: String) -> URL {
+    private static func fetchImageUrlFromSymbol(_ symbol: String) -> String {
         
         let baseURL = URL(string: "https://github.com/spothq/cryptocurrency-icons/tree/master/32/icon")!
         let symbolImageURL = baseURL.appendingPathComponent(symbol.lowercased() + "png")
-        return symbolImageURL
+        return symbolImageURL.absoluteString
     }
 }
 
@@ -48,7 +48,7 @@ extension TickerListCellViewModel {
     
     struct State {
         
-        var firstSymbolImageURL: URL
+        var firstSymbolImageURL: String
         var pairSymbolName: String
         var price: String
         var percent: String

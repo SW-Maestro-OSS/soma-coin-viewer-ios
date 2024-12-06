@@ -60,6 +60,7 @@ let project = Project(
             dependencies: [
                 .target(name: "AllMarketTickerFeatureInterface"),
                 
+                D.ThirdParty.SimpleImageProvider,
                 D.Shared.CommonUI,
             ]
         ),
