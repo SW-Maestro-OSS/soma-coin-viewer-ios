@@ -28,10 +28,11 @@ class TickerListCellViewModel: Identifiable, UDFObservableObject {
         self.id = tickerVO.pairSymbol
         
         let initialState: State = .init(
-            pairSymbolName: tickerVO.pairSymbol,
-            price: tickerVO.price.roundToTwoDecimalPlaces().description,
-            percent: tickerVO.changedPercent.roundToTwoDecimalPlaces().description + "%"
+            pairSymbolNameText: tickerVO.pairSymbol,
+            priceText: tickerVO.price.roundToTwoDecimalPlaces(),
+            percentText: tickerVO.changedPercent.roundToTwoDecimalPlaces().getPlusText() + " %"
         )
+        
         self._state = Published(initialValue: initialState)
         
         createStateStream()
@@ -74,8 +75,21 @@ extension TickerListCellViewModel {
     struct State {
         
         public var firstSymbolImage: UIImage?
-        public var pairSymbolName: String
-        public var price: String
-        public var percent: String
+        public var pairSymbolNameText: String
+        public var priceText: String
+        public var percentText: String
+    }
+}
+
+fileprivate extension String {
+    
+    func getPlusText() -> String {
+        
+        if let double = Double(self), double >= 0.0 {
+            
+            return "+" + self
+        }
+        
+        return "-1.0"
     }
 }

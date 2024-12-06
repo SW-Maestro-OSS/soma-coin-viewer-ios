@@ -7,7 +7,10 @@
 
 import Foundation
 
-public struct CVNumber: Comparable {
+public struct CVNumber: Comparable, CustomStringConvertible, ExpressibleByFloatLiteral {
+    
+    public typealias FloatLiteralType = Double
+    
     
     private var wrappedNumber: Decimal
     
@@ -16,7 +19,12 @@ public struct CVNumber: Comparable {
         self.wrappedNumber = Decimal(wrappedNumber)
     }
     
-    public func roundToTwoDecimalPlaces() -> Decimal {
+    public init(floatLiteral value: Double) {
+        
+        wrappedNumber = Decimal(value)
+    }
+    
+    public func roundToTwoDecimalPlaces() -> String {
         
         let formatter = NumberFormatter()
         formatter.maximumFractionDigits = 2
@@ -25,11 +33,22 @@ public struct CVNumber: Comparable {
 
         let formattedString = formatter.string(from: wrappedNumber as NSDecimalNumber)
         
-        return Decimal(string: formattedString ?? "-1.0") ?? -1.0
+        return formattedString ?? "-1.0"
     }
+}
+
+extension CVNumber {
     
     public static func < (lhs: CVNumber, rhs: CVNumber) -> Bool {
         
         lhs.wrappedNumber < rhs.wrappedNumber
+    }
+}
+
+extension CVNumber {
+    
+    public var description: String {
+        
+        wrappedNumber.description
     }
 }

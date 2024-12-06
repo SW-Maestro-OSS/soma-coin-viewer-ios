@@ -50,7 +50,7 @@ struct TickerListCellView: View {
                 }
                 
                 // Pair symbol text
-                CVText(text: $viewModel.state.pairSymbolName)
+                CVText(text: $viewModel.state.pairSymbolNameText)
                     .font(.caption2)
                     .lineLimit(1)
                 
@@ -59,12 +59,12 @@ struct TickerListCellView: View {
             .padding(.horizontal, 10)
             
             // MARK: Price
-            CVText(text: $viewModel.state.price)
+            CVText(text: $viewModel.state.priceText)
                 .font(.body)
             
             
             // MARK: 24h change percent
-            CVText(text: $viewModel.state.percent)
+            CVText(text: $viewModel.state.percentText)
                 .font(.body)
         }
     }
