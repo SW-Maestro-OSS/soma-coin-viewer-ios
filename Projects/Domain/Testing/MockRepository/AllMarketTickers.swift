@@ -9,6 +9,7 @@ import Combine
 import Foundation
 
 import DomainInterface
+import CoreUtil
 
 public class MockAllMarketTickersRepository: AllMarketTickersRepository {
     
@@ -31,7 +32,7 @@ fileprivate extension Twenty4HourTickerForSymbolVO {
         
         Twenty4HourTickerForSymbolVO(
             symbol: "symbol\(index)",
-            price: 100.0 * Double(index),
+            price: CVNumber(100.0 * Double(index)),
             totalTradedQuoteAssetVolume: 100.0 * Double(index),
             changedPercent: Double(index % 100)
         )

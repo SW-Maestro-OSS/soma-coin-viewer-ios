@@ -22,6 +22,9 @@ class TickerSortSelectorViewModel: Identifiable, UDFObservableObject {
     private let ascendingComparator: any TickerSortComparator
     private let descendingComparator: any TickerSortComparator
     
+    // Ouside case
+    let tap: PassthroughSubject<any TickerSortComparator, Never> = .init()
+    
     private(set) var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
     
@@ -66,6 +69,11 @@ class TickerSortSelectorViewModel: Identifiable, UDFObservableObject {
             case .descending:
                 nextDirection = .ascending
             }
+            
+            
+            // 선택사항을 외부로 전달
+            tap.send(nextDirection == .ascending ? ascendingComparator : descendingComparator)
+            
             
             return Just(Action.changeSortDirection(direction: nextDirection)).eraseToAnyPublisher()
             

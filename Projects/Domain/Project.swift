@@ -40,7 +40,7 @@ let project = Project(
             bundleId: "com.CoinViewer.Domain.interface",
             sources: ["Interface/**"],
             dependencies: [
-                
+                D.Util.CoreUtil,
             ]
         ),
         

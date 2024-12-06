@@ -7,14 +7,16 @@
 
 import Foundation
 
+import CoreUtil
+
 public struct Twenty4HourTickerForSymbolVO {
     
     public let symbol: String
-    public let price: Double
-    public let totalTradedQuoteAssetVolume: Double
-    public let changedPercent: Double
+    public let price: CVNumber
+    public let totalTradedQuoteAssetVolume: CVNumber
+    public let changedPercent: CVNumber
     
-    public init(symbol: String, price: Double, totalTradedQuoteAssetVolume: Double, changedPercent: Double) {
+    public init(symbol: String, price: CVNumber, totalTradedQuoteAssetVolume: CVNumber, changedPercent: CVNumber) {
         self.symbol = symbol
         self.price = price
         self.totalTradedQuoteAssetVolume = totalTradedQuoteAssetVolume
