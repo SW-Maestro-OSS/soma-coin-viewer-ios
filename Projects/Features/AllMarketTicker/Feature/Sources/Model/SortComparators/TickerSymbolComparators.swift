@@ -15,7 +15,7 @@ struct TickerSymbolAscendingComparator: TickerSortComparator {
     
     func compare(lhs: TickerVO, rhs: TickerVO) -> Bool {
         
-        lhs.symbol < rhs.symbol
+        lhs.pairSymbol < rhs.pairSymbol
     }
 }
 
@@ -25,7 +25,7 @@ struct TickerSymbolDescendingComparator: TickerSortComparator {
     
     func compare(lhs: TickerVO, rhs: TickerVO) -> Bool {
         
-        lhs.symbol > rhs.symbol
+        lhs.pairSymbol > rhs.pairSymbol
     }
 }
 

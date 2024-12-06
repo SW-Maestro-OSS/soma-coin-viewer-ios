@@ -20,6 +20,8 @@ public class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
         attributes: .concurrent
     )
     
+    private let standardSymbol = "USDT"
+    
     public init() { }
     
     public func requestTickers() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> {
@@ -27,28 +29,51 @@ public class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
         repository
             .request24hTickerForAllSymbols()
             .throttle(for: 0.3, scheduler: throttleTimerQueue, latest: true)
-            .map { fetchedTickers in
+            .map { [standardSymbol] fetchedTickers in
                 
-                // MARK: #1. Filter symbols that dont cotain USDT as suffix
+                // MARK: #1. Filter symbols that dont cotain Standard symbol as suffix
                 
                 fetchedTickers.filter { vo in
                     
-                    vo.symbol.hasSuffix("USDT")
+                    let pairSymbol = vo.pairSymbol.uppercased()
+                    
+                    return pairSymbol.hasSuffix(standardSymbol)
                 }
                 
             }
-            .map { usdtTickers in
+            .map { [standardSymbol] standardTickers in
                 
-                // MARK: #2. Sort tickers
+                // MARK: #2. Separate pair to each symbols
                 
-                usdtTickers.sorted { ticker1, ticker2 in
+                standardTickers.map { ticker in
+                    
+                    var newTicker = ticker
+                    
+                    newTicker.setSymbols { pairSymbol in
+                        
+                        let upperScaled = pairSymbol.uppercased()
+                        
+                        let firstSymbol = upperScaled.replacingOccurrences(of: standardSymbol, with: "")
+                        let secondSymbol = standardSymbol
+                        
+                        return (firstSymbol, secondSymbol)
+                    }
+                    
+                    return newTicker
+                }
+            }
+            .map { completedTickers in
+                
+                // MARK: #3. Sort tickers
+                
+                completedTickers.sorted { ticker1, ticker2 in
                     
                     ticker1.totalTradedQuoteAssetVolume > ticker2.totalTradedQuoteAssetVolume
                 }
             }
             .map { sortedTickers in
                 
-                // MARK: #3. Cut 30 tickes
+                // MARK: #4. Cut 30 tickes
                 
                 let listSize = sortedTickers.count
                 

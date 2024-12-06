@@ -35,31 +35,6 @@ public struct AllMarketTickerView: View {
                 
             }
             
-            LazyVStack {
-                
-                ForEach(viewModel.state.tickerList, id: \.symbol) { tickerVO in
-                    
-                    HStack {
-                        
-                        Text("\(tickerVO.symbol)")
-                            .font(.body)
-                            .foregroundStyle(.black)
-                        
-                        Text("\(tickerVO.price.roundToTwoDecimalPlaces())")
-                            .font(.body)
-                            .foregroundStyle(.black)
-                        
-                        Text("\(tickerVO.changedPercent.roundToTwoDecimalPlaces())")
-                            .font(.body)
-                            .foregroundStyle(.black)
-                        
-                        Spacer()
-                    }
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 20)
-                    
-                }
-            }
             
         }
     }

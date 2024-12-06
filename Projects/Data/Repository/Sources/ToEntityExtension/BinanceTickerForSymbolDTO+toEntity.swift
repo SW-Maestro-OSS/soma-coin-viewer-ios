@@ -18,7 +18,7 @@ extension BinanceTickerForSymbolDTO {
     func toEntity() -> Twenty4HourTickerForSymbolVO {
         
         return .init(
-            symbol: symbol,
+            pairSymbol: symbol,
             price: CVNumber(Double(lastPrice) ?? 0.0),
             totalTradedQuoteAssetVolume: CVNumber(Double(quoteAssetVolume) ?? 0.0),
             changedPercent: CVNumber(Double(priceChangePercent) ?? 0.0)
