@@ -46,7 +46,7 @@ class TickerListCellViewModel: Identifiable, UDFObservableObject {
     
     private static func createImageURL(_ symbol: String) -> String {
         
-        let baseURL = URL(string: "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/32/icon/")!
+        let baseURL = URL(string: "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/32/icon")!
         let symbolImageURL = baseURL.appendingPathComponent(symbol.lowercased(), conformingTo: .png)
         
         return symbolImageURL.absoluteString
