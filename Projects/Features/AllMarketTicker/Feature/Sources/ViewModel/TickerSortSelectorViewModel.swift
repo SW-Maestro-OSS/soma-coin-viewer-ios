@@ -36,8 +36,8 @@ class TickerSortSelectorViewModel: Identifiable, UDFObservableObject {
         self.descendingComparator = descendingComparator
         
         let initialState: State = .init(
-            title: title,
-            sortDirection: .unselected
+            sortDirection: .unselected,
+            title: title
         )
         
         self._state = .init(initialValue: initialState)

@@ -12,31 +12,55 @@ import DomainInterface
 import BaseFeatureInterface
 import CoreUtil
 
-class TickerListCellViewModel: UDFObservableObject {
+import SimpleImageProvider
+
+class TickerListCellViewModel: Identifiable, UDFObservableObject {
     
-    @Published var state: State
+    public let id: String
+    
+    @Published public var state: State
     
     private(set) var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
     
     init(tickerVO: Twenty4HourTickerForSymbolVO) {
         
+        self.id = tickerVO.pairSymbol
+        
         let initialState: State = .init(
-            firstSymbolImageURL: Self.fetchImageUrlFromSymbol(tickerVO.firstSymbol),
             pairSymbolName: tickerVO.pairSymbol,
             price: tickerVO.price.roundToTwoDecimalPlaces().description,
-            percent: tickerVO.price.roundToTwoDecimalPlaces().description + "%"
+            percent: tickerVO.changedPercent.roundToTwoDecimalPlaces().description + "%"
         )
         self._state = Published(initialValue: initialState)
         
         createStateStream()
+        
+        fetchImageUrlFromSymbol(tickerVO.firstSymbol)
     }
     
-    private static func fetchImageUrlFromSymbol(_ symbol: String) -> String {
+    func reduce(_ action: Action, state: State) -> State {
+        switch action {
+        case .imageLoaded(let uIImage):
+            var newState = state
+            newState.firstSymbolImage = uIImage
+            
+            return newState
+        }
+    }
+    
+    private func fetchImageUrlFromSymbol(_ symbol: String) {
         
-        let baseURL = URL(string: "https://github.com/spothq/cryptocurrency-icons/tree/master/32/icon")!
+        let baseURL = URL(string: "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/32/icon/")!
         let symbolImageURL = baseURL.appendingPathComponent(symbol.lowercased(), conformingTo: .png)
-        return symbolImageURL.absoluteString
+        
+        Task {
+            
+            guard let image = await SimpleImageProvider.shared
+                .requestImage(url: symbolImageURL.absoluteString, size: .init(width: 32, height: 32)) else { return }
+            
+            action.send(.imageLoaded(image))
+        }
     }
 }
 
@@ -44,11 +68,12 @@ extension TickerListCellViewModel {
     
     enum Action {
             
+        case imageLoaded(UIImage)
     }
     
     struct State {
         
-        public var firstSymbolImageURL: String
+        public var firstSymbolImage: UIImage?
         public var pairSymbolName: String
         public var price: String
         public var percent: String

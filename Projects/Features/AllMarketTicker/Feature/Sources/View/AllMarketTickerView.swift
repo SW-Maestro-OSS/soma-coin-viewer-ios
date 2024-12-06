@@ -23,8 +23,9 @@ public struct AllMarketTickerView: View {
     
     public var body: some View {
         
-        ScrollView {
+        VStack {
             
+            // MARK: Sort selection
             LazyVGrid(columns: columns, spacing: 0) {
                 
                 ForEach(viewModel.state.sortCompartorViewModels) { viewModel in
@@ -32,7 +33,19 @@ public struct AllMarketTickerView: View {
                     TickerSortSelectorView(viewModel: viewModel)
                         .frame(height: 45)
                 }
+            }
+            
+            // MARK: Ticker list
+            ScrollView {
                 
+                LazyVStack(spacing: 3) {
+                    
+                    ForEach(viewModel.state.tickerListCellViewModels) { viewModel in
+                        
+                        TickerListCellView(viewModel: viewModel)
+                            .frame(height: 45)
+                    }
+                }
             }
         }
     }
