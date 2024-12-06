@@ -51,8 +51,18 @@ public struct AllMarketTickerView: View {
                     
                     ForEach(viewModel.state.tickerListCellViewModels) { viewModel in
                         
-                        TickerListCellView(viewModel: viewModel)
-                            .frame(height: 45)
+                        VStack {
+                            
+                            TickerListCellView(viewModel: viewModel)
+                                .frame(height: 45)
+                            
+                            
+                            Rectangle()
+                                .foregroundStyle(.gray)
+                                .frame(height: 1)
+                                .padding(.horizontal, 1)
+                        }
+                            
                     }
                 }
             }
