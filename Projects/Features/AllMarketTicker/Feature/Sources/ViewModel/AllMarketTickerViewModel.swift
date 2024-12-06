@@ -19,12 +19,40 @@ class AllMarketTickerViewModel: UDFObservableObject {
     @Injected private var webSocketManagementHelper: WebSocketManagementHelper
     @Injected private var allMarketTickersUseCase: AllMarketTickersUseCase
     
-    @Published var state: State = .init()
+    @Published var state: State
     
     var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
      
     init() {
+        
+        let initialState: State = .init(
+            sortCompartorViewModels: [
+                
+                TickerSortSelectorViewModel(
+                    id: "symbol_sort",
+                    title: "Symbol",
+                    ascendingComparator: TickerSymbolAscendingComparator(),
+                    descendingComparator: TickerSymbolDescendingComparator()
+                ),
+                
+                TickerSortSelectorViewModel(
+                    id: "price_sort",
+                    title: "Price($)",
+                    ascendingComparator: TickerPriceAscendingComparator(),
+                    descendingComparator: TickerPriceDescendingComparator()
+                ),
+                
+                TickerSortSelectorViewModel(
+                    id: "24hchange_sort",
+                    title: "24h Changes(%)",
+                    ascendingComparator: Ticker24hChangeAscendingComparator(),
+                    descendingComparator: Ticker24hChangeDescendingComparator()
+                )
+            ]
+        )
+        
+        self._state = Published(initialValue: initialState)
         
         // Create state stream
         createStateStream()
@@ -83,6 +111,7 @@ extension AllMarketTickerViewModel {
     struct State {
         // - 저장 프로퍼티
         var tickerList: [Twenty4HourTickerForSymbolVO] = []
+        var sortCompartorViewModels: [TickerSortSelectorViewModel]
         var currentSortComparator: (any TickerSortComparator)? = nil
         
         // - 연산 프로퍼티

@@ -13,7 +13,9 @@ import WebSocketManagementHelperInterface
 import DomainInterface
 import CoreUtil
 
-class TickerSortSelectorViewModel: UDFObservableObject {
+class TickerSortSelectorViewModel: Identifiable, UDFObservableObject {
+    
+    let id: String
     
     @Published var state: State
     
@@ -24,8 +26,9 @@ class TickerSortSelectorViewModel: UDFObservableObject {
     var store: Set<AnyCancellable> = []
     
     
-    init(title: String, ascendingComparator: any TickerSortComparator, descendingComparator: any TickerSortComparator) {
+    init(id: String, title: String, ascendingComparator: any TickerSortComparator, descendingComparator: any TickerSortComparator) {
         
+        self.id = id
         self.ascendingComparator = ascendingComparator
         self.descendingComparator = descendingComparator
         

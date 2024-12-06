@@ -27,35 +27,33 @@ struct TickerSortSelectorView: View {
     
     var body: some View {
         
-        Button {
+        ZStack {
+            
+            Rectangle()
+                .foregroundStyle(backgroundColor)
+            
+            HStack(spacing: 10) {
+                
+                Image(systemName: viewModel.state.imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 10)
+                
+                CVText(text: $viewModel.state.title)
+                    .font(.caption)
+                    .lineLimit(1)
+            }
+            .foregroundStyle(.black)
+        }
+        .frame(height: 45)
+        .onTapGesture {
             
             viewModel.action.send(.tap)
             
-        } label: {
-            
-            ZStack {
-                
-                Rectangle()
-                    .foregroundStyle(backgroundColor)
-                    .onTapGesture {
-                        
-                        backgroundColor = .gray.opacity(0.35)
-                        
-                        withAnimation {
-                            backgroundColor = .white
-                        }
-                    }
-                
-                HStack(spacing: 10) {
-                    
-                    Image(systemName: viewModel.state.imageName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 10)
-                    
-                    CVText(text: $viewModel.state.title)
-                }
-                .foregroundStyle(.black)
+            // Click animation
+            backgroundColor = .gray.opacity(0.2)
+            withAnimation {
+                backgroundColor = .white
             }
         }
     }
@@ -64,6 +62,7 @@ struct TickerSortSelectorView: View {
 #Preview {
     TickerSortSelectorView(
         viewModel: .init(
+            id: "test",
             title: "Symbol",
             ascendingComparator: TickerSymbolAscendingComparator(),
             descendingComparator: TickerSymbolDescendingComparator()
