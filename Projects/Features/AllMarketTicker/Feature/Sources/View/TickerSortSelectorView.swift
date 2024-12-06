@@ -11,7 +11,11 @@ import CommonUI
 
 struct TickerSortSelectorView: View {
     
+    // ViewModel
     @StateObject var viewModel: TickerSortSelectorViewModel
+    
+    // View state
+    @State private var backgroundColor: Color = .white
     
     init(viewModel: TickerSortSelectorViewModel) {
         
@@ -20,12 +24,46 @@ struct TickerSortSelectorView: View {
     
     var body: some View {
         
-        HStack {
+        Button {
             
-            Image(systemName: "chevron.up.chevron.down")
             
-            CVText(text: $viewModel.state.title)
+        } label: {
+            
+            ZStack {
+                
+                Rectangle()
+                    .foregroundStyle(backgroundColor)
+                    .onTapGesture {
+                        
+                        backgroundColor = .gray.opacity(0.35)
+                        
+                        withAnimation {
+                            backgroundColor = .white
+                        }
+                    }
+                
+                HStack(spacing: 10) {
+                    
+                    Image(systemName: viewModel.state.imageName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 10)
+                    
+                    CVText(text: $viewModel.state.title)
+                }
+                .foregroundStyle(.black)
+            }
         }
     }
 }
 
+#Preview {
+    TickerSortSelectorView(
+        viewModel: .init(
+            title: "Symbol",
+            imageName: "chevron.up.chevron.down",
+            ascendingComparator: TickerSymbolAscendingComparator(),
+            descendingComparator: TickerSymbolDescendingComparator()
+        )
+    )
+}
