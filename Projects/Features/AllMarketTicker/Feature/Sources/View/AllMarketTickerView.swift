@@ -34,6 +34,15 @@ public struct AllMarketTickerView: View {
                         .frame(height: 45)
                 }
             }
+            .background {
+                Rectangle()
+                    .foregroundStyle(.gray.opacity(0.3))
+                    .background { Rectangle().foregroundStyle(.white) }
+                    .padding(.vertical, 1)
+                    .background {
+                        Rectangle().foregroundStyle(.black)
+                    }
+            }
             
             // MARK: Ticker list
             ScrollView {

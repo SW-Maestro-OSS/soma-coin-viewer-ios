@@ -44,12 +44,13 @@ struct TickerListCellView: View {
                 
                 // Pair symbol text
                 CVText(text: $viewModel.state.pairSymbolNameText)
-                    .font(.caption2)
+                    .font(.body)
+                    .fixedSize(horizontal: true, vertical: false)
                     .lineLimit(1)
                 
                 Spacer(minLength: 0)
             }
-            .padding(.horizontal, 10)
+            .padding(.leading, 10)
             
             // MARK: Price
             GeometryReader { geo in
