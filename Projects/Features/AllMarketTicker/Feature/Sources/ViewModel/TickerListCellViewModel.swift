@@ -28,6 +28,7 @@ class TickerListCellViewModel: Identifiable, UDFObservableObject {
         self.id = tickerVO.pairSymbol
         
         let initialState: State = .init(
+            firstSymbolImageURL: Self.createImageURL(tickerVO.firstSymbol),
             pairSymbolNameText: tickerVO.pairSymbol,
             priceText: tickerVO.price.roundToTwoDecimalPlaces(),
             percentText: tickerVO.changedPercent.roundToTwoDecimalPlaces().getPlusText() + " %"
@@ -36,32 +37,19 @@ class TickerListCellViewModel: Identifiable, UDFObservableObject {
         self._state = Published(initialValue: initialState)
         
         createStateStream()
-        
-        fetchImageUrlFromSymbol(tickerVO.firstSymbol)
     }
     
     func reduce(_ action: Action, state: State) -> State {
-        switch action {
-        case .imageLoaded(let uIImage):
-            var newState = state
-            newState.firstSymbolImage = uIImage
-            
-            return newState
-        }
+        
+        return state
     }
     
-    private func fetchImageUrlFromSymbol(_ symbol: String) {
+    private static func createImageURL(_ symbol: String) -> String {
         
         let baseURL = URL(string: "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/32/icon/")!
         let symbolImageURL = baseURL.appendingPathComponent(symbol.lowercased(), conformingTo: .png)
         
-        Task {
-            
-            guard let image = await SimpleImageProvider.shared
-                .requestImage(url: symbolImageURL.absoluteString, size: .init(width: 32, height: 32)) else { return }
-            
-            action.send(.imageLoaded(image))
-        }
+        return symbolImageURL.absoluteString
     }
 }
 
@@ -69,12 +57,12 @@ extension TickerListCellViewModel {
     
     enum Action {
             
-        case imageLoaded(UIImage)
+        
     }
     
     struct State {
         
-        public var firstSymbolImage: UIImage?
+        public var firstSymbolImageURL: String
         public var pairSymbolNameText: String
         public var priceText: String
         public var percentText: String

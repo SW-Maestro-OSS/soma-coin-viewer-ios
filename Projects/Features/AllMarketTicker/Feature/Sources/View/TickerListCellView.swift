@@ -39,14 +39,7 @@ struct TickerListCellView: View {
                         .foregroundStyle(.gray.opacity(0.5))
                     
                     // First symbol image
-                    Group {
-                        
-                        if let image = viewModel.state.firstSymbolImage {
-                            
-                            Image(uiImage: image)
-                                .transition(.opacity)
-                        }
-                    }
+                    ImageView(imageURL: $viewModel.state.firstSymbolImageURL)
                 }
                 
                 // Pair symbol text
@@ -59,13 +52,21 @@ struct TickerListCellView: View {
             .padding(.horizontal, 10)
             
             // MARK: Price
-            CVText(text: $viewModel.state.priceText)
-                .font(.body)
+            GeometryReader { geo in
+                CVText(text: $viewModel.state.priceText)
+                    .font(.body)
+                    .frame(width: geo.size.width, height: geo.size.height, alignment: .leading)
+                    .padding(.leading, geo.size.width * 0.25)
+            }
             
             
             // MARK: 24h change percent
-            CVText(text: $viewModel.state.percentText)
-                .font(.body)
+            GeometryReader { geo in
+                CVText(text: $viewModel.state.percentText)
+                    .font(.body)
+                    .frame(width: geo.size.width, height: geo.size.height, alignment: .leading)
+                    .padding(.leading, geo.size.width * 0.25)
+            }
         }
     }
 }
