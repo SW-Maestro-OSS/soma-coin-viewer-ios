@@ -54,23 +54,17 @@ class AllMarketTickerViewModel: UDFObservableObject {
         
         self._state = Published(initialValue: initialState)
         
+        
         // Create state stream
         createStateStream()
         
         
+        // Subscribe to sort selection events
+        subscribeToSortSelectionEvent(viewModels: state.sortCompartorViewModels)
+        
+        
         // Subscribe to data stream
-        allMarketTickersUseCase
-            .requestTickers()
-            .map { tickers in
-                
-                return Action.fetchList(list: tickers)
-            }
-            .subscribe(action)
-            .store(in: &store)
-        
-        
-        // Subscribe to webSocketStream
-        webSocketManagementHelper.requestSubscribeToStream(streams: ["!ticker@arr"])
+        subscribeToTickerDataStream()
     }
     
     func reduce(_ action: Action, state: State) -> State {
@@ -102,6 +96,52 @@ class AllMarketTickerViewModel: UDFObservableObject {
             
             return newState
         }
+    }
+    
+    private func subscribeToSortSelectionEvent(viewModels: [TickerSortSelectorViewModel]) {
+        
+        let tapObservables = state.sortCompartorViewModels.map { viewModel in
+            
+            viewModel.tap
+        }
+        
+        let mergedTapObservablesPublishers = Publishers.MergeMany(tapObservables).share()
+        
+        mergedTapObservablesPublishers
+            .unretained(self)
+            .sink { viewModel, comparator in
+                
+                viewModel.state.sortCompartorViewModels.forEach { sortViewModel in
+                    
+                    sortViewModel.action.send(.sortComparatorChangedOutside(
+                        comparator: comparator
+                    ))
+                }
+            }
+            .store(in: &store)
+        
+        mergedTapObservablesPublishers
+            .map { comparator in
+                Action.changeSortingCriteria(comparator: comparator)
+            }
+            .subscribe(action)
+            .store(in: &store)
+    }
+    
+    private func subscribeToTickerDataStream() {
+        
+        allMarketTickersUseCase
+            .requestTickers()
+            .map { tickers in
+                
+                return Action.fetchList(list: tickers)
+            }
+            .subscribe(action)
+            .store(in: &store)
+        
+        
+        // Subscribe to webSocketStream
+        webSocketManagementHelper.requestSubscribeToStream(streams: ["!ticker@arr"])
     }
 }
 

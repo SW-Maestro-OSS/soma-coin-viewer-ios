@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+import CoreUtil
+
 public struct AllMarketTickerView: View {
     
     @StateObject private var viewModel: AllMarketTickerViewModel = .init()
@@ -28,6 +30,7 @@ public struct AllMarketTickerView: View {
                 ForEach(viewModel.state.sortCompartorViewModels) { viewModel in
                     
                     TickerSortSelectorView(viewModel: viewModel)
+                        .frame(height: 45)
                 }
                 
             }
@@ -39,7 +42,15 @@ public struct AllMarketTickerView: View {
                     HStack {
                         
                         Text("\(tickerVO.symbol)")
-                            .font(.title3)
+                            .font(.body)
+                            .foregroundStyle(.black)
+                        
+                        Text("\(tickerVO.price.roundToTwoDecimalPlaces())")
+                            .font(.body)
+                            .foregroundStyle(.black)
+                        
+                        Text("\(tickerVO.changedPercent.roundToTwoDecimalPlaces())")
+                            .font(.body)
                             .foregroundStyle(.black)
                         
                         Spacer()

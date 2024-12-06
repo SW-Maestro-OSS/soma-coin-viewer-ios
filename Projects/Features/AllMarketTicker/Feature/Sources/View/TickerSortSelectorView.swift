@@ -13,7 +13,7 @@ import CommonUI
 struct TickerSortSelectorView: View {
     
     // ViewModel
-    @StateObject private var viewModel: TickerSortSelectorViewModel
+    @ObservedObject private var viewModel: TickerSortSelectorViewModel
     
     // View state
     @State private var backgroundColor: Color = .white
@@ -22,7 +22,7 @@ struct TickerSortSelectorView: View {
     
     init(viewModel: TickerSortSelectorViewModel) {
         
-        self._viewModel = StateObject(wrappedValue: viewModel)
+        self._viewModel = ObservedObject(wrappedValue: viewModel)
     }
     
     var body: some View {
@@ -45,7 +45,6 @@ struct TickerSortSelectorView: View {
             }
             .foregroundStyle(.black)
         }
-        .frame(height: 45)
         .onTapGesture {
             
             viewModel.action.send(.tap)

@@ -9,6 +9,7 @@ import Foundation
 
 import DataSource
 import DomainInterface
+import CoreUtil
 
 // MARK: Binance API
 
@@ -18,9 +19,9 @@ extension BinanceTickerForSymbolDTO {
         
         return .init(
             symbol: symbol,
-            price: Double(lastPrice) ?? 0.0,
-            totalTradedQuoteAssetVolume: Double(quoteAssetVolume) ?? 0.0,
-            changedPercent: Double(priceChangePercent) ?? 0.0
+            price: CVNumber(Double(lastPrice) ?? 0.0),
+            totalTradedQuoteAssetVolume: CVNumber(Double(quoteAssetVolume) ?? 0.0),
+            changedPercent: CVNumber(Double(priceChangePercent) ?? 0.0)
         )
     }
 }
