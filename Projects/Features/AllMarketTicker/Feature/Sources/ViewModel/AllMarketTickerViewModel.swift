@@ -89,7 +89,7 @@ class AllMarketTickerViewModel: UDFObservableObject {
             
             let currentComparator = state.currentSortComparator
             
-            let sortedTickerList = state.tickerList.sorted(by: currentComparator)
+            let sortedTickerList = list.sorted(by: currentComparator)
             
             newState.tickerList = sortedTickerList
             newState.tickerListCellViewModels = sortedTickerList.map(TickerListCellViewModel.init)

@@ -32,23 +32,40 @@ struct TickerListCellView: View {
             // MARK: Symbol image + text
             HStack(spacing: 5) {
                 
-                // First symbol image
-                SimpleImage(
-                    url: viewModel.state.firstSymbolImageURL,
-                    size: .init(width: 33, height: 33)
-                )
+                ZStack {
+                 
+                    Circle()
+                        .frame(width: 32, height: 32)
+                        .foregroundStyle(.gray.opacity(0.5))
+                    
+                    // First symbol image
+                    Group {
+                        
+                        if let image = viewModel.state.firstSymbolImage {
+                            
+                            Image(uiImage: image)
+                                .transition(.opacity)
+                        }
+                    }
+                }
                 
                 // Pair symbol text
                 CVText(text: $viewModel.state.pairSymbolName)
+                    .font(.caption2)
+                    .lineLimit(1)
                 
+                Spacer(minLength: 0)
             }
+            .padding(.horizontal, 10)
             
             // MARK: Price
             CVText(text: $viewModel.state.price)
+                .font(.body)
             
             
             // MARK: 24h change percent
             CVText(text: $viewModel.state.percent)
+                .font(.body)
         }
     }
 }
