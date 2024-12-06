@@ -13,12 +13,14 @@ import WebSocketManagementHelperInterface
 import DomainInterface
 import CoreUtil
 
-class TickerSortSelectorViewModel: UDFViewModel {
+class TickerSortSelectorViewModel: UDFObservableObject {
     
     @Published var state: State
     
+    
     private(set) var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
+    
     
     init(title: String, comparator: any TickerSortComparator, reverseComparator: any TickerSortComparator) {
         

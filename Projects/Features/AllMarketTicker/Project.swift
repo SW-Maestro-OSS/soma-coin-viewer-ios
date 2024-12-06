@@ -59,6 +59,8 @@ let project = Project(
             resources: ["Feature/Resources/**"],
             dependencies: [
                 .target(name: "AllMarketTickerFeatureInterface"),
+                
+                D.Shared.CommonUI,
             ]
         ),
 
