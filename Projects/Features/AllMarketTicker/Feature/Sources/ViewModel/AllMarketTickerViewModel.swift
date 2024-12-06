@@ -75,7 +75,11 @@ class AllMarketTickerViewModel: UDFObservableObject {
             var newState = state
             
             newState.currentSortComparator = comparator
-            newState.tickerList = state.tickerList.sorted(by: comparator)
+            
+            let sortedTickerList = state.tickerList.sorted(by: comparator)
+            
+            newState.tickerList = sortedTickerList
+            newState.tickerListCellViewModels = sortedTickerList.map(TickerListCellViewModel.init)
             
             return newState
             
@@ -85,14 +89,10 @@ class AllMarketTickerViewModel: UDFObservableObject {
             
             let currentComparator = state.currentSortComparator
             
-            if let currentComparator {
-                
-                newState.tickerList = list.sorted(by: currentComparator)
-                
-            } else {
-                
-                newState.tickerList = list
-            }
+            let sortedTickerList = state.tickerList.sorted(by: currentComparator)
+            
+            newState.tickerList = sortedTickerList
+            newState.tickerListCellViewModels = sortedTickerList.map(TickerListCellViewModel.init)
             
             return newState
         }
@@ -149,14 +149,17 @@ class AllMarketTickerViewModel: UDFObservableObject {
 extension AllMarketTickerViewModel {
     
     struct State {
+        
         // - 저장 프로퍼티
-        var tickerList: [Twenty4HourTickerForSymbolVO] = []
-        var sortCompartorViewModels: [TickerSortSelectorViewModel]
-        var currentSortComparator: (any TickerSortComparator)? = nil
+        fileprivate var tickerList: [Twenty4HourTickerForSymbolVO] = []
+        fileprivate var currentSortComparator: any TickerSortComparator = TickerNoneComparator()
+        
+        public var tickerListCellViewModels: [TickerListCellViewModel] = []
+        public var sortCompartorViewModels: [TickerSortSelectorViewModel]
         
         // - 연산 프로퍼티
         var isLoaded: Bool {
-            !tickerList.isEmpty
+            !tickerListCellViewModels.isEmpty
         }
     }
     

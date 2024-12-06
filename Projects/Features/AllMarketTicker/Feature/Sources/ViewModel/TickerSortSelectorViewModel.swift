@@ -124,10 +124,13 @@ extension TickerSortSelectorViewModel {
     
     struct State {
         
-        var title: String
-        var sortDirection: SortDirection = .unselected
+        // - 저장 프로퍼티
+        fileprivate var sortDirection: SortDirection = .unselected
         
-        var imageName: String {
+        public var title: String
+        
+        // - 연산 프로퍼티
+        public var imageName: String {
             
             switch sortDirection {
             case .unselected:
