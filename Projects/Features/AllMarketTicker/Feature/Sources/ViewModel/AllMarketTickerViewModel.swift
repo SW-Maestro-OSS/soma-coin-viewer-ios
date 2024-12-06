@@ -8,12 +8,10 @@
 import SwiftUI
 import Combine
 
-import DomainInterface
+import BaseFeatureInterface
 import WebSocketManagementHelperInterface
 import DomainInterface
 import CoreUtil
-
-import BaseFeatureInterface
 
 class AllMarketTickerViewModel: UDFObservableObject {
     
