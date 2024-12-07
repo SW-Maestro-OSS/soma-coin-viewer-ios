@@ -9,7 +9,7 @@ import SwiftUI
 
 public struct SkeletonUI: View {
     
-    @State private var isAnimating = false
+    public init() { }
     
     public var body: some View {
         
@@ -44,9 +44,6 @@ public struct SkeletonUI: View {
             }
             
         }
-        .onAppear(perform: {
-            isAnimating = true
-        })
         .background(.white)
     }
 }

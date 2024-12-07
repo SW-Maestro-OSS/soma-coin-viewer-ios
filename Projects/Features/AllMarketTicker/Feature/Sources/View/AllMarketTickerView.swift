@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+import CommonUI
 import CoreUtil
 
 public struct AllMarketTickerView: View {
@@ -45,27 +46,11 @@ public struct AllMarketTickerView: View {
             }
             
             // MARK: Ticker list
-            ScrollView {
-                
-                LazyVStack(spacing: 3) {
-                    
-                    ForEach(viewModel.state.tickerListCellViewModels) { viewModel in
-                        
-                        VStack {
-                            
-                            TickerListCellView(viewModel: viewModel)
-                                .frame(height: 45)
-                            
-                            
-                            Rectangle()
-                                .foregroundStyle(.gray)
-                                .frame(height: 1)
-                                .padding(.horizontal, 1)
-                        }
-                            
-                    }
-                }
-            }
+            AllMarketTickerListView(
+                isLoaded: viewModel.state.isLoaded,
+                listItems: $viewModel.state.tickerListCellViewModels
+            )
+            
         }
     }
 }
