@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SortSelectionContainerView: View {
     
-    @Binding var sortSelectionViewModels: [TickerSortSelectorViewModel]
+    @Binding private var sortSelectionViewModels: [TickerSortSelectorViewModel]
     
     private let columns: [GridItem] = [
         GridItem(.flexible()),

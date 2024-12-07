@@ -11,9 +11,9 @@ import CommonUI
 
 struct AllMarketTickerListView: View {
     
-    var isLoaded: Bool
+    private var isLoaded: Bool
     
-    @Binding var listItems: [TickerListCellViewModel]
+    @Binding private var listItems: [TickerListCellViewModel]
     
     var body: some View {
         
