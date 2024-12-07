@@ -24,10 +24,10 @@ func sortingTest() {
     )
     
     let testTickers: [Twenty4HourTickerForSymbolVO] = [
-        Twenty4HourTickerForSymbolVO(pairSymbol: "test1USDT", price: 100.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
-        Twenty4HourTickerForSymbolVO(pairSymbol: "test2USDT", price: 200.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
-        Twenty4HourTickerForSymbolVO(pairSymbol: "test3USDT", price: 300.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
-        Twenty4HourTickerForSymbolVO(pairSymbol: "test4USDT", price: 400.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
+        Twenty4HourTickerForSymbolVO(pairSymbol: "test1USDT", price: 400.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
+        Twenty4HourTickerForSymbolVO(pairSymbol: "test2USDT", price: 100.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
+        Twenty4HourTickerForSymbolVO(pairSymbol: "test3USDT", price: 200.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
+        Twenty4HourTickerForSymbolVO(pairSymbol: "test4USDT", price: 300.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
     ].map { ticker in
         
         var newTicker = ticker
