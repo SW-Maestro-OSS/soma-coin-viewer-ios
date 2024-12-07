@@ -16,15 +16,19 @@ import CoreUtil
 class AllMarketTickerViewModel: UDFObservableObject {
     
     // Service locator
-    @Injected private var webSocketManagementHelper: WebSocketManagementHelper
-    @Injected private var allMarketTickersUseCase: AllMarketTickersUseCase
+    private var webSocketManagementHelper: WebSocketManagementHelper
+    private var allMarketTickersUseCase: AllMarketTickersUseCase
     
     @Published var state: State
     
     var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
-     
-    init() {
+    
+    
+    init(socketHelper: WebSocketManagementHelper, useCase: AllMarketTickersUseCase) {
+        
+        self.webSocketManagementHelper = socketHelper
+        self.allMarketTickersUseCase = useCase
         
         let initialState: State = .init(
             sortCompartorViewModels: [
@@ -155,8 +159,8 @@ extension AllMarketTickerViewModel {
     struct State {
         
         // - 저장 프로퍼티
-        fileprivate var tickerList: [Twenty4HourTickerForSymbolVO] = []
-        fileprivate var currentSortComparator: any TickerSortComparator = TickerNoneComparator()
+        var tickerList: [Twenty4HourTickerForSymbolVO] = []
+        var currentSortComparator: any TickerSortComparator = TickerNoneComparator()
         
         public var tickerListCellViewModels: [TickerListCellViewModel] = []
         public var sortCompartorViewModels: [TickerSortSelectorViewModel]

@@ -10,13 +10,16 @@ import SwiftUI
 import CommonUI
 import CoreUtil
 
-public struct AllMarketTickerView: View {
+struct AllMarketTickerView: View {
     
-    @StateObject private var viewModel: AllMarketTickerViewModel = .init()
+    @StateObject private var viewModel: AllMarketTickerViewModel
     
-    public init() { }
+    init(viewModel: AllMarketTickerViewModel) {
+        
+        self._viewModel = StateObject(wrappedValue: viewModel)
+    }
     
-    public var body: some View {
+    var body: some View {
         
         VStack {
             

@@ -7,7 +7,11 @@
 
 import SwiftUI
 
-import AllMarketTickerFeature
+@testable import AllMarketTickerFeature
+
+import WebSocketManagementHelperInterface
+import DomainInterface
+import CoreUtil
 
 @main
 struct CoinViewerApp: App {
@@ -18,7 +22,12 @@ struct CoinViewerApp: App {
         
         WindowGroup {
             
-            AllMarketTickerView()
+            AllMarketTickerView(
+                viewModel: .init(
+                    socketHelper: DependencyInjector.shared.resolve(WebSocketManagementHelper.self),
+                    useCase: DependencyInjector.shared.resolve(AllMarketTickersUseCase.self)
+                )
+            )
         }
     }
 }
