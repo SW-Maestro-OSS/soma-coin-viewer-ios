@@ -11,6 +11,10 @@ struct SortSelectionContainerView: View {
     
     @Binding private var sortSelectionViewModels: [TickerSortSelectorViewModel]
     
+    init(sortSelectionViewModels: Binding<[TickerSortSelectorViewModel]>) {
+        self._sortSelectionViewModels = sortSelectionViewModels
+    }
+    
     private let columns: [GridItem] = [
         GridItem(.flexible()),
         GridItem(.flexible()),

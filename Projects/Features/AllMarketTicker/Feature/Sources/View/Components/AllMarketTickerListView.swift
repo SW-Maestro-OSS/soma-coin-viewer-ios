@@ -15,6 +15,11 @@ struct AllMarketTickerListView: View {
     
     @Binding private var listItems: [TickerListCellViewModel]
     
+    init(isLoaded: Bool, listItems: Binding<[TickerListCellViewModel]>) {
+        self.isLoaded = isLoaded
+        self._listItems = listItems
+    }
+    
     var body: some View {
         
         if isLoaded {
