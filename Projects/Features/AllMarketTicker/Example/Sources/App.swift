@@ -21,13 +21,14 @@ struct CoinViewerApp: App {
     var body: some Scene {
         
         WindowGroup {
-            
+          
             AllMarketTickerView(
                 viewModel: .init(
                     socketHelper: DependencyInjector.shared.resolve(WebSocketManagementHelper.self),
                     useCase: DependencyInjector.shared.resolve(AllMarketTickersUseCase.self)
                 )
             )
+
         }
     }
 }
