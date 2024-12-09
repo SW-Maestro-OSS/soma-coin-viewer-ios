@@ -19,7 +19,7 @@ struct TickerListCellView: View {
         self._viewModel = ObservedObject(wrappedValue: viewModel)
     }
     
-    private let columns: [GridItem] = [
+    @State private var columns: [GridItem] = [
         GridItem(.flexible()),
         GridItem(.flexible()),
         GridItem(.flexible()),
@@ -27,47 +27,57 @@ struct TickerListCellView: View {
     
     var body: some View {
         
-        LazyVGrid(columns: columns, spacing: 0) {
+        GeometryReader { geo in
             
-            // MARK: Symbol image + text
-            HStack(spacing: 5) {
-                
-                // Symbol image view
-                SymbolImageView(imageURL: $viewModel.state.firstSymbolImageURL)
-                    .frame(width: 40, height: 44)
-                
-                // Pair symbol text
+            VStack(spacing: 0) {
                 Spacer(minLength: 0)
-                    .overlay(alignment: .leading) {
+                LazyVGrid(columns: columns, spacing: 0) {
+                    
+                    // MARK: Symbol image + text
+                    HStack(spacing: 5) {
+                        
+                        // Symbol image view
+                        SymbolImageView(imageURL: $viewModel.state.firstSymbolImageURL)
+                            .frame(width: 40, height: 40)
+                        
+                        // Pair symbol text
                         CVText(text: $viewModel.state.pairSymbolNameText)
                             .font(.subheadline)
                             .lineLimit(1)
-                            .fixedSize(horizontal: true, vertical: false)
+                            
+                        Spacer(minLength: 0)
                     }
+                    .padding(.leading, 10)
                     
-            }
-            .padding(.leading, 10)
-            
-            // MARK: Price
-            GeometryReader { geo in
-                Spacer(minLength: 0)
-                    .overlay(alignment: .leading) {
+                    
+                    // MARK: Price
+                    HStack {
                         CVText(text: $viewModel.state.priceText)
                             .font(.body)
                             .lineLimit(1)
-                            .fixedSize(horizontal: true, vertical: false)
+                        Spacer(minLength: 0)
                     }
-                    .padding(.leading, geo.size.width * 0.4)
+                    
+                    
+                    // MARK: 24h change percent
+                    HStack {
+                        CVText(text: $viewModel.state.percentText)
+                            .font(.body)
+                            .lineLimit(1)
+                        Spacer(minLength: 0)
+                    }
+                }
+                Spacer(minLength: 0)
             }
-            
-            
-            // MARK: 24h change percent
-            GeometryReader { geo in
-                CVText(text: $viewModel.state.percentText)
-                    .font(.body)
-                    .lineLimit(1)
-                    .frame(width: geo.size.width, height: geo.size.height, alignment: .leading)
-                    .padding(.leading, geo.size.width * 0.25)
+            .onAppear {
+                
+                let width = geo.size.width
+                
+                columns = [
+                    GridItem(.fixed(width * 0.4)),
+                    GridItem(.fixed(width * 0.3)),
+                    GridItem(.fixed(width * 0.3)),
+                ]
             }
         }
     }
