@@ -21,7 +21,7 @@ struct AllMarketTickerView: View {
     
     var body: some View {
         
-        VStack {
+        VStack(spacing: 0) {
             
             // MARK: Sort selection
             SortSelectionContainerView(

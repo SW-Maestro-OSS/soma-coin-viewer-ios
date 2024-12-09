@@ -26,15 +26,14 @@ struct AllMarketTickerListView: View {
             
             ScrollView {
                 
-                LazyVStack(spacing: 3) {
+                LazyVStack(spacing: 0) {
                     
                     ForEach(listItems) { viewModel in
                         
-                        VStack {
+                        VStack(spacing: 0) {
                             
                             TickerListCellView(viewModel: viewModel)
-                                .frame(height: 45)
-                            
+                                .frame(height: 50)
                             
                             Rectangle()
                                 .foregroundStyle(.gray)
