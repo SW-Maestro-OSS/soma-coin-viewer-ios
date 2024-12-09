@@ -19,19 +19,14 @@ struct TickerListCellView: View {
         self._viewModel = ObservedObject(wrappedValue: viewModel)
     }
     
-    @State private var columns: [GridItem] = [
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-    ]
-    
     var body: some View {
         
         GeometryReader { geo in
             
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
-                LazyVGrid(columns: columns, spacing: 0) {
+                
+                HStack(spacing: 0) {
                     
                     // MARK: Symbol image + text
                     HStack(spacing: 5) {
@@ -48,36 +43,30 @@ struct TickerListCellView: View {
                         Spacer(minLength: 0)
                     }
                     .padding(.leading, 10)
+                    .frame(width: geo.size.width * 0.4)
                     
                     
                     // MARK: Price
-                    HStack {
+                    HStack(spacing: 0) {
+                        Spacer(minLength: 0)
                         CVText(text: $viewModel.state.priceText)
                             .font(.body)
                             .lineLimit(1)
-                        Spacer(minLength: 0)
                     }
+                    .frame(width: geo.size.width * 0.2)
                     
                     
                     // MARK: 24h change percent
-                    HStack {
+                    HStack(spacing: 0) {
+                        Spacer(minLength: 0)
                         CVText(text: $viewModel.state.percentText)
                             .font(.body)
                             .lineLimit(1)
-                        Spacer(minLength: 0)
                     }
+                    .padding(.trailing, 10)
+                    .frame(width: geo.size.width * 0.4)
                 }
                 Spacer(minLength: 0)
-            }
-            .onAppear {
-                
-                let width = geo.size.width
-                
-                columns = [
-                    GridItem(.fixed(width * 0.4)),
-                    GridItem(.fixed(width * 0.3)),
-                    GridItem(.fixed(width * 0.3)),
-                ]
             }
         }
     }
