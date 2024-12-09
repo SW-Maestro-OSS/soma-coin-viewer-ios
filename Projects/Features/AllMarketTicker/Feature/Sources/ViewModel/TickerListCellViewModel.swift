@@ -78,6 +78,6 @@ fileprivate extension String {
             return "+" + self
         }
         
-        return "-1.0"
+        return self
     }
 }
