@@ -13,7 +13,7 @@ import WebSocketManagementHelperInterface
 import DomainInterface
 import CoreUtil
 
-class AllMarketTickerViewModel: UDFObservableObject {
+class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModelDelegate {
     
     // Service locator
     private var webSocketManagementHelper: WebSocketManagementHelper
@@ -25,7 +25,7 @@ class AllMarketTickerViewModel: UDFObservableObject {
     
     
     // Sub ViewModel
-    let sortCompartorViewModels: [TickerSortSelectorViewModel]
+    private(set) var sortCompartorViewModels: [TickerSortSelectorViewModel] = []
     
     
     var action: PassthroughSubject<Action, Never> = .init()
@@ -34,43 +34,16 @@ class AllMarketTickerViewModel: UDFObservableObject {
     
     init(socketHelper: WebSocketManagementHelper, useCase: AllMarketTickersUseCase) {
         
+        let initialState: State = .init()
+        self._state = Published(initialValue: initialState)
+        
         self.webSocketManagementHelper = socketHelper
         self.allMarketTickersUseCase = useCase
-        self.sortCompartorViewModels = [
-            
-            TickerSortSelectorViewModel(
-                id: "symbol_sort",
-                title: "Symbol",
-                ascendingComparator: TickerSymbolAscendingComparator(),
-                descendingComparator: TickerSymbolDescendingComparator()
-            ),
-            
-            TickerSortSelectorViewModel(
-                id: "price_sort",
-                title: "Price($)",
-                ascendingComparator: TickerPriceAscendingComparator(),
-                descendingComparator: TickerPriceDescendingComparator()
-            ),
-            
-            TickerSortSelectorViewModel(
-                id: "24hchange_sort",
-                title: "24h Changes(%)",
-                ascendingComparator: Ticker24hChangeAscendingComparator(),
-                descendingComparator: Ticker24hChangeDescendingComparator()
-            )
-        ]
-        
-        let initialState: State = .init()
-        
-        self._state = Published(initialValue: initialState)
+        self.sortCompartorViewModels = createTickerSortSelectorViewModels()
         
         
         // Create state stream
         createStateStream()
-        
-        
-        // Subscribe to sort selection events
-        subscribeToSortSelectionEvent()
         
         
         // Subscribe to data stream
@@ -107,56 +80,6 @@ class AllMarketTickerViewModel: UDFObservableObject {
             return newState
         }
     }
-    
-    private func subscribeToSortSelectionEvent() {
-        
-        let tapObservables = sortCompartorViewModels.map { viewModel in
-            
-            // 정렬기준 버튼 선택 이벤트
-            viewModel.tap
-        }
-        
-        let mergedTapObservablesPublishers = Publishers.MergeMany(tapObservables).share()
-        
-        // 정렬 버튼 UI에게 현재 선택된 정렬기준을 전파
-        mergedTapObservablesPublishers
-            .unretained(self)
-            .sink { viewModel, comparator in
-                
-                viewModel.sortCompartorViewModels.forEach { sortViewModel in
-                    
-                    sortViewModel.action.send(.sortComparatorChangedOutside(
-                        comparator: comparator
-                    ))
-                }
-            }
-            .store(in: &store)
-        
-        
-        // 현재 선택된 정렬기준을 리스트에 적용하기 위해 액션으로 전달
-        mergedTapObservablesPublishers
-            .map { comparator in
-                Action.changeSortingCriteria(comparator: comparator)
-            }
-            .subscribe(action)
-            .store(in: &store)
-    }
-    
-    private func subscribeToTickerDataStream() {
-        
-        allMarketTickersUseCase
-            .requestTickers()
-            .map { tickers in
-                
-                return Action.fetchList(list: tickers)
-            }
-            .subscribe(action)
-            .store(in: &store)
-        
-        
-        // Subscribe to webSocketStream
-        webSocketManagementHelper.requestSubscribeToStream(streams: ["!ticker@arr"])
-    }
 }
 
 // MARK: State & Action
@@ -181,6 +104,77 @@ extension AllMarketTickerViewModel {
         // Event
         case changeSortingCriteria(comparator: any TickerSortComparator)
         case fetchList(list: [Twenty4HourTickerForSymbolVO])
+    }
+}
+
+
+private extension AllMarketTickerViewModel {
+    
+    func subscribeToTickerDataStream() {
+        
+        allMarketTickersUseCase
+            .requestTickers()
+            .map { tickers in
+                
+                return Action.fetchList(list: tickers)
+            }
+            .subscribe(action)
+            .store(in: &store)
+        
+        
+        // Subscribe to webSocketStream
+        webSocketManagementHelper.requestSubscribeToStream(streams: ["!ticker@arr"])
+    }
+    
+    func createTickerSortSelectorViewModels() -> [TickerSortSelectorViewModel] {
+        
+        let viewModels = [
+            
+            TickerSortSelectorViewModel(
+                id: "symbol_sort",
+                title: "Symbol",
+                ascendingComparator: TickerSymbolAscendingComparator(),
+                descendingComparator: TickerSymbolDescendingComparator()
+            ),
+            
+            TickerSortSelectorViewModel(
+                id: "price_sort",
+                title: "Price($)",
+                ascendingComparator: TickerPriceAscendingComparator(),
+                descendingComparator: TickerPriceDescendingComparator()
+            ),
+            
+            TickerSortSelectorViewModel(
+                id: "24hchange_sort",
+                title: "24h Changes(%)",
+                ascendingComparator: Ticker24hChangeAscendingComparator(),
+                descendingComparator: Ticker24hChangeDescendingComparator()
+            )
+        ]
+        
+        viewModels.forEach { viewModel in
+            
+            viewModel.delegate = self
+        }
+        
+        return viewModels
+    }
+}
+
+
+// MARK: TickerSortSelectorViewModelDelegate
+extension AllMarketTickerViewModel {
+    
+    func sortSelector(selection comparator: any TickerSortComparator) {
+        
+        // 정렬 버튼 UI에게 현재 선택된 정렬기준을 전파
+        sortCompartorViewModels.forEach { sortViewModel in
+            
+            sortViewModel.notifySelectedComparator(comparator)
+        }
+        
+        // 현재 선택된 정렬기준을 리스트에 적용하기 위해 액션으로 전달
+        action.send(.changeSortingCriteria(comparator: comparator))
     }
 }
 

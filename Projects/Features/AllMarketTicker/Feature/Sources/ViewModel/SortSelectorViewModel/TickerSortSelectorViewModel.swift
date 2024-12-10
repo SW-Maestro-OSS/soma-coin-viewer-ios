@@ -19,11 +19,10 @@ class TickerSortSelectorViewModel: Identifiable, UDFObservableObject {
     
     @Published var state: State
     
+    weak var delegate: TickerSortSelectorViewModelDelegate?
+    
     private let ascendingComparator: any TickerSortComparator
     private let descendingComparator: any TickerSortComparator
-    
-    // Ouside case
-    let tap: PassthroughSubject<any TickerSortComparator, Never> = .init()
     
     private(set) var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
@@ -45,6 +44,13 @@ class TickerSortSelectorViewModel: Identifiable, UDFObservableObject {
         // Create state stream
         createStateStream()
     }
+    
+    
+    public func notifySelectedComparator(_ comparator: any TickerSortComparator) {
+        
+        action.send(.sortComparatorChangedOutside(comparator: comparator))
+    }
+    
     
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
         switch action {
@@ -72,7 +78,8 @@ class TickerSortSelectorViewModel: Identifiable, UDFObservableObject {
             
             
             // 선택사항을 외부로 전달
-            tap.send(nextDirection == .ascending ? ascendingComparator : descendingComparator)
+            let selectedComparator = getComparator(nextDirection)
+            delegate?.sortSelector(selection: selectedComparator)
             
             
             return Just(Action.changeSortDirection(direction: nextDirection)).eraseToAnyPublisher()
@@ -94,18 +101,6 @@ class TickerSortSelectorViewModel: Identifiable, UDFObservableObject {
             
         default:
             return state
-        }
-    }
-    
-    private func getNextDirectionFromOutsideSelection(_ state: State, _ comparator: any TickerSortComparator) -> SortDirection {
-        
-        switch comparator.id {
-        case ascendingComparator.id:
-            return .ascending
-        case descendingComparator.id:
-            return .descending
-        default:
-            return .unselected
         }
     }
 }
@@ -148,5 +143,25 @@ extension TickerSortSelectorViewModel {
         case unselected
         case ascending
         case descending
+    }
+}
+
+private extension TickerSortSelectorViewModel {
+    
+    func getNextDirectionFromOutsideSelection(_ state: State, _ comparator: any TickerSortComparator) -> SortDirection {
+        
+        switch comparator.id {
+        case ascendingComparator.id:
+            return .ascending
+        case descendingComparator.id:
+            return .descending
+        default:
+            return .unselected
+        }
+    }
+    
+    func getComparator(_ direction: SortDirection) -> TickerSortComparator {
+        
+        return direction == .ascending ? ascendingComparator : descendingComparator
     }
 }
