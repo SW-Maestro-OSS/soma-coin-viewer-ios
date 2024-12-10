@@ -9,10 +9,11 @@ import SwiftUI
 
 struct SortSelectionContainerView: View {
     
-    @Binding private var sortSelectionViewModels: [TickerSortSelectorViewModel]
+    private let sortSelectionViewModels: [TickerSortSelectorViewModel]
     
-    init(sortSelectionViewModels: Binding<[TickerSortSelectorViewModel]>) {
-        self._sortSelectionViewModels = sortSelectionViewModels
+    init(viewModels: [TickerSortSelectorViewModel]) {
+        
+        self.sortSelectionViewModels = viewModels
     }
     
     private let columns: [GridItem] = [

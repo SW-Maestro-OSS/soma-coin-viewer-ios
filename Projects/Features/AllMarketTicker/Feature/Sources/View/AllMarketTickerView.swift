@@ -24,9 +24,7 @@ struct AllMarketTickerView: View {
         VStack(spacing: 0) {
             
             // MARK: Sort selection
-            SortSelectionContainerView(
-                sortSelectionViewModels: $viewModel.state.sortCompartorViewModels
-            )
+            SortSelectionContainerView(viewModels: viewModel.sortCompartorViewModels)
             
             // MARK: Ticker list
             AllMarketTickerListView(
