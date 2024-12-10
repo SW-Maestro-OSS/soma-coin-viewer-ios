@@ -19,7 +19,14 @@ class AllMarketTickerViewModel: UDFObservableObject {
     private var webSocketManagementHelper: WebSocketManagementHelper
     private var allMarketTickersUseCase: AllMarketTickersUseCase
     
+    
+    // Publishing state
     @Published var state: State
+    
+    
+    // Sub ViewModel
+    let sortCompartorViewModels: [TickerSortSelectorViewModel]
+    
     
     var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
@@ -29,32 +36,31 @@ class AllMarketTickerViewModel: UDFObservableObject {
         
         self.webSocketManagementHelper = socketHelper
         self.allMarketTickersUseCase = useCase
+        self.sortCompartorViewModels = [
+            
+            TickerSortSelectorViewModel(
+                id: "symbol_sort",
+                title: "Symbol",
+                ascendingComparator: TickerSymbolAscendingComparator(),
+                descendingComparator: TickerSymbolDescendingComparator()
+            ),
+            
+            TickerSortSelectorViewModel(
+                id: "price_sort",
+                title: "Price($)",
+                ascendingComparator: TickerPriceAscendingComparator(),
+                descendingComparator: TickerPriceDescendingComparator()
+            ),
+            
+            TickerSortSelectorViewModel(
+                id: "24hchange_sort",
+                title: "24h Changes(%)",
+                ascendingComparator: Ticker24hChangeAscendingComparator(),
+                descendingComparator: Ticker24hChangeDescendingComparator()
+            )
+        ]
         
-        let initialState: State = .init(
-            sortCompartorViewModels: [
-                
-                TickerSortSelectorViewModel(
-                    id: "symbol_sort",
-                    title: "Symbol",
-                    ascendingComparator: TickerSymbolAscendingComparator(),
-                    descendingComparator: TickerSymbolDescendingComparator()
-                ),
-                
-                TickerSortSelectorViewModel(
-                    id: "price_sort",
-                    title: "Price($)",
-                    ascendingComparator: TickerPriceAscendingComparator(),
-                    descendingComparator: TickerPriceDescendingComparator()
-                ),
-                
-                TickerSortSelectorViewModel(
-                    id: "24hchange_sort",
-                    title: "24h Changes(%)",
-                    ascendingComparator: Ticker24hChangeAscendingComparator(),
-                    descendingComparator: Ticker24hChangeDescendingComparator()
-                )
-            ]
-        )
+        let initialState: State = .init()
         
         self._state = Published(initialValue: initialState)
         
@@ -64,7 +70,7 @@ class AllMarketTickerViewModel: UDFObservableObject {
         
         
         // Subscribe to sort selection events
-        subscribeToSortSelectionEvent(viewModels: state.sortCompartorViewModels)
+        subscribeToSortSelectionEvent()
         
         
         // Subscribe to data stream
@@ -102,9 +108,9 @@ class AllMarketTickerViewModel: UDFObservableObject {
         }
     }
     
-    private func subscribeToSortSelectionEvent(viewModels: [TickerSortSelectorViewModel]) {
+    private func subscribeToSortSelectionEvent() {
         
-        let tapObservables = state.sortCompartorViewModels.map { viewModel in
+        let tapObservables = sortCompartorViewModels.map { viewModel in
             
             // 정렬기준 버튼 선택 이벤트
             viewModel.tap
@@ -117,7 +123,7 @@ class AllMarketTickerViewModel: UDFObservableObject {
             .unretained(self)
             .sink { viewModel, comparator in
                 
-                viewModel.state.sortCompartorViewModels.forEach { sortViewModel in
+                viewModel.sortCompartorViewModels.forEach { sortViewModel in
                     
                     sortViewModel.action.send(.sortComparatorChangedOutside(
                         comparator: comparator
@@ -160,10 +166,9 @@ extension AllMarketTickerViewModel {
         
         // - 저장 프로퍼티
         var tickerList: [Twenty4HourTickerForSymbolVO] = []
-        var currentSortComparator: any TickerSortComparator = TickerNoneComparator()
         
-        public var tickerListCellViewModels: [TickerListCellViewModel] = []
-        public var sortCompartorViewModels: [TickerSortSelectorViewModel]
+        var currentSortComparator: any TickerSortComparator = TickerNoneComparator()
+        var tickerListCellViewModels: [TickerListCellViewModel] = []
         
         // - 연산 프로퍼티
         var isLoaded: Bool {
