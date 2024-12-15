@@ -37,8 +37,7 @@ func sortingTest() {
     }
     
     let initialState: AllMarketTickerViewModel.State = .init(
-        tickerList: testTickers,
-        sortCompartorViewModels: []
+        tickerList: testTickers
     )
     
     let testComparator = TestSortComparator()
