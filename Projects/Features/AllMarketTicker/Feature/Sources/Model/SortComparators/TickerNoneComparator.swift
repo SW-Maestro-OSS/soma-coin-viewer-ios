@@ -5,6 +5,8 @@
 //  Created by choijunios on 12/6/24.
 //
 
+import AllMarketTickerFeatureInterface
+
 struct TickerNoneComparator: TickerSortComparator {
     
     let id: String = .init(describing: TickerNoneComparator.self)
