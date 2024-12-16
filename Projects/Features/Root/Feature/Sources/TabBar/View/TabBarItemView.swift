@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TabBarItemView: View {
     
-    @Binding var tabItem: TabItem
+    let tabItem: TabItem
     
     var body: some View {
         

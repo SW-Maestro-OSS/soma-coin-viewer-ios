@@ -21,7 +21,6 @@ class TabBarViewModel: UDFObservableObject {
         
         // Initial state
         self.state = .init(
-            presentingPages: TabBarPage.orderedPages,
             tabItem: [
                 .allMarketTicker : .init(
                     titleText: "24hTicker",
@@ -36,18 +35,11 @@ class TabBarViewModel: UDFObservableObject {
         
         createStateStream()
     }
-    
-    func binding(page: TabBarPage) -> Binding<TabItem> {
-        
-        Binding { self.state.tabItem[page]! }
-        set: { _ in }
-    }
 }
 
 extension TabBarViewModel {
     
     struct State {
-        var presentingPages: [TabBarPage]
         var tabItem: [TabBarPage: TabItem]
     }
     

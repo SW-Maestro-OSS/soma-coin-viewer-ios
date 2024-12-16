@@ -15,7 +15,7 @@ import WebSocketManagementHelperInterface
 
 class RootViewModel: UDFObservableObject {
     
-    @Injected private var webSocketHelper: WebSocketManagementHelper
+    private var webSocketHelper: WebSocketManagementHelper
     
     
     // Public state interface
@@ -29,7 +29,9 @@ class RootViewModel: UDFObservableObject {
     var store: Set<AnyCancellable> = .init()
     
     
-    init() {
+    init(webSocketHelper: WebSocketManagementHelper) {
+        
+        self.webSocketHelper = webSocketHelper
         
         // Create state stream
         createStateStream()

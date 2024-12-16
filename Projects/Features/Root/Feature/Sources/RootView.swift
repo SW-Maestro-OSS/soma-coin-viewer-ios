@@ -11,10 +11,17 @@ import BaseFeatureInterface
 
 public struct RootView: View {
     
-    @StateObject private var viewModel: RootViewModel = .init()
+    @StateObject private var viewModel: RootViewModel
     
-    @ObservedObject var router: Router
-    @ViewBuilder var destinationView: (RootDestination) -> any View
+    @ObservedObject private var router: Router
+    
+    @ViewBuilder private var destinationView: (RootDestination) -> any View
+    
+    init(viewModel: RootViewModel, router: Router, destinationView: @escaping (RootDestination) -> any View) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+        self._router = ObservedObject(wrappedValue: router)
+        self.destinationView = destinationView
+    }
     
     public var body: some View {
         
@@ -32,6 +39,7 @@ public struct RootView: View {
                 .navigationDestination(for: RootDestination.self) { destination in
                     
                     AnyView(destinationView(destination))
+                        .navigationBarBackButtonHidden()
                 }
         }
     }

@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+import WebSocketManagementHelperInterface
 import BaseFeatureInterface
 import CoreUtil
 
@@ -16,21 +17,28 @@ enum RootDestination: Hashable {
     case coinDetailPage
 }
 
-public class RootCoordinator: Coordinator {
+public class RootCoordinator: Coordinator, CoordinatorFinishDelegate {
     
-    private let router: Router
+    // Dependency inject
+    @Injected private var webSocketHelper: WebSocketManagementHelper
+    @Injected private var router: Router
     
+    public var children: [any Coordinator] = []
     
-    public init(router: Router = .init()) {
-        self.router = router
-    }
-    
+    public init() { }
     
     public func start() -> RootView {
         
+        let viewModel: RootViewModel = .init(
+            webSocketHelper: webSocketHelper
+        )
+        
+        router.present(destination: RootDestination.mainTabBarPage)
+        
         return RootView(
+            viewModel: viewModel,
             router: router,
-            destinationView: present
+            destinationView: views
         )
     }
     
@@ -41,24 +49,39 @@ public class RootCoordinator: Coordinator {
 
 extension RootCoordinator {
     
-    @ViewBuilder
-    func present(destination: RootDestination) -> any View {
+    
+    func views(destination: RootDestination) -> any View {
         
         switch destination {
         case .mainTabBarPage:
             
             // start coordinator
+            let tabBarCoordinator = TabBarCoordinator()
+            tabBarCoordinator.delegate = self
+            children.append(tabBarCoordinator)
             
-            Text("mainTabBarPage")
+            return tabBarCoordinator.start()
+            
         case .coinDetailPage:
             
             // start coordinator
             
-            Text("coinDetailPage")
+            return Text("coinDetailPage")
         }
     }
 }
 
+
+// MARK: Coordinator
 extension RootCoordinator {
     public enum OutsideDestination { }
+}
+
+
+// MARK: CoordinatorFinishDelegate
+extension RootCoordinator {
+    
+    public func coordinator(finishedCoordinator: any Coordinator) {
+        
+    }
 }

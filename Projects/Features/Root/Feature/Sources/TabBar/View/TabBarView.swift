@@ -21,17 +21,16 @@ struct TabBarView: View {
         
         TabView {
             
-            ForEach($viewModel.state.presentingPages) { page in
+            ForEach(TabBarPage.orderedPages) { page in
                 
                 Tab {
                     
-                    AnyView(destinationView(page.wrappedValue))
+                    AnyView(destinationView(page))
                     
                 } label: {
                     
-                    TabBarItemView(tabItem: viewModel.binding(page: page.wrappedValue))
+                    TabBarItemView(tabItem: viewModel.state.tabItem[page]!)
                 }
-                
             }
         }
     }

@@ -13,6 +13,7 @@ public protocol Coordinator: AnyObject {
     associatedtype Content: View
     
     var present: ((OutsideDestination) -> ())? { get set }
+    var children: [any Coordinator] { get set }
     
     var delegate: CoordinatorFinishDelegate? { get set }
     
