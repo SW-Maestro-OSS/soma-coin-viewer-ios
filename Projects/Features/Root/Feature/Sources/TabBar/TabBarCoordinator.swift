@@ -35,9 +35,15 @@ extension TabBarCoordinator {
         
         switch page {
         case .allMarketTicker:
+            
+            // Coordinator
             Text("allMarketTicker")
+            
         case .setting:
+            
+            // Coordinator
             Text("setting")
+            
         }
     }
 }
