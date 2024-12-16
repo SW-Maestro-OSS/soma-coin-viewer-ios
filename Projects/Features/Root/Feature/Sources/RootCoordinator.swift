@@ -81,7 +81,13 @@ extension RootCoordinator {
 // MARK: CoordinatorFinishDelegate
 extension RootCoordinator {
     
-    public func coordinator(finishedCoordinator: any Coordinator) {
+    public func coordinator(finished coordinator: any Coordinator) {
+        
+        // Remove from children arr
+        if let index = children.firstIndex(where: { $0 === coordinator }) {
+            
+            self.children.remove(at: index)
+        }
         
     }
 }
