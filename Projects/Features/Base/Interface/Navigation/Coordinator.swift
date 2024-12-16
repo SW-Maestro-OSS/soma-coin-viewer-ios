@@ -22,5 +22,5 @@ public protocol Coordinator: AnyObject {
 
 public protocol CoordinatorFinishDelegate: AnyObject {
     
-    func coordinator(finishedCoordinator: any Coordinator)
+    func coordinator(finished coordinator: any Coordinator)
 }
