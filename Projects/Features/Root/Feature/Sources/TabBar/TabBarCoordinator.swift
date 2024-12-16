@@ -12,7 +12,7 @@ import BaseFeatureInterface
 class TabBarCoordinator: Coordinator {
     
     var present: ((OutsideDestination) -> ())?
-    typealias Content = TabBarView
+    var children: [any Coordinator] = []
     
     weak var delegate: CoordinatorFinishDelegate?
     
