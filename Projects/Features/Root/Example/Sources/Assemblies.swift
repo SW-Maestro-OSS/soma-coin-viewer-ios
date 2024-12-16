@@ -9,7 +9,6 @@ import RootFeatureTesting
 
 import BaseFeatureInterface
 import WebSocketManagementHelperInterface
-import BaseFeature
 
 import Swinject
 
