@@ -26,4 +26,19 @@ public struct PriceDTO : Decodable {
     public var tenDayExchangeFeeRate: String? // 10일환가료율 (TEN_DD_EFEE_R)
     public var kftcBaseExchangeRate: String?  // 서울외국환중개 매매기준율 (KFTC_DEAL_BAS_R)
     public var kftcBookPrice: String?         // 서울외국환중개 장부가격 (KFTC_BKPR)
+    
+    
+    enum CodingKeys: String, CodingKey {
+        case result
+        case currencyCode = "cur_unit"
+        case remittanceReceiveRate = "ttb"
+        case remittanceSendRate = "tts"
+        case baseExchangeRate = "deal_bas_r"
+        case bookPrice = "bkpr"
+        case annualExchangeFeeRate = "yy_efee_r"
+        case tenDayExchangeFeeRate = "ten_dd_efee_r"
+        case kftcBookPrice = "kftc_bkpr"
+        case kftcBaseExchangeRate = "kftc_deal_bas_r"
+        case currencyName = "cur_nm"
+    }
 }
