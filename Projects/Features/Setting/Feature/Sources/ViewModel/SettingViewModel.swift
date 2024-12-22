@@ -50,6 +50,7 @@ class SettingViewModel : UDFObservableObject {
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
         switch action {
         case .tap(let type) :
+            //I18N 모듈로 상태 전달 해야함. 근데 어떻게 하지..
             return Just(action).eraseToAnyPublisher()
         }
     }
