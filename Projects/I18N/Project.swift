@@ -34,6 +34,7 @@ let project = Project(
             sources: ["Concrete/**"],
             dependencies: [
                 .target(name: "I18NInterface"),
+                D.Domain.interface
             ]
         ),
         
@@ -45,7 +46,7 @@ let project = Project(
             bundleId: "com.CoinViewer.I18N.interface",
             sources: ["Interface/**"],
             dependencies: [
-                
+                D.Domain.interface
             ]
         ),
         

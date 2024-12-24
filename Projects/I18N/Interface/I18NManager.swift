@@ -6,12 +6,18 @@
 //
 
 import Foundation
+import DomainInterface
 
 protocol I18NManager {
-//    func getPriceUnit() -> String
-//    func getLanguage() -> String
-//    func getGride() -> Int
-//    func setPriceUnit()
-//    func setLanguage()
-//    func setGride()
+    //화페 타입 획득
+    func getCurrencyType() -> CurrencyType
+    
+    //화페 타입 설정
+    func setCurrencyType(type: CurrencyType)
+    
+    //언어 타입 획득
+    func getLanguageType() -> LanguageType
+    
+    //언어 타입 설정
+    func setLanguageType(type : LanguageType)
 }

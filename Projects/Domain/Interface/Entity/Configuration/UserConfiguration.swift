@@ -12,6 +12,7 @@ public enum UserConfiguration: String {
     
     case currency
     case gridType
+    case language
     
     public var defaultSavingValue: String {
         switch self {
@@ -19,6 +20,8 @@ public enum UserConfiguration: String {
             CurrencyType.dollar.savingValue
         case .gridType:
             GridType.list.savingValue
+        case .language:
+            LanguageType.korean.savingValue
         }
     }
     
@@ -39,8 +42,20 @@ public enum GridType: String {
 
 // MARK: Currency, 화폐 타입
 public enum CurrencyType: String {
+    //필요 화폐 타입 추가 가능
     case won="WON"
     case dollar="DOLLAR"
+    
+    public var savingValue: String {
+        self.rawValue
+    }
+}
+
+//MARK: Language, 언어 타입
+public enum LanguageType: String {
+    //필요 언어 추가 가능
+    case korean="KOR"
+    case english="ENG"
     
     public var savingValue: String {
         self.rawValue
