@@ -8,5 +8,5 @@
 import Combine
 
 public protocol PriceRepository {
-    func requestPrice(date : String) -> AnyPublisher<PriceVO, Never>
+    func getPrice() -> AnyPublisher<[PriceVO], Never>
 }

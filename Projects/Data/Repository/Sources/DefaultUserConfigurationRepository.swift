@@ -57,6 +57,37 @@ public class DefaultUserConfigurationRepository: UserConfigurationRepository {
     }
     
     
+    public func getLanguageType() -> LanguageType {
+        let config: UserConfiguration = .language
+        
+        if let memoryCached: String = checkMemoryCache(key: config.savingKey) {
+            // 캐싱된 정보를 먼저 확인합니다.
+            return .init(rawValue: memoryCached)!
+        }
+        
+        if let diskCached = userConfigurationService.getStringValue(key: config.savingKey) {
+            // 로컬에 저장된 정보를 확인합니다.
+            
+            // 정보를 메모리에 캐싱
+            caching(key: config.savingKey, value: diskCached)
+            
+            return .init(rawValue: diskCached)!
+        }
+        
+        return .init(rawValue: config.defaultSavingValue)!
+    }
+    
+    
+    public func setLanguageType(type: LanguageType) {
+        let config: UserConfiguration = .language
+        
+        // 디스크 저장
+        userConfigurationService.setConfiguration(key: config.savingKey, value: type.savingValue)
+        
+        // 메모리 저장
+        cachedConfiguration[config.savingKey] = type.savingValue
+    }
+    
     
     public func getGridType() -> GridType {
         let config: UserConfiguration = .gridType

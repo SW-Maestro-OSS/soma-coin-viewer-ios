@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 public protocol PriceService {
-    func getDollarPrice(date: String) -> AnyPublisher<PriceDTO, Never>
+    func getPrice(date : String) -> AnyPublisher<[PriceDTO], Never>
 }
 
 public class DefaultPriceService: PriceService {
@@ -19,9 +19,9 @@ public class DefaultPriceService: PriceService {
        
     public init() { }
     
-    public func getDollarPrice(date: String) -> AnyPublisher<PriceDTO, Never> {
+    public func getPrice(date : String) -> AnyPublisher<[PriceDTO], Never> {
         guard var components = URLComponents(string: baseURL) else {
-            return Just(PriceDTO(
+            return Just([PriceDTO(
                 result: .dataCodeError,
                 currencyCode: "",
                 currencyName: "",
@@ -33,7 +33,7 @@ public class DefaultPriceService: PriceService {
                 tenDayExchangeFeeRate: "",
                 kftcBaseExchangeRate: "",
                 kftcBookPrice: ""
-            ))
+            )])
             .eraseToAnyPublisher()
         }
         
@@ -44,7 +44,7 @@ public class DefaultPriceService: PriceService {
         ]
         
         guard let url = components.url else {
-            return Just(PriceDTO(
+            return Just([PriceDTO(
                 result: .dataCodeError,
                 currencyCode: "",
                 currencyName: "",
@@ -56,16 +56,23 @@ public class DefaultPriceService: PriceService {
                 tenDayExchangeFeeRate: "",
                 kftcBaseExchangeRate: "",
                 kftcBookPrice: ""
-            ))
+            )])
             .eraseToAnyPublisher()
         }
 
         return URLSession.shared.dataTaskPublisher(for: url)
             .map { $0.data }
             .decode(type: [PriceDTO].self, decoder: JSONDecoder())
-            .compactMap { $0.first { $0.currencyCode == "USD" } }
+            .flatMap { priceList -> AnyPublisher<[PriceDTO], Never> in
+                if let price = priceList.first {
+                    return Just(priceList).eraseToAnyPublisher()
+                } else {
+                    let previousDate = self.getPreviousData(date: date)
+                    return self.getPrice(date: previousDate)
+                }
+            }
             .catch { _ in
-                Just(PriceDTO(
+                Just([PriceDTO(
                     result: .dataCodeError,
                     currencyCode: "",
                     currencyName: "",
@@ -77,8 +84,16 @@ public class DefaultPriceService: PriceService {
                     tenDayExchangeFeeRate: "",
                     kftcBaseExchangeRate: "",
                     kftcBookPrice: ""
-                ))
+                )])
             }
             .eraseToAnyPublisher()
+    }
+    
+    private func getPreviousData(date : String) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMdd"
+        guard let currentDate = dateFormatter.date(from: date) else { return date }
+        let previousDate = Calendar.current.date(byAdding: .day, value: -1, to: currentDate)!
+        return dateFormatter.string(from: previousDate)
     }
 }

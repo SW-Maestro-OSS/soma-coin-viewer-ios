@@ -18,9 +18,19 @@ public class DefaultPriceRepository : PriceRepository {
     
     public init() { }
     
-    public func requestPrice(date : String) -> AnyPublisher<PriceVO, Never> {
-        return priceService.getDollarPrice(date: "")
-            .map { $0.toEntity() }
+    public func getPrice() -> AnyPublisher<[PriceVO], Never> {
+        let date = self.getDate()
+        return priceService.getPrice(date: date)
+            .map { priceDTO in
+                priceDTO.map{ $0.toEntity() }
+            }
             .eraseToAnyPublisher()
+    }
+    
+    private func getDate() -> String {
+        let dateFormatter = DateFormatter()
+        let date = Date()
+        dateFormatter.dateFormat = "yyyyMMdd"
+        return dateFormatter.string(from: date)
     }
 }

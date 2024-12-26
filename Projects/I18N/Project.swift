@@ -34,6 +34,7 @@ let project = Project(
             sources: ["Concrete/**"],
             dependencies: [
                 .target(name: "I18NInterface"),
+                D.Util.CoreUtil,
                 D.Domain.interface
             ]
         ),

@@ -8,10 +8,12 @@
 import Foundation
 
 public struct PriceVO {
+    public let currencyCode : String
     public let ttb : Double
     public let tts : Double
     
-    public init(ttb: Double, tts: Double) {
+    public init(currencyCode: String ,ttb: Double, tts: Double) {
+        self.currencyCode = currencyCode
         self.ttb = ttb
         self.tts = tts
     }

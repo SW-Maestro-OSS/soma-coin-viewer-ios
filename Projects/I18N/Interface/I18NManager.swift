@@ -8,7 +8,7 @@
 import Foundation
 import DomainInterface
 
-protocol I18NManager {
+public protocol I18NManager {
     //화페 타입 획득
     func getCurrencyType() -> CurrencyType
     
@@ -20,4 +20,16 @@ protocol I18NManager {
     
     //언어 타입 설정
     func setLanguageType(type : LanguageType)
+    
+    //그리드 타입 획득
+    func getGridType() -> GridType
+    
+    //그리드 타입 설정
+    func setGridType(type : GridType)
+    
+    //환율 정보 획득
+    func getExchangeRate(type : CurrencyType)
+    
+    //환율 정보 외부 API로 부터 설정
+    func setExchangeRate()
 }

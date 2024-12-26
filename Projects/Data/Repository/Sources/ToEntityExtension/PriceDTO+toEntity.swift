@@ -13,6 +13,7 @@ import DomainInterface
 extension PriceDTO {
     func toEntity() -> PriceVO {
         return .init(
+            currencyCode: currencyCode ?? "Error",
             ttb: Double(remittanceReceiveRate ?? "-1.0") ?? 0.0,
             tts: Double(remittanceSendRate ?? "-1.0") ?? 0.0
         )
