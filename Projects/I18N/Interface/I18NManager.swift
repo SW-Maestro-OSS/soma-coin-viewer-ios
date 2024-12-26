@@ -28,7 +28,7 @@ public protocol I18NManager {
     func setGridType(type : GridType)
     
     //환율 정보 획득
-    func getExchangeRate(type : CurrencyType)
+    func getExchangeRate(type : CurrencyType) -> PriceVO
     
     //환율 정보 외부 API로 부터 설정
     func setExchangeRate()

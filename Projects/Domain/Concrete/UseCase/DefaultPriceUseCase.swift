@@ -11,18 +11,50 @@ import Combine
 import DomainInterface
 import CoreUtil
 
+import SwiftStructures
+
 public class DefaultPriceUseCase : PriceUseCase {
     
     @Injected private var repository: PriceRepository
     
+    // Cache configuration
+    private let cachedConfiguration: LockedDictionary<String, Any> = .init()
+    private var store: Set<AnyCancellable> = []
+    
     public init() { }
     
-    public func getPrice(currency: String) -> AnyPublisher<PriceVO, Never> {
-        return repository.getPrice()
-            .map { priceVO in
-                let filteredPriceVO = priceVO.filter { $0.currencyCode == currency}
-                return filteredPriceVO.first ?? PriceVO(currencyCode: "ErrorPrice", ttb: -1, tts: -1)
+    public func getPrice(currency: String) -> PriceVO {
+        if let cachedPrices = getCachedPriceVOList(key: "currencyPrices"),
+                   let cachedPrice = cachedPrices.first(where: { $0.currencyCode == currency }) {
+            return cachedPrice
+        }
+                
+        return PriceVO(currencyCode: "ErrorPrice", ttb: -1, tts: -1)
+    }
+    
+    public func setPrice() {
+        repository.getPrice()
+            .map { priceVOList in
+                self.caching(key: "currencyPrices", value: priceVOList)
             }
-            .eraseToAnyPublisher()
+            .sink { _ in } 
+            .store(in: &store)
+    }
+    
+    // MARK: check cache
+    private func checkMemoryCache<T>(key: String) -> T? {
+        cachedConfiguration[key] as? T
+    }
+    
+    private func caching(key: String, value: Any) {
+        
+        DispatchQueue.global().async { [weak self] in
+            // 정보를 메모리에 캐싱
+            self?.cachedConfiguration[key] = value
+        }
+    }
+    
+    private func getCachedPriceVOList(key: String) -> [PriceVO]? {
+        cachedConfiguration[key] as? [PriceVO]
     }
 }

@@ -8,5 +8,6 @@
 import Combine
 
 public protocol PriceUseCase {
-    func getPrice(currency : String) -> AnyPublisher<PriceVO, Never>
+    func getPrice(currency : String) -> PriceVO
+    func setPrice()
 }

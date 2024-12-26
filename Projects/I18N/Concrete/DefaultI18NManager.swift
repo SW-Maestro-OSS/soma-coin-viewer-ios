@@ -14,6 +14,7 @@ import CoreUtil
 public class DefaultI18NManger : I18NManager {
     
     @Injected private var repository : UserConfigurationRepository
+    @Injected private var usecase : PriceUseCase
     
     public func getCurrencyType() -> CurrencyType {
         return repository.getCurrencyType()
@@ -39,11 +40,11 @@ public class DefaultI18NManger : I18NManager {
         repository.setGrideType(type: type)
     }
     
-    public func getExchangeRate(type: CurrencyType) {
-        
+    public func getExchangeRate(type: CurrencyType) -> PriceVO {
+        return usecase.getPrice(currency: type.savingValue)
     }
     
     public func setExchangeRate() {
-        
+        usecase.setPrice()
     }
 }

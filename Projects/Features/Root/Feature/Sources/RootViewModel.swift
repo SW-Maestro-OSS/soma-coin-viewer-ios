@@ -11,11 +11,13 @@ import Combine
 import BaseFeatureInterface
 
 import CoreUtil
+import I18NInterface
 import WebSocketManagementHelperInterface
 
 class RootViewModel: UDFObservableObject {
     
     @Injected private var webSocketHelper: WebSocketManagementHelper
+    @Injected private var i18NManager : I18NManager
     
     
     // Public state interface
@@ -36,7 +38,10 @@ class RootViewModel: UDFObservableObject {
         
         // Subscribe to notifications
         setAppLifeCycleNotification()
+        
+        i18NManager.setExchangeRate()
     }
+    
     
     
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
