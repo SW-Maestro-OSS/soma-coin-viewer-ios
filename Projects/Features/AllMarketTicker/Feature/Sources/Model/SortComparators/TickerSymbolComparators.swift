@@ -5,6 +5,7 @@
 //  Created by choijunios on 12/6/24.
 //
 
+import AllMarketTickerFeatureInterface
 import DomainInterface
 
 // MARK: Symbol

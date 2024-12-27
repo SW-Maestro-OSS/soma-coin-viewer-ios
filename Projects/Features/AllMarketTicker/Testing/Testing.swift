@@ -6,10 +6,9 @@
 import Foundation
 import Combine
 
+import AllMarketTickerFeatureInterface
 import WebSocketManagementHelperInterface
 import DomainInterface
-
-@testable import AllMarketTickerFeature
 
 struct TestSortComparator: TickerSortComparator {
     

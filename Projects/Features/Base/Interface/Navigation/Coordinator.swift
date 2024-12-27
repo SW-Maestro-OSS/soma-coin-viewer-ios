@@ -13,6 +13,7 @@ public protocol Coordinator: AnyObject {
     associatedtype Content: View
     
     var present: ((OutsideDestination) -> ())? { get set }
+    var children: [any Coordinator] { get set }
     
     var delegate: CoordinatorFinishDelegate? { get set }
     
@@ -21,5 +22,5 @@ public protocol Coordinator: AnyObject {
 
 public protocol CoordinatorFinishDelegate: AnyObject {
     
-    func coordinator(finishedCoordinator: any Coordinator)
+    func coordinator(finished coordinator: any Coordinator)
 }

@@ -2,12 +2,12 @@
 //  TickerSortComparator.swift
 //  AllMarketTickerModule
 //
-//  Created by choijunios on 12/5/24.
+//  Created by choijunios on 12/15/24.
 //
 
 import DomainInterface
 
-protocol TickerSortComparator {
+public protocol TickerSortComparator {
     
     typealias TickerVO = Twenty4HourTickerForSymbolVO
     
