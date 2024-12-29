@@ -41,6 +41,19 @@ let project = Project(
                 .target(name: "BaseFeatureTesting"),
             ]
         ),
+        
+        
+        // Testing
+        .target(
+            name: "BaseFeatureTesting",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.choijunios.feature.Base.testing",
+            sources: ["Testing/**"],
+            dependencies: [
+                .target(name: "BaseFeature"),
+            ]
+        ),
 
 
         // Feature
@@ -50,39 +63,13 @@ let project = Project(
             product: .framework,
             bundleId: "com.choijunios.feature.Base",
             sources: ["Feature/Sources/**"],
-            resources: ["Feature/Resources/**"],
             dependencies: [
-                .target(name: "BaseFeatureInterface"),
                 
                 D.Util.PresentationUtil,
-            ]
-        ),
-
-
-        // Testing
-        .target(
-            name: "BaseFeatureTesting",
-            destinations: .iOS,
-            product: .framework,
-            bundleId: "com.choijunios.feature.Base.testing",
-            sources: ["Testing/**"],
-            dependencies: [
-                .target(name: "BaseFeatureInterface"),
-            ]
-        ),
-
-
-        // FeatureInterface
-        .target(
-            name: "BaseFeatureInterface",
-            destinations: .iOS,
-            product: .framework,
-            bundleId: "com.choijunios.feature.Base.interface",
-            sources: ["Interface/**"],
-            dependencies: [
                 
                 D.Shared.CommonUI,
                 D.Shared.WebSocketManagementHelperInterface,
+                
                 D.Domain.interface,
             ]
         ),

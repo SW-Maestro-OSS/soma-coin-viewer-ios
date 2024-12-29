@@ -26,18 +26,16 @@ public enum ModuleDependency {
     }
     
     public enum Feature {
-        public static let AllMarketTickerFeatureInterface: TargetDependency = .project(target: "AllMarketTickerFeatureInterface", path: .relativeToRoot("Projects/Features/AllMarketTicker"))
+        
         public static let AllMarketTickerFeature: TargetDependency = .project(target: "AllMarketTickerFeature", path: .relativeToRoot("Projects/Features/AllMarketTicker"))
         
-        
-        public static let BaseFeatureInterface: TargetDependency = .project(target: "BaseFeatureInterface", path: .relativeToRoot("Projects/Features/Base"))
+    
         public static let BaseFeature: TargetDependency = .project(target: "BaseFeature", path: .relativeToRoot("Projects/Features/Base"))
         
         
-        public static let RootFeatureInterface: TargetDependency = .project(target: "RootFeatureInterface", path: .relativeToRoot("Projects/Features/Root"))
         public static let RootFeature: TargetDependency = .project(target: "RootFeature", path: .relativeToRoot("Projects/Features/Root"))
         
-        public static let SettingFeatureInterface: TargetDependency = .project(target: "SettingFeatureInterface", path: .relativeToRoot("Projects/Features/Setting"))
+        
         public static let SettingFeature: TargetDependency = .project(target: "SettingFeature", path: .relativeToRoot("Projects/Features/Setting"))
     }
     

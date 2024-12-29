@@ -41,6 +41,19 @@ let project = Project(
                 .target(name: "RootFeatureTesting"),
             ]
         ),
+        
+        
+        // Testing
+        .target(
+            name: "RootFeatureTesting",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.choijunios.feature.Root.testing",
+            sources: ["Testing/**"],
+            dependencies: [
+                .target(name: "RootFeature"),
+            ]
+        ),
 
 
         // Feature
@@ -52,39 +65,11 @@ let project = Project(
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
             dependencies: [
-                .target(name: "RootFeatureInterface"),
+                
+                D.Feature.AllMarketTickerFeature,
+                D.Feature.SettingFeature,
                 
                 D.Util.PresentationUtil,
-            ]
-        ),
-
-
-        // Testing
-        .target(
-            name: "RootFeatureTesting",
-            destinations: .iOS,
-            product: .framework,
-            bundleId: "com.choijunios.feature.Root.testing",
-            sources: ["Testing/**"],
-            dependencies: [
-                .target(name: "RootFeatureInterface"),
-            ]
-        ),
-
-
-        // FeatureInterface
-        .target(
-            name: "RootFeatureInterface",
-            destinations: .iOS,
-            product: .framework,
-            bundleId: "com.choijunios.feature.Root.interface",
-            sources: ["Interface/**"],
-            dependencies: [
-                
-                D.Feature.AllMarketTickerFeatureInterface,
-                D.Feature.SettingFeatureInterface,
-                
-                D.Shared.WebSocketManagementHelperInterface,
             ]
         ),
     ]

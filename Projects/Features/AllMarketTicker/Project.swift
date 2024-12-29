@@ -23,13 +23,16 @@ let project = Project(
             sources: ["Example/Sources/**"],
             resources: ["Example/Resources/**"],
             dependencies: [
+                
                 .target(name: "AllMarketTickerFeature"),
                 .target(name: "AllMarketTickerFeatureTesting"),
                 
                 // Implements for demo app
                 D.Shared.WebSocketManagementHelper,
+                
                 D.Data.dataSource,
                 D.Data.repository,
+                
                 D.Domain.concrete,
             ]
         ),
@@ -48,6 +51,19 @@ let project = Project(
             ]
         ),
 
+        
+        // Testing
+        .target(
+            name: "AllMarketTickerFeatureTesting",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.choijunios.feature.AllMarketTicker.testing",
+            sources: ["Testing/**"],
+            dependencies: [
+                .target(name: "AllMarketTickerFeature"),
+            ]
+        ),
+        
 
         // Feature
         .target(
@@ -58,37 +74,12 @@ let project = Project(
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
             dependencies: [
-                .target(name: "AllMarketTickerFeatureInterface"),
+                
+                D.Feature.BaseFeature,
                 
                 D.ThirdParty.SimpleImageProvider,
-                D.Shared.CommonUI,
-            ]
-        ),
-
-
-        // Testing
-        .target(
-            name: "AllMarketTickerFeatureTesting",
-            destinations: .iOS,
-            product: .framework,
-            bundleId: "com.choijunios.feature.AllMarketTicker.testing",
-            sources: ["Testing/**"],
-            dependencies: [
-                .target(name: "AllMarketTickerFeatureInterface"),
-            ]
-        ),
-
-
-        // FeatureInterface
-        .target(
-            name: "AllMarketTickerFeatureInterface",
-            destinations: .iOS,
-            product: .framework,
-            bundleId: "com.choijunios.feature.AllMarketTicker.interface",
-            sources: ["Interface/**"],
-            dependencies: [
                 
-                D.Feature.BaseFeatureInterface,
+                D.Shared.CommonUI,
             ]
         ),
     ]

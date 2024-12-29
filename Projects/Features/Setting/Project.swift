@@ -80,7 +80,7 @@ let project = Project(
             sources: ["Interface/**"],
             dependencies: [
                 
-                D.Feature.BaseFeatureInterface,
+//                D.Feature.BaseFeatureInterface,
             ]
         ),
     ]
