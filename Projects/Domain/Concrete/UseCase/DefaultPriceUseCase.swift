@@ -19,7 +19,6 @@ public class DefaultPriceUseCase : PriceUseCase {
     
     // Cache configuration
     private let cachedConfiguration: LockedDictionary<String, Any> = .init()
-    private var store: Set<AnyCancellable> = []
     
     public init() { }
     
@@ -32,13 +31,17 @@ public class DefaultPriceUseCase : PriceUseCase {
         return PriceVO(currencyCode: "ErrorPrice", ttb: -1, tts: -1)
     }
     
-    public func setPrice() {
+    public func setPrice() -> AnyPublisher<PriceState, Never> {
         repository.getPrice()
-            .map { priceVOList in
-                self.caching(key: "currencyPrices", value: priceVOList)
+            .map { priceVOList -> PriceState in
+                if priceVOList.isEmpty {
+                    return .failed
+                } else {
+                    self.caching(key: "currencyPrices", value: priceVOList)
+                    return .complete
+                }
             }
-            .sink { _ in } 
-            .store(in: &store)
+            .eraseToAnyPublisher()
     }
     
     // MARK: check cache

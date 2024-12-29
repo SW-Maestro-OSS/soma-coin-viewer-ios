@@ -9,5 +9,11 @@ import Combine
 
 public protocol PriceUseCase {
     func getPrice(currency : String) -> PriceVO
-    func setPrice()
+    func setPrice() -> AnyPublisher<PriceState, Never>
+}
+
+public enum PriceState {
+    case complete
+    case ready
+    case failed
 }

@@ -16,6 +16,15 @@ public class DefaultI18NManger : I18NManager {
     @Injected private var repository : UserConfigurationRepository
     @Injected private var usecase : PriceUseCase
     
+    //I18N 상태정보
+    private let priceStateSubject  = PassthroughSubject<PriceState, Never>()
+    
+    public var state : AnyPublisher<PriceState, Never> {
+        priceStateSubject.eraseToAnyPublisher()
+    }
+    
+    private var store: Set<AnyCancellable> = .init()
+    
     public func getCurrencyType() -> CurrencyType {
         return repository.getCurrencyType()
     }
@@ -46,5 +55,13 @@ public class DefaultI18NManger : I18NManager {
     
     public func setExchangeRate() {
         usecase.setPrice()
+            .sink { [weak self] priceState in
+                if priceState == .failed {
+                    self?.priceStateSubject.send(.failed)
+                } else {
+                    self?.priceStateSubject.send(.complete)
+                }
+            }
+            .store(in: &store)
     }
 }
