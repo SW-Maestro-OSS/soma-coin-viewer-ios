@@ -33,7 +33,7 @@ public class DefaultPriceUseCase : PriceUseCase {
     
     public func setPrice() -> AnyPublisher<PriceState, Never> {
         repository.getPrice()
-            .map { priceVOList -> PriceState in
+            .map { priceVOList in
                 if priceVOList.isEmpty {
                     return .failed
                 } else {
