@@ -5,7 +5,7 @@
 
 import Testing
 
-@testable import AllMarketTickerFeatureTesting
+import AllMarketTickerFeatureTesting
 @testable import AllMarketTickerFeature
 
 import DomainInterface

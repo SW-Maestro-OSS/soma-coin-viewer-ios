@@ -29,6 +29,7 @@ let project = Project(
                 
                 // Implements for demo app
                 D.Shared.WebSocketManagementHelper,
+                D.Shared.WebSocketManagementHelperInterface,
                 
                 D.Data.dataSource,
                 D.Data.repository,

@@ -41,3 +41,10 @@ struct SymbolImageView: View {
         
     }
 }
+
+
+#Preview {
+    SymbolImageView(
+        imageURL: .constant("plus")
+    )
+}
