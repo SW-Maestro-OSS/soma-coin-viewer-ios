@@ -19,5 +19,9 @@ class DomainAssembly: Assembly {
         container.register(AllMarketTickersUseCase.self) { _ in
             DefaultAllMarketTickersUseCase()
         }
+        
+        container.register(PriceUseCase.self) { _ in
+            DefaultPriceUseCase()
+        }
     }
 }

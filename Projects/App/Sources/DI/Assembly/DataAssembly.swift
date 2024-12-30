@@ -34,6 +34,10 @@ public class DataAssembly: Assembly {
         }
         .inObjectScope(.container)
         
+        container.register(PriceService.self) { _ in
+            DefaultPriceService()
+        }
+        
         
         // MARK: Repository
         container.register(UserConfigurationRepository.self) { _ in
@@ -44,5 +48,10 @@ public class DataAssembly: Assembly {
         container.register(AllMarketTickersRepository.self) { _ in
             BinanceAllMarketTickersRepository()
         }
+        
+        container.register(PriceRepository.self) { _ in
+            DefaultPriceRepository()
+        }
+        
     }
 }
