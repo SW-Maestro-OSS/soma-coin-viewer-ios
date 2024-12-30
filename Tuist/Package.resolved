@@ -1,15 +1,6 @@
 {
   "pins" : [
     {
-      "identity" : "kingfisher",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/onevcat/Kingfisher.git",
-      "state" : {
-        "revision" : "b6256f191b4c1d8d09f4df94bae69e5ac6e42c81",
-        "version" : "8.1.1"
-      }
-    },
-    {
       "identity" : "simpleimageprovider",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/J0onYEong/SimpleImageProvider.git",

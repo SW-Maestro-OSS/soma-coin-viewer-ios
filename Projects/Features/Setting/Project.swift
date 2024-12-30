@@ -25,6 +25,9 @@ let project = Project(
             dependencies: [
                 .target(name: "SettingFeature"),
                 .target(name: "SettingFeatureTesting"),
+                D.Data.dataSource,
+                D.Data.repository,
+                D.Domain.concrete,
             ]
         ),
 
@@ -42,7 +45,7 @@ let project = Project(
             ]
         ),
         
-        
+      
         // Testing
         .target(
             name: "SettingFeatureTesting",
