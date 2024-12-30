@@ -44,6 +44,19 @@ let project = Project(
                 .target(name: "SettingFeatureTesting"),
             ]
         ),
+        
+      
+        // Testing
+        .target(
+            name: "SettingFeatureTesting",
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "com.choijunios.feature.Setting.testing",
+            sources: ["Testing/**"],
+            dependencies: [
+                .target(name: "SettingFeature"),
+            ]
+        ),
 
 
         // Feature
@@ -56,35 +69,6 @@ let project = Project(
             resources: ["Feature/Resources/**"],
             dependencies: [
                 
-                .target(name: "SettingFeatureInterface"),
-                D.Shared.CommonUI
-            ]
-        ),
-
-
-        // Testing
-        .target(
-            name: "SettingFeatureTesting",
-            destinations: .iOS,
-            product: .framework,
-            bundleId: "com.choijunios.feature.Setting.testing",
-            sources: ["Testing/**"],
-            dependencies: [
-                .target(name: "SettingFeatureInterface"),
-            ]
-        ),
-
-
-        // FeatureInterface
-        .target(
-            name: "SettingFeatureInterface",
-            destinations: .iOS,
-            product: .framework,
-            bundleId: "com.choijunios.feature.Setting.interface",
-            sources: ["Interface/**"],
-            dependencies: [
-                
-                D.Feature.BaseFeatureInterface,
             ]
         ),
     ]

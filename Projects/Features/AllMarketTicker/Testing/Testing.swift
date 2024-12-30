@@ -6,44 +6,54 @@
 import Foundation
 import Combine
 
-import AllMarketTickerFeatureInterface
+import AllMarketTickerFeature
+
 import WebSocketManagementHelperInterface
 import DomainInterface
 
-struct TestSortComparator: TickerSortComparator {
+public struct TestSortComparator: TickerSortComparator {
     
-    var id: String = "test-comparator"
+    public var id: String
     
-    func compare(lhs: TickerVO, rhs: TickerVO) -> Bool {
+    public init(id: String = "test-comparator") {
+        self.id = id
+    }
+    
+    public func compare(lhs: TickerVO, rhs: TickerVO) -> Bool {
         
         lhs.price < rhs.price
     }
 }
 
-class MockAllMarketTickersUseCase: AllMarketTickersUseCase {
-    func requestTickers() -> AnyPublisher<[DomainInterface.Twenty4HourTickerForSymbolVO], Never> {
+public class MockAllMarketTickersUseCase: AllMarketTickersUseCase {
+    
+    public init() { }
+    
+    public func requestTickers() -> AnyPublisher<[DomainInterface.Twenty4HourTickerForSymbolVO], Never> {
         
         Just([]).eraseToAnyPublisher()
     }
 }
 
-class MockWebSocketHelper: WebSocketManagementHelper {
+public class MockWebSocketHelper: WebSocketManagementHelper {
     
-    var isWebSocketConnected: AnyPublisher<Bool, Never> = Just(false).eraseToAnyPublisher()
+    public init() { }
     
-    func requestSubscribeToStream(streams: [String]) {
+    public var isWebSocketConnected: AnyPublisher<Bool, Never> = Just(false).eraseToAnyPublisher()
+    
+    public func requestSubscribeToStream(streams: [String]) {
         
     }
     
-    func requestUnsubscribeToStream(streams: [String]) {
+    public func requestUnsubscribeToStream(streams: [String]) {
         
     }
     
-    func requestDisconnection() {
+    public func requestDisconnection() {
         
     }
     
-    func requestConnection(connectionType: WebSocketManagementHelperInterface.ConnectionType) {
+    public func requestConnection(connectionType: WebSocketManagementHelperInterface.ConnectionType) {
         
     }
 }

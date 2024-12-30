@@ -2,7 +2,7 @@
 //  TickerSortComparator.swift
 //  AllMarketTickerModule
 //
-//  Created by choijunios on 12/15/24.
+//  Created by choijunios on 12/29/24.
 //
 
 import DomainInterface
