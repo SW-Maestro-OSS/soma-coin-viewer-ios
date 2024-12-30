@@ -8,8 +8,8 @@
 import SwiftUI
 import Combine
 
-import AllMarketTickerFeatureInterface
-import BaseFeatureInterface
+import BaseFeature
+
 import WebSocketManagementHelperInterface
 import DomainInterface
 import CoreUtil

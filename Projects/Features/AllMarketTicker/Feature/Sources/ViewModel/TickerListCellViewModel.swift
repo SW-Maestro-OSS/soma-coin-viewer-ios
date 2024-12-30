@@ -8,8 +8,9 @@
 import SwiftUI
 import Combine
 
+import BaseFeature
+
 import DomainInterface
-import BaseFeatureInterface
 import CoreUtil
 
 import SimpleImageProvider

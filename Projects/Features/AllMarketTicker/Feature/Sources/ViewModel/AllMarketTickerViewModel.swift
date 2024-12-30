@@ -8,7 +8,8 @@
 import SwiftUI
 import Combine
 
-import BaseFeatureInterface
+import BaseFeature
+
 import WebSocketManagementHelperInterface
 import DomainInterface
 import CoreUtil
