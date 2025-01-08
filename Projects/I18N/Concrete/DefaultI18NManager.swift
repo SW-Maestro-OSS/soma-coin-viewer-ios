@@ -11,7 +11,7 @@ import I18NInterface
 import DomainInterface
 import CoreUtil
 
-public class DefaultI18NManger : I18NManager {
+public class DefaultI18NManager : I18NManager {
     
     @Injected private var repository : UserConfigurationRepository
     @Injected private var usecase : PriceUseCase
@@ -24,6 +24,8 @@ public class DefaultI18NManger : I18NManager {
     }
     
     private var store: Set<AnyCancellable> = .init()
+    
+    public init() { }
     
     public func getCurrencyType() -> CurrencyType {
         return repository.getCurrencyType()

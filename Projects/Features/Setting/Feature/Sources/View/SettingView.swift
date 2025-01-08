@@ -88,6 +88,7 @@ struct SettingView : View {
                 Spacer()
                 
                 VStack {
+                    //TODO: toggle Bind를 어떤 식으로 변경 할 것인지 관리할 필요가 있음
                     Toggle("",isOn : Binding(
                         get: {viewModel.state.gride},
                         set: { _ in viewModel.action.send(.tap(.gride))}
@@ -101,7 +102,7 @@ struct SettingView : View {
         }
     }
 }
-
+//
 //struct SettingView_Previews: PreviewProvider {
 //    static var previews: some View {
 //        SettingView(viewModel: SettingViewModel())

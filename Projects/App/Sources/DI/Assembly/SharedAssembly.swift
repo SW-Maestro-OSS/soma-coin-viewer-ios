@@ -7,6 +7,7 @@
 
 import WebSocketManagementHelper
 import WebSocketManagementHelperInterface
+import I18NInterface
 
 import Swinject
 
@@ -18,6 +19,12 @@ public class SharedAssembly: Assembly {
         container.register(WebSocketManagementHelper.self) { _ in
             
             DefaultWebSocketManagementHelper()
+        }
+        .inObjectScope(.container)
+        
+        //MARK: I18NManager
+        container.register(I18NManager.self) { _ in
+            DefaultI18NManager()
         }
         .inObjectScope(.container)
     }

@@ -68,7 +68,9 @@ let project = Project(
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
             dependencies: [
+                D.Feature.BaseFeature,
                 
+                D.Shared.CommonUI
             ]
         ),
     ]

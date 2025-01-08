@@ -6,4 +6,9 @@
 //
 
 import SwiftUI
+import CommonUI
 
+struct SettingCellViewTests : View {
+    
+    @ObservableObject private var viewModel
+}

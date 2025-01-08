@@ -10,11 +10,12 @@ import Combine
 
 import BaseFeatureInterface
 import DomainInterface
+import I18NInterface
 
 
-class SettingViewModel : UDFObservableObject {
+class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
     //Service Locator
-    
+    private var i18NManager :I18NManager
     
     //Publishing State
     @Published var state : State
@@ -75,5 +76,12 @@ extension SettingViewModel {
         case priceUnit
         case language
         case gride
+    }
+}
+
+//MARK: SettingDelegate
+extension SettingViewModel {
+    func updateSetting() {
+        // 선택된 기준을 I18NManager 통해 전달
     }
 }
