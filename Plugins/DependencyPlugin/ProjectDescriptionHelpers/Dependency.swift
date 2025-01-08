@@ -52,6 +52,10 @@ public enum ModuleDependency {
         
         public static let PresentationUtil: TargetDependency = .project(target: "PresentationUtil", path: .relativeToRoot("Projects/Utils/PresentationUtil"))
     }
+    
+    public enum I18N {
+        public static let I18N: TargetDependency = .project(target: "I18N", path: .relativeToRoot("Projects/I18N"))
+    }
 }
 
 // External dependencies

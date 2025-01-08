@@ -11,11 +11,11 @@ import Combine
 import BaseFeatureInterface
 import DomainInterface
 import I18NInterface
-
+import CoreUtil
 
 class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
     //Service Locator
-    private var i18NManager :I18NManager
+    @Injected var i18NManager :I18NManager
     
     //Publishing State
     @Published var state : State
@@ -81,7 +81,9 @@ extension SettingViewModel {
 
 //MARK: SettingDelegate
 extension SettingViewModel {
-    func updateSetting() {
+    func updateSetting(settingType : String) {
         // 선택된 기준을 I18NManager 통해 전달
+        //action으로 전달하고 이를 state에 저장 -> state를 string이나 다른 값으로 변경 필요
+        //TODO: 처음 정렬 기준을 하위 viewModel에 전달할 필요 있음
     }
 }

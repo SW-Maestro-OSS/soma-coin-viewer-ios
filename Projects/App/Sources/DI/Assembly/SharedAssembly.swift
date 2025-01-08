@@ -10,6 +10,7 @@ import WebSocketManagementHelperInterface
 import I18NInterface
 
 import Swinject
+import I18N
 
 public class SharedAssembly: Assembly {
     
