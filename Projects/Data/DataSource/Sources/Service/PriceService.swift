@@ -64,7 +64,7 @@ public class DefaultPriceService: PriceService {
             .map { $0.data }
             .decode(type: [PriceDTO].self, decoder: JSONDecoder())
             .flatMap { priceList -> AnyPublisher<[PriceDTO], Never> in
-                if let price = priceList.first {
+                if priceList.first != nil {
                     return Just(priceList).eraseToAnyPublisher()
                 } else {
                     let previousDate = self.getPreviousData(date: date)
@@ -72,7 +72,7 @@ public class DefaultPriceService: PriceService {
                 }
             }
             .catch { _ in
-                Just([PriceDTO(
+                return Just([PriceDTO(
                     result: .dataCodeError,
                     currencyCode: "",
                     currencyName: "",

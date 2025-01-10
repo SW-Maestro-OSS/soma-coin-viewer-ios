@@ -6,5 +6,5 @@
 //
 
 protocol SettingViewModelDelegate: AnyObject {
-    func updateSetting(settingType : String, settingValue : String)
+    func updateSetting(cellType : CellType)
 }

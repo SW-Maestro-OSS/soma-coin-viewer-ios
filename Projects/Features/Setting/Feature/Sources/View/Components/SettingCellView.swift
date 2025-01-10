@@ -32,14 +32,19 @@ struct SettingCellView : View {
             
             Spacer()
             
-            VStack {
+            VStack (alignment : .trailing) {
                 CVText(text: $viewModel.state.option)
                     .font(.body)
                     .foregroundColor(.gray)
                 
-                Toggle("",isOn : $viewModel.state.isSelected)
-                .labelsHidden()
-                .toggleStyle(SwitchToggleStyle(tint: .gray))
+                HStack {
+                    Toggle("",isOn : $viewModel.state.isSelected)
+                        .labelsHidden()
+                        .toggleStyle(SwitchToggleStyle(tint: .gray))
+                    
+                    Spacer()
+                        .frame(width : 16)
+                }
             }
             
             Spacer().frame(width : 16)

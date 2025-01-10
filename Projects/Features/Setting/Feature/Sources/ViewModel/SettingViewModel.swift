@@ -30,6 +30,8 @@ class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
         self.state.languageType = i18NManager.getLanguageType()
         self.state.gridType = i18NManager.getGridType()
         self.state.settingCellViewModel = createSettingCellViewModels()
+        
+        i18NManager.setExchangeRate()
     }
     
     //Action 처리
@@ -55,7 +57,6 @@ class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
         switch action {
         case .tap(_) :
-            //I18N 모듈로 상태 전달 해야함. 근데 어떻게 하지..
             return Just(action).eraseToAnyPublisher()
         }
     }
@@ -86,20 +87,15 @@ extension SettingViewModel {
 
 //MARK: SettingDelegate
 extension SettingViewModel {
-    func updateSetting(settingType : String, settingValue : String) {
-        // 선택된 기준을 I18NManager 통해 전달
-        //action으로 전달하고 이를 state에 저장 -> state를 string이나 다른 값으로 변경 필요
-        //TODO: 처음 정렬 기준을 하위 viewModel에 전달할 필요 있음
-        if settingType == "currencyType" {
-            let currencyType = CurrencyType(rawValue: settingValue)!
+    func updateSetting(cellType : CellType) {
+        switch cellType {
+        case .currencyType(let currencyType):
             i18NManager.setCurrencyType(type: currencyType)
             action.send(.tap(.currency))
-        } else if settingType == "languageType" {
-            let languageType = LanguageType(rawValue: settingValue)!
+        case .languageType(let languageType):
             i18NManager.setLanguageType(type: languageType)
             action.send(.tap(.language))
-        } else if settingType == "gridType" {
-            let gridType = GridType(rawValue: settingValue)!
+        case .gridType(let gridType):
             i18NManager.setGridType(type: gridType)
             action.send(.tap(.grid))
         }
@@ -109,10 +105,14 @@ extension SettingViewModel {
 extension SettingViewModel {
     func createSettingCellViewModels() -> [SettingCellViewModel] {
         let viewModels = [
-            SettingCellViewModel(type: "currencyType", title: "Price Currency Unit", cellValue: CellType.currencyType(state.currencyType), option: "Dollar | Won", isSelected: state.currencyType == .dollar),
-            SettingCellViewModel(type: "languageType", title: "Language", cellValue: CellType.languageType(state.languageType), option: "English | Korean", isSelected: state.languageType == .english),
-            SettingCellViewModel(type: "gridType", title: "Show symbols with 2x2 grid", cellValue: CellType.gridType(state.gridType), option: "2x2 | List", isSelected: state.gridType == .twoByTwo)
+            SettingCellViewModel(title: "Price Currency Unit", cellValue: CellType.currencyType(state.currencyType), option: "Dollar | Won", isSelected: state.currencyType == .dollar),
+            SettingCellViewModel(title: "Language", cellValue: CellType.languageType(state.languageType), option: "English | Korean", isSelected: state.languageType == .english),
+            SettingCellViewModel(title: "Show symbols with 2x2 grid", cellValue: CellType.gridType(state.gridType), option: "2x2 | List", isSelected: state.gridType == .twoByTwo)
         ]
+        
+        viewModels.forEach{ viewModel in
+            viewModel.delegate = self
+        }
         
         return viewModels
     }

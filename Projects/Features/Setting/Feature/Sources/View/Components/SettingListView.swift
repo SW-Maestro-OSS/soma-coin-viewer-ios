@@ -20,7 +20,7 @@ struct SettingListView: View {
     var body: some View {
         ScrollView {
             VStack {
-                ForEach(listItems, id: \.type) { viewModel in
+                ForEach(listItems) { viewModel in
                     SettingCellView(viewModel: viewModel)
                 }
             }
