@@ -23,12 +23,14 @@ class SettingCellViewModel: UDFObservableObject {
     var action : PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
     
-    init(type : String, title : String, cellValue : CellType) {
+    init(type : String, title : String, cellValue : CellType, option : String, isSelected : Bool) {
         self.type = type
         //TODO: cellTyp을 어떤 식으로 초기화 할거임>> SettingViewModel에서 부터 어떻게 해야할지 다시 생각해봐야함. 이 부분 때문에 지금 진도 막힘
         let initialState : State = .init(
             cellType: cellValue,
-            title: title
+            title: title,
+            option: option,
+            isSelected: isSelected
         )
         self._state = .init(initialValue: initialState)
     }
@@ -44,29 +46,10 @@ extension SettingCellViewModel {
         //저장 프로퍼티
         fileprivate var cellType : CellType
         public var title : String
+        public var option : String
+        public var isSelected : Bool
         
         //연산 프로퍼티
-        public var option : String {
-            switch cellType {
-            case .currencyType(let currencyType):
-                "Dollar | Won"
-            case .languageType(let languageType):
-                "English | Korean"
-            case .gridType(let gridType):
-                "2x2 | List"
-            }
-        }
-        
-        public var isSelected : Bool {
-            switch cellType {
-            case .currencyType(let currencyType):
-                currencyType == .won
-            case .languageType(let languageType):
-                languageType == .korean
-            case .gridType(let gridType):
-                gridType == .list
-            }
-        }
         
     }
 }

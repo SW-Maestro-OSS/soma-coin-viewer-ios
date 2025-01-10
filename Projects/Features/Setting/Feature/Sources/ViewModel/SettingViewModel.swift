@@ -20,18 +20,16 @@ class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
     //Publishing State
     @Published var state : State
     
-    //Sub ViewModel
-    private var settingCellViewModel : [SettingCellViewModel] = []
-    
     var action : PassthroughSubject<Action, Never> = .init()
     var store : Set<AnyCancellable> = []
     
     init() {
-        var initialState : State = .init()
+        let initialState : State = .init()
         self._state = Published(initialValue: initialState)
         self.state.currencyType = i18NManager.getCurrencyType()
         self.state.languageType = i18NManager.getLanguageType()
         self.state.gridType = i18NManager.getGridType()
+        self.state.settingCellViewModel = createSettingCellViewModels()
     }
     
     //Action 처리
@@ -56,7 +54,7 @@ class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
     //Action에 따른 추가 action 처리
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
         switch action {
-        case .tap(let type) :
+        case .tap(_) :
             //I18N 모듈로 상태 전달 해야함. 근데 어떻게 하지..
             return Just(action).eraseToAnyPublisher()
         }
@@ -70,6 +68,7 @@ extension SettingViewModel {
         var currencyType : CurrencyType = CurrencyType.dollar
         var languageType : LanguageType = LanguageType.english
         var gridType : GridType = GridType.list
+        var settingCellViewModel : [SettingCellViewModel] = []
         //Operate Property
         
     }
@@ -110,9 +109,9 @@ extension SettingViewModel {
 extension SettingViewModel {
     func createSettingCellViewModels() -> [SettingCellViewModel] {
         let viewModels = [
-            SettingCellViewModel(type: "currencyType", title: "Price Currency Unit", cellValue: CellType.currencyType(state.currencyType)),
-            SettingCellViewModel(type: "languageType", title: "Language", cellValue: CellType.languageType(state.languageType)),
-            SettingCellViewModel(type: "gridType", title: "Show symbols with 2x2 grid", cellValue: CellType.gridType(state.gridType))
+            SettingCellViewModel(type: "currencyType", title: "Price Currency Unit", cellValue: CellType.currencyType(state.currencyType), option: "Dollar | Won", isSelected: state.currencyType == .dollar),
+            SettingCellViewModel(type: "languageType", title: "Language", cellValue: CellType.languageType(state.languageType), option: "English | Korean", isSelected: state.languageType == .english),
+            SettingCellViewModel(type: "gridType", title: "Show symbols with 2x2 grid", cellValue: CellType.gridType(state.gridType), option: "2x2 | List", isSelected: state.gridType == .twoByTwo)
         ]
         
         return viewModels

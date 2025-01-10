@@ -12,7 +12,7 @@ import CommonUI
 import DomainInterface
 import CoreUtil
 
-struct SettingCellViewTests : View {
+struct SettingCellView : View {
     
     @ObservedObject private var viewModel : SettingCellViewModel
     
@@ -21,8 +21,41 @@ struct SettingCellViewTests : View {
     }
     
     var body : some View {
-        HStack(spacing : 0) {
+        HStack {
+            Spacer().frame(width : 16)
             
+            VStack {
+                CVText(text : $viewModel.state.title)
+                    .font(.body)
+                    .foregroundColor(.black)
+            }
+            
+            Spacer()
+            
+            VStack {
+                CVText(text: $viewModel.state.option)
+                    .font(.body)
+                    .foregroundColor(.gray)
+                
+                Toggle("",isOn : $viewModel.state.isSelected)
+                .labelsHidden()
+                .toggleStyle(SwitchToggleStyle(tint: .gray))
+            }
+            
+            Spacer().frame(width : 16)
         }
+        .frame(height: 80)
+        .background(
+            VStack {
+                Spacer()
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(.black)
+            }
+        )
     }
 }
+
+//#Preview {
+//    SettingCellViewTests(viewModel: SettingCellViewModel(type: "preview", title: "PreviewTitle", cellValue: CellType.currencyType(CurrencyType.dollar), option: "Dollar | Won", isSelected: false))
+//}
