@@ -6,9 +6,23 @@
 //
 
 import SwiftUI
+import Combine
+
 import CommonUI
+import DomainInterface
+import CoreUtil
 
 struct SettingCellViewTests : View {
     
-    @ObservableObject private var viewModel
+    @ObservedObject private var viewModel : SettingCellViewModel
+    
+    init(viewModel : SettingCellViewModel) {
+        self._viewModel = ObservedObject(wrappedValue: viewModel)
+    }
+    
+    var body : some View {
+        HStack(spacing : 0) {
+            
+        }
+    }
 }
