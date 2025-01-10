@@ -32,6 +32,9 @@ class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
         self.state.settingCellViewModel = createSettingCellViewModels()
         
         i18NManager.setExchangeRate()
+        createStateStream()
+        
+        print(state)
     }
     
     //Action 처리
@@ -48,19 +51,10 @@ class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
             case .grid :
                 newState.gridType = i18NManager.getGridType()
             }
-            
+            print(newState)
             return newState
         }
     }
-    
-    //Action에 따른 추가 action 처리
-    func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
-        switch action {
-        case .tap(_) :
-            return Just(action).eraseToAnyPublisher()
-        }
-    }
-    
 }
 
 extension SettingViewModel {
@@ -105,9 +99,9 @@ extension SettingViewModel {
 extension SettingViewModel {
     func createSettingCellViewModels() -> [SettingCellViewModel] {
         let viewModels = [
-            SettingCellViewModel(title: "Price Currency Unit", cellValue: CellType.currencyType(state.currencyType), option: "Dollar | Won", isSelected: state.currencyType == .dollar),
-            SettingCellViewModel(title: "Language", cellValue: CellType.languageType(state.languageType), option: "English | Korean", isSelected: state.languageType == .english),
-            SettingCellViewModel(title: "Show symbols with 2x2 grid", cellValue: CellType.gridType(state.gridType), option: "2x2 | List", isSelected: state.gridType == .twoByTwo)
+            SettingCellViewModel(title: "Price Currency Unit", cellValue: CellType.currencyType(state.currencyType), option: "Dollar | Won", isSelected: state.currencyType == .won),
+            SettingCellViewModel(title: "Language", cellValue: CellType.languageType(state.languageType), option: "English | Korean", isSelected: state.languageType == .korean),
+            SettingCellViewModel(title: "Show symbols with 2x2 grid", cellValue: CellType.gridType(state.gridType), option: "2x2 | List", isSelected: state.gridType == .list)
         ]
         
         viewModels.forEach{ viewModel in

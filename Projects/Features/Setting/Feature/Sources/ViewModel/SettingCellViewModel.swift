@@ -31,6 +31,8 @@ class SettingCellViewModel: UDFObservableObject, Identifiable {
         )
         self._state = .init(initialValue: initialState)
         self.id = title
+        
+        createStateStream()
     }
     
     //Action처리
@@ -52,17 +54,9 @@ class SettingCellViewModel: UDFObservableObject, Identifiable {
                 let updatedGridType: GridType = (gridType == .list) ? .twoByTwo : .list
                 newState.cellType = .gridType(updatedGridType)
             }
-            print(newState)
+            
+            delegate?.updateSetting(cellType: newState.cellType)
             return newState
-        }
-    }
-    
-    //Action에 따른 추가 action처리
-    func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
-        switch action {
-        case .tap :
-            delegate?.updateSetting(cellType: state.cellType)
-            return Just(action).eraseToAnyPublisher()
         }
     }
 }

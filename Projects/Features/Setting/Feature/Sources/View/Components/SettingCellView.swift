@@ -38,7 +38,14 @@ struct SettingCellView : View {
                     .foregroundColor(.gray)
                 
                 HStack {
-                    Toggle("",isOn : $viewModel.state.isSelected)
+                    Toggle("",isOn : Binding(
+                        get : {
+                            viewModel.state.isSelected
+                        },
+                        set : { newValue in
+                            viewModel.action.send(.tap)
+                        }
+                    ))
                         .labelsHidden()
                         .toggleStyle(SwitchToggleStyle(tint: .gray))
                     
