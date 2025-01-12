@@ -11,18 +11,13 @@ import CommonUI
 
 struct AllMarketTickerCollectionView: View {
     
-    enum DisplayType {
-        case row
-        case grid
-    }
-    
     private var isLoaded: Bool
-    private var displayType: DisplayType
+    private var displayType: TickerDisplayType
     
     private var cellViewModels: [TickerCellViewModel]
     
     
-    init(isLoaded: Bool, displayType: DisplayType, cellViewModels: [TickerCellViewModel]) {
+    init(isLoaded: Bool, displayType: TickerDisplayType, cellViewModels: [TickerCellViewModel]) {
         self.isLoaded = isLoaded
         self.displayType = displayType
         self.cellViewModels = cellViewModels
@@ -43,7 +38,7 @@ struct AllMarketTickerCollectionView: View {
             if isLoaded {
                 
                 switch displayType {
-                case .row:
+                case .list:
                     listView
                 case .grid:
                     gridView
@@ -52,7 +47,7 @@ struct AllMarketTickerCollectionView: View {
             } else {
                 
                 switch displayType {
-                case .row:
+                case .list:
                     listSkeletionView
                 case .grid:
                     gridSkeletionView
