@@ -25,6 +25,7 @@ let project = Project(
             dependencies: [
                 .target(name: "SettingFeature"),
                 .target(name: "SettingFeatureTesting"),
+                D.I18N.I18N,
                 D.Data.dataSource,
                 D.Data.repository,
                 D.Domain.concrete,
@@ -42,6 +43,7 @@ let project = Project(
             dependencies: [
                 .target(name: "SettingFeature"),
                 .target(name: "SettingFeatureTesting"),
+                D.I18N.I18N,
             ]
         ),
         
@@ -68,7 +70,9 @@ let project = Project(
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
             dependencies: [
-                
+                D.Feature.BaseFeature,
+                D.Shared.CommonUI,
+                D.I18N.I18N,
             ]
         ),
     ]

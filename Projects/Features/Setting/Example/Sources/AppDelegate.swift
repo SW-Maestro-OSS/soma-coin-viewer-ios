@@ -5,14 +5,22 @@
 //
 
 import UIKit
+import SwiftUI
 
-@main
+import CoreUtil
+import SettingFeature
+
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        DependencyInjector.shared.assemble([
+            Assemblies()
+        ])
+        
         return true
     }
 

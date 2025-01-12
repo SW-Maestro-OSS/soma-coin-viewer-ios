@@ -6,4 +6,68 @@
 //
 
 import SwiftUI
+import Combine
 
+import CommonUI
+import DomainInterface
+import CoreUtil
+
+struct SettingCellView : View {
+    
+    @ObservedObject private var viewModel : SettingCellViewModel
+    
+    init(viewModel : SettingCellViewModel) {
+        self._viewModel = ObservedObject(wrappedValue: viewModel)
+    }
+    
+    var body : some View {
+        HStack {
+            Spacer().frame(width : 16)
+            
+            VStack {
+                CVText(text : $viewModel.state.title)
+                    .font(.body)
+                    .foregroundColor(.black)
+            }
+            
+            Spacer()
+            
+            VStack (alignment : .trailing) {
+                CVText(text: $viewModel.state.option)
+                    .font(.body)
+                    .foregroundColor(.gray)
+                
+                HStack {
+                    Toggle("",isOn : Binding(
+                        get : {
+                            viewModel.state.isSelected
+                        },
+                        set : { newValue in
+                            viewModel.action.send(.tap)
+                        }
+                    ))
+                        .labelsHidden()
+                        .toggleStyle(SwitchToggleStyle(tint: .gray))
+                    
+                    Spacer()
+                        .frame(width : 16)
+                }
+            }
+            
+            Spacer().frame(width : 16)
+        }
+        .frame(height: 80)
+        .background(
+            VStack {
+                Spacer()
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(.black)
+            }
+        )
+    }
+}
+
+//#Preview {
+//    SettingCellViewTests(viewModel: SettingCellViewModel(type: "preview", title: "PreviewTitle", cellValue: CellType.currencyType(CurrencyType.dollar), option: "Dollar | Won", isSelected: false))
+//}
