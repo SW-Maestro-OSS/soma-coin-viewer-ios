@@ -7,52 +7,57 @@
 
 import SwiftUI
 
+import CommonUI
+
 struct TickerGridCell: View {
     
-    @State var imageURLString: String
-    @State var pairSymbolNameText: String
+    @ObservedObject private var viewModel: TickerCellViewModel
+    
+    init(viewModel: TickerCellViewModel) {
+        self._viewModel = ObservedObject(wrappedValue: viewModel)
+    }
     
     var body: some View {
         
-        VStack(alignment: .leading, spacing: 10) {
-            
-            // Sybol image + pair symbol name
-            HStack(spacing: 5) {
+        HStack(spacing: 0) {
+
+            VStack(alignment: .trailing, spacing: 10) {
                 
-                // Symbol image view
-                SymbolImageView(imageURL: $imageURLString)
-                    .frame(width: 40, height: 40)
-                
-                // Pair symbol text
-                Text(pairSymbolNameText)
-                    .font(.title3)
-                    .lineLimit(1)
-            }
-            
-            HStack {
-                
-                Rectangle().frame(width: 40, height: 0)
-                
-                VStack(alignment: .trailing, spacing: 10) {
+                // Sybol image + pair symbol name
+                HStack(spacing: 5) {
                     
-                    Text("63.240.01")
-                        .font(.title2)
+                    // Symbol image view
+                    SymbolImageView(imageURL: $viewModel.state.firstSymbolImageURL)
+                        .frame(width: 40, height: 40)
                     
-                    Text("+3.12%")
+                    // Pair symbol text
+                    CVText(text: $viewModel.state.pairSymbolNameText)
                         .font(.title3)
+                        .lineLimit(1)
+                    
+                    Spacer(minLength: 0)
+                }
+                
+                HStack(spacing: 0) {
+                    
+                    Spacer(minLength: 0)
+                    
+                    VStack(alignment: .trailing) {
+                        CVText(text: $viewModel.state.priceText)
+                            .font(.largeTitle)
+                            .lineLimit(1)
                         
+                        CVText(text: $viewModel.state.percentText)
+                            .font(.largeTitle)
+                            .lineLimit(1)
+                    }
                 }
             }
+            
+            Spacer(minLength: 0)
         }
         .padding(10)
         .background(.gray.opacity(0.2))
         .border(.black, width: 1)
     }
-}
-
-#Preview {
-    TickerGridCell(
-        imageURLString: "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/32/icon/btc.png",
-        pairSymbolNameText: "BTCUSDT"
-    )
 }
