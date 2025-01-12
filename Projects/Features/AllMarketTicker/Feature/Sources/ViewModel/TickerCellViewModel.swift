@@ -1,5 +1,5 @@
 //
-//  TickerListCellViewModel.swift
+//  TickerCellViewModel.swift
 //  AllMarketTickerModule
 //
 //  Created by choijunios on 12/6/24.
@@ -15,7 +15,7 @@ import CoreUtil
 
 import SimpleImageProvider
 
-class TickerListCellViewModel: Identifiable, UDFObservableObject {
+class TickerCellViewModel: Identifiable, UDFObservableObject {
     
     public let id: String
     
@@ -54,7 +54,7 @@ class TickerListCellViewModel: Identifiable, UDFObservableObject {
     }
 }
 
-extension TickerListCellViewModel {
+extension TickerCellViewModel {
     
     enum Action {
             
