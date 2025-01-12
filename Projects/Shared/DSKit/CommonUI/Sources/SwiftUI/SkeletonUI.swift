@@ -59,6 +59,6 @@ public struct SkeletonUI: View {
                 
             }
         }
-        .frame(width: geo.size.width, height: geo.size.height)
+        .frame(height: geo.size.height)
     }
 }
