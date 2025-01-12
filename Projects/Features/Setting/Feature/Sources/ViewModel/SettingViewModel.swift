@@ -8,9 +8,9 @@
 import SwiftUI
 import Combine
 
-import BaseFeatureInterface
+import BaseFeature
 import DomainInterface
-import I18NInterface
+import I18N
 import CoreUtil
 
 class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
