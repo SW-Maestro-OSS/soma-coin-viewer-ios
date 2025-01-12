@@ -17,8 +17,9 @@ import CoreUtil
 class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModelDelegate {
     
     // Service locator
-    private var webSocketManagementHelper: WebSocketManagementHelper
-    private var allMarketTickersUseCase: AllMarketTickersUseCase
+    private let webSocketManagementHelper: WebSocketManagementHelper
+    private let allMarketTickersUseCase: AllMarketTickersUseCase
+    private let userConfigurationRepository: UserConfigurationRepository
     
     
     // Publishing state
@@ -33,14 +34,24 @@ class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModel
     var store: Set<AnyCancellable> = []
     
     
-    init(socketHelper: WebSocketManagementHelper, useCase: AllMarketTickersUseCase) {
-        
-        let initialState: State = .init()
-        self._state = Published(initialValue: initialState)
+    init(socketHelper: WebSocketManagementHelper, useCase: AllMarketTickersUseCase, userConfigurationRepository: UserConfigurationRepository) {
         
         self.webSocketManagementHelper = socketHelper
         self.allMarketTickersUseCase = useCase
-        self.sortCompartorViewModels = createTickerSortSelectorViewModels()
+        self.userConfigurationRepository = userConfigurationRepository
+        
+        
+        // Initial configuration
+        let tickerDisplayType = userConfigurationRepository.getGridType()
+        
+        let initialState: State = .init(
+            tickerDisplayType: tickerDisplayType
+        )
+        self._state = Published(initialValue: initialState)
+        
+        
+        // Create sort selection view models
+        createTickerSortSelectorViewModels()
         
         
         // Create state stream
@@ -90,6 +101,7 @@ extension AllMarketTickerViewModel {
         
         // - 저장 프로퍼티
         var tickerList: [Twenty4HourTickerForSymbolVO] = []
+        var tickerDisplayType: GridType
         
         var currentSortComparator: any TickerSortComparator = TickerNoneComparator()
         var tickerCellViewModels: [TickerCellViewModel] = []
@@ -127,7 +139,7 @@ private extension AllMarketTickerViewModel {
         webSocketManagementHelper.requestSubscribeToStream(streams: ["!ticker@arr"])
     }
     
-    func createTickerSortSelectorViewModels() -> [TickerSortSelectorViewModel] {
+    func createTickerSortSelectorViewModels() {
         
         let viewModels = [
             
@@ -158,7 +170,7 @@ private extension AllMarketTickerViewModel {
             viewModel.delegate = self
         }
         
-        return viewModels
+        self.sortCompartorViewModels = viewModels
     }
 }
 

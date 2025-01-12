@@ -81,7 +81,6 @@ let project = Project(
                 D.ThirdParty.SimpleImageProvider,
                 
                 D.Shared.CommonUI,
-                D.Shared.I18N,
             ]
         ),
     ]

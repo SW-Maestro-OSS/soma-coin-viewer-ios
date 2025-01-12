@@ -7,17 +7,19 @@
 
 import SwiftUI
 
+import DomainInterface
+
 import CommonUI
 
 struct AllMarketTickerCollectionView: View {
     
     private var isLoaded: Bool
-    private var displayType: TickerDisplayType
+    private var displayType: GridType
     
     private var cellViewModels: [TickerCellViewModel]
     
     
-    init(isLoaded: Bool, displayType: TickerDisplayType, cellViewModels: [TickerCellViewModel]) {
+    init(isLoaded: Bool, displayType: GridType, cellViewModels: [TickerCellViewModel]) {
         self.isLoaded = isLoaded
         self.displayType = displayType
         self.cellViewModels = cellViewModels
@@ -40,7 +42,7 @@ struct AllMarketTickerCollectionView: View {
                 switch displayType {
                 case .list:
                     listView
-                case .grid:
+                case .twoByTwo:
                     gridView
                 }
                 
@@ -49,7 +51,7 @@ struct AllMarketTickerCollectionView: View {
                 switch displayType {
                 case .list:
                     listSkeletionView
-                case .grid:
+                case .twoByTwo:
                     gridSkeletionView
                 }
             }

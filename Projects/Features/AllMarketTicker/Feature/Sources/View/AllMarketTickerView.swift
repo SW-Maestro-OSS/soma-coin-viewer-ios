@@ -26,10 +26,10 @@ struct AllMarketTickerView: View {
             // MARK: Sort selection
             SortSelectionContainerView(viewModels: viewModel.sortCompartorViewModels)
             
-            // MARK: Ticker list
-            AllMarketTickerListView(
+            // MARK: Ticker collection view
+            AllMarketTickerCollectionView(
                 isLoaded: viewModel.state.isLoaded,
-                displayType: .grid,
+                displayType: viewModel.state.tickerDisplayType,
                 cellViewModels: viewModel.state.tickerCellViewModels
             )
         }
