@@ -13,9 +13,9 @@ import SimpleImageProvider
 
 struct TickerListCellView: View {
     
-    @ObservedObject private var viewModel: TickerListCellViewModel
+    @ObservedObject private var viewModel: TickerCellViewModel
     
-    init(viewModel: TickerListCellViewModel) {
+    init(viewModel: TickerCellViewModel) {
         self._viewModel = ObservedObject(wrappedValue: viewModel)
     }
     
