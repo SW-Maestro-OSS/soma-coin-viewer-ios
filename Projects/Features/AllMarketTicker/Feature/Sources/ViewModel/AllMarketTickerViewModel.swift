@@ -63,7 +63,7 @@ class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModel
             let sortedTickerList = state.tickerList.sorted(by: comparator)
             
             newState.tickerList = sortedTickerList
-            newState.tickerListCellViewModels = sortedTickerList.map(TickerCellViewModel.init)
+            newState.tickerCellViewModels = sortedTickerList.map(TickerCellViewModel.init)
             
             return newState
             
@@ -76,7 +76,7 @@ class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModel
             let sortedTickerList = list.sorted(by: currentComparator)
             
             newState.tickerList = sortedTickerList
-            newState.tickerListCellViewModels = sortedTickerList.map(TickerCellViewModel.init)
+            newState.tickerCellViewModels = sortedTickerList.map(TickerCellViewModel.init)
             
             return newState
         }
@@ -92,11 +92,11 @@ extension AllMarketTickerViewModel {
         var tickerList: [Twenty4HourTickerForSymbolVO] = []
         
         var currentSortComparator: any TickerSortComparator = TickerNoneComparator()
-        var tickerListCellViewModels: [TickerCellViewModel] = []
+        var tickerCellViewModels: [TickerCellViewModel] = []
         
         // - 연산 프로퍼티
         var isLoaded: Bool {
-            !tickerListCellViewModels.isEmpty
+            !tickerCellViewModels.isEmpty
         }
     }
     

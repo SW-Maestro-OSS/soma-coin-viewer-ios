@@ -29,9 +29,9 @@ struct AllMarketTickerView: View {
             // MARK: Ticker list
             AllMarketTickerListView(
                 isLoaded: viewModel.state.isLoaded,
-                listItems: $viewModel.state.tickerListCellViewModels
+                displayType: .grid,
+                cellViewModels: viewModel.state.tickerCellViewModels
             )
-            
         }
     }
 }
