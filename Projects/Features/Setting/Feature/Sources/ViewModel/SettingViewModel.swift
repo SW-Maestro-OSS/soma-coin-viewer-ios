@@ -51,7 +51,6 @@ class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
             case .grid :
                 newState.gridType = i18NManager.getGridType()
             }
-            print(newState)
             return newState
         }
     }
