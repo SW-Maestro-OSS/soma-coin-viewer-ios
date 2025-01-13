@@ -42,7 +42,7 @@ let project = Project(
             ],
             settings: .settings(
                 base: [
-                    "KOREAEXIM_API_KEY" : "$(inherited)"
+                    "OPENEX_API_KEY" : "$(inherited)"
                 ],
                 configurations: [
                     .debug(

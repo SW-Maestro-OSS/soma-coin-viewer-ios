@@ -22,22 +22,33 @@ public class DefaultExchangeUseCase: ExchangeRateUseCase {
     
     public init() { }
     
-    public func getExchangeRate(type: CurrencyType) -> AnyPublisher<ExchangeRateVO, Error> {
+    public func getExchangeRate(base: CurrencyType, to: CurrencyType) -> AnyPublisher<Double, Never> {
         
         fetchSuccessFlag
             .filter({ $0 })
             .unretained(self)
-            .flatMap { useCase, _ in
+            .map { useCase, _ in
                 
-                useCase.exchangeRateRepository
-                    .getExchangeRateInKRW(currencyCode: type.currencyCode)
+                let result = useCase.exchangeRateRepository
+                    .getExchangeRate(
+                        baseCurrencyCode: base.currencyCode,
+                        toCurrencyCode: to.currencyCode
+                    )
+                
+                guard let result else {
+                    printIfDebug("DefaultExchangeUseCase, 환율정보가져오기 실패 from: \(base.currencyCode) to: \(to.currencyCode)")
+                    return 0.0
+                }
+                
+                return result
             }
             .eraseToAnyPublisher()
     }
     
     public func prepare() {
         
-        exchangeRateRepository.prepare()
+        exchangeRateRepository
+            .prepare(baseCurrencyCode: "USD", toCurrencyCodes: CurrencyType.allCases.map({ $0.currencyCode }))
             .sink { error in
                 
                 // Fetch 도중 에러 발생 -> 유저에게 알리기

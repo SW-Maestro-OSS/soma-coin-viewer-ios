@@ -5,7 +5,7 @@
 //  Created by choijunios on 1/13/25.
 //
 
-public enum CurrencyType: String {
+public enum CurrencyType: String, CaseIterable {
     //필요 화폐 타입 추가 가능
     case won="WON"
     case dollar="DOLLAR"

@@ -1,8 +1,8 @@
 //
-//  PriceRepository.swift
+//  ExchangeRateInKRWRepository.swift
 //  Domain
 //
-//  Created by 최재혁 on 12/22/24.
+//  Created by 최준영 on 01/14/25.
 //
 
 import Foundation
@@ -25,7 +25,7 @@ public enum ExchangeRateRepositoryError: LocalizedError {
 
 public protocol ExchangeRateRepository {
     
-    func prepare() -> AnyPublisher<Void, Error>
+    func prepare(baseCurrencyCode: String, toCurrencyCodes: [String]) -> AnyPublisher<Void, Error>
     
-    func getExchangeRateInKRW(currencyCode: String) -> AnyPublisher<ExchangeRateVO, Error>
+    func getExchangeRate(baseCurrencyCode: String, toCurrencyCode: String) -> Double?
 }
