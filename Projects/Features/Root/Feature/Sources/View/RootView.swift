@@ -21,20 +21,31 @@ struct RootView: View {
     
     var body: some View {
         
-        NavigationStack(path: viewModel.router?.getPath() ?? .constant(.init())) {
+        Group {
             
-            SplashView()
-                .navigationDestination(for: RootDestination.self) { destination in
-                    
-                    if let router = viewModel.router {
-                        AnyView(router.destinationView(destination: destination))
-                            .navigationBarBackButtonHidden()
-                    } else {
-                        
-                        Text("Router not found")
-                    }
+            if viewModel.state.isLoading {
+                
+                SplashView()
+                
+            } else {
+                
+                NavigationStack(path: viewModel.router?.getPath() ?? .constant(.init())) {
+                                
+                    Text("")
+                        .navigationDestination(for: RootDestination.self) { destination in
+                            
+                            if let router = viewModel.router {
+                                AnyView(router.destinationView(destination: destination))
+                                    .navigationBarBackButtonHidden()
+                            } else {
+                                
+                                Text("Router not found")
+                            }
+                        }
                 }
+            }
         }
+        .animation(.easeIn(duration: 0.2), value: viewModel.state.isLoading)
         .onAppear {
             viewModel.action(.onAppear)
         }
