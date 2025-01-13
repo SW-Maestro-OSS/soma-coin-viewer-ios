@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+import AllMarketTickerFeature
 import BaseFeature
 
 protocol TabBarRouting: AnyObject {
@@ -16,7 +17,13 @@ protocol TabBarRouting: AnyObject {
 
 class TabBarRouter: Router<TabBarViewModelable>, TabBarRouting {
     
-    init(view: TabBarView, viewModel: TabBarViewModel) {
+    // Builder
+    private let allMarketTickerBuilder: AllMarketTickerBuilder
+    
+    init(allMarketTickerBuilder: AllMarketTickerBuilder, view: TabBarView, viewModel: TabBarViewModel) {
+        
+        self.allMarketTickerBuilder = allMarketTickerBuilder
+        
         super.init(view: AnyView(view), viewModel: viewModel)
         
         viewModel.router = self
@@ -31,11 +38,13 @@ extension TabBarRouter {
         switch page {
         case .allMarketTicker:
             
-            Text("allMarketTicker")
+            let router = allMarketTickerBuilder.build()
+            attach(router)
+            return router.view
             
         case .setting:
             
-            Text("setting")
+            return Text("setting")
         }
     }
 }

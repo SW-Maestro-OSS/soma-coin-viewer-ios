@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+import AllMarketTickerFeature
 import BaseFeature
 
 class TabBarBuilder {
@@ -15,7 +16,12 @@ class TabBarBuilder {
         
         let viewModel: TabBarViewModel = .init()
         let view = TabBarView(viewModel: viewModel)
-        let router = TabBarRouter(view: view, viewModel: viewModel)
+        let allMarketTickerBuilder = AllMarketTickerBuilder()
+        let router = TabBarRouter(
+            allMarketTickerBuilder: allMarketTickerBuilder,
+            view: view,
+            viewModel: viewModel
+        )
         
         return router
     }
