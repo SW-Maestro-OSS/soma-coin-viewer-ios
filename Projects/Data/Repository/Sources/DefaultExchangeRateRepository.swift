@@ -12,13 +12,13 @@ import DomainInterface
 import Combine
 import CoreUtil
 
-public class DefaultPriceRepository : PriceRepository {
+public class DefaultExchangeRateRepository : ExchangeRateRepository {
     // DI
     @Injected var priceService: PriceService
     
     public init() { }
     
-    public func getPrice() -> AnyPublisher<[PriceVO], Never> {
+    public func getPrice() -> AnyPublisher<[ExchangeRateVO], Never> {
         let date = self.getDate()
         return priceService.getPrice(date: date)
             .map { priceDTO in

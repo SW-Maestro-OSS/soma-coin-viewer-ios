@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct PriceVO {
+public struct ExchangeRateVO {
     public let currencyCode : String
     public let ttb : Double
     public let tts : Double

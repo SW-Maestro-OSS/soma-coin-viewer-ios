@@ -7,6 +7,6 @@
 
 import Combine
 
-public protocol PriceRepository {
-    func getPrice() -> AnyPublisher<[PriceVO], Never>
+public protocol ExchangeRateRepository {
+    func getPrice() -> AnyPublisher<[ExchangeRateVO], Never>
 }
