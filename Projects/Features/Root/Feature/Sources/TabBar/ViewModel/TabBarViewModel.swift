@@ -10,6 +10,8 @@ import Combine
 
 import BaseFeature
 
+
+
 class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     
     // State
@@ -20,7 +22,11 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     
     
     // Router
-    @Published var router: TabBarRouting?
+    @Published private var _router: WeakTabBarRouting = .init(nil)
+    var router: TabBarRouting? {
+        get { _router.value }
+        set { _router = WeakTabBarRouting(newValue) }
+    }
     
     
     init() {
@@ -52,5 +58,18 @@ extension TabBarViewModel {
     enum Action {
         
         // 로컬라이제이션 관련 액션
+    }
+}
+
+
+private extension TabBarViewModel {
+ 
+    class WeakTabBarRouting {
+        
+        weak var value: TabBarRouting?
+        
+        init(_ value: TabBarRouting?) {
+            self.value = value
+        }
     }
 }
