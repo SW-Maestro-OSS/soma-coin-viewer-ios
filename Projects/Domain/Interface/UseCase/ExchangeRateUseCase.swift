@@ -9,8 +9,8 @@ import Combine
 
 public protocol ExchangeRateUseCase {
     
-    /// 원화 기준 환율정보를 반환 받습니다.
-    func getExchangeRate(type: CurrencyType) -> AnyPublisher<ExchangeRateVO, Error>
+    /// 환율정보를 반환 받습니다.
+    func getExchangeRate(base: CurrencyType, to: CurrencyType) -> AnyPublisher<Double, Never>
     
     /// 가격 정보를 반환할 수 있도록 준비합니다.
     func prepare()
