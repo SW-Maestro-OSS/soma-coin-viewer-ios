@@ -34,8 +34,8 @@ public class DataAssembly: Assembly {
         }
         .inObjectScope(.container)
         
-        container.register(PriceService.self) { _ in
-            DefaultPriceService()
+        container.register(ExchangeRateService.self) { _ in
+            DefaultExchangeRateService()
         }
         
         
@@ -49,8 +49,8 @@ public class DataAssembly: Assembly {
             BinanceAllMarketTickersRepository()
         }
         
-        container.register(PriceRepository.self) { _ in
-            DefaultPriceRepository()
+        container.register(ExchangeRateRepository.self) { _ in
+            DefaultExchangeRateRepository()
         }
         
     }

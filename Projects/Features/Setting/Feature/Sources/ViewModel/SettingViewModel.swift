@@ -15,7 +15,7 @@ import CoreUtil
 
 class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
     //Service Locator
-    @Injected var i18NManager :I18NManager
+    @Injected var i18NManager: I18NManager
     
     //Publishing State
     @Published var state : State
