@@ -11,7 +11,7 @@ import DataSource
 import DomainInterface
 
 extension PriceDTO {
-    func toEntity() -> PriceVO {
+    func toEntity() -> ExchangeRateVO {
         return .init(
             currencyCode: currencyCode ?? "Error",
             ttb: Double(remittanceReceiveRate ?? "-1.0") ?? 0.0,

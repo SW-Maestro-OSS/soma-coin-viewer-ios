@@ -1,5 +1,5 @@
 //
-//  PriceService.swift
+//  ExchangeRateService.swift
 //  Data
 //
 //  Created by 최재혁 on 12/13/24.
@@ -12,7 +12,7 @@ public protocol ExchangeRateService {
     func getExchanges(date: Date) -> AnyPublisher<[PriceDTO], Error>
 }
 
-public class DefaultPriceService: ExchangeRateService {
+public class DefaultExchangeRateService: ExchangeRateService {
     
     private let baseURL = "https://www.koreaexim.go.kr/site/program/financial/exchangeJSON"
     

@@ -1,36 +1,58 @@
 //
-//  DefaultPriceRepository.swift
+//  DefaultExchangeRateRepository.swift
 //  Data
 //
-//  Created by 최재혁 on 12/22/24.
+//  Created by 최준영 on 01/13/25.
 //
 
 import Foundation
+import Combine
+
+import DomainInterface
 
 import DataSource
-import DomainInterface
-import Combine
+
 import CoreUtil
 
-public class DefaultExchangeRateRepository : ExchangeRateRepository {
+import SwiftStructures
+
+public class DefaultExchangeRateRepository: ExchangeRateRepository {
+    
     // DI
-    @Injected var priceService: PriceService
+    @Injected private var priceService: ExchangeRateService
+    
+    // Cache
+    private let exchangeRateCache: LockedDictionary<String, ExchangeRateVO> = .init()
     
     public init() { }
     
-    public func getPrice() -> AnyPublisher<[ExchangeRateVO], Never> {
-        let date = self.getDate()
-        return priceService.getPrice(date: date)
-            .map { priceDTO in
-                priceDTO.map{ $0.toEntity() }
+    public func prepare() -> AnyPublisher<Void, Error> {
+        
+        priceService.getExchanges(date: .now)
+            .map { [weak self] priceDTO in
+                let entities = priceDTO.map{ $0.toEntity() }
+                entities.forEach { entity in
+                    self?.exchangeRateCache[entity.currencyCode] = entity
+                }
+                return ()
             }
+            .mapError({ error in
+                printIfDebug("DefaultExchangeRateRepository, 환율정보 가져오기 실패, \(error.localizedDescription)")
+                return ExchangeRateRepositoryError.fetchExhangeRateErrorError
+            })
             .eraseToAnyPublisher()
     }
     
-    private func getDate() -> String {
-        let dateFormatter = DateFormatter()
-        let date = Date()
-        dateFormatter.dateFormat = "yyyyMMdd"
-        return dateFormatter.string(from: date)
+    public func getExchangeRateInKRW(currencyCode: String) -> AnyPublisher<ExchangeRateVO, Error> {
+        
+        Future { [weak self] promise in
+            
+            if let exchangeRate = self?.exchangeRateCache[currencyCode] {
+                promise(.success(exchangeRate))
+            } else {
+                promise(.failure(ExchangeRateRepositoryError.exchangeRateNotFound))
+            }
+        }
+        .eraseToAnyPublisher()
     }
 }
