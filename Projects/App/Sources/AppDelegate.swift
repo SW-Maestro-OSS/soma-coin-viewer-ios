@@ -1,7 +1,7 @@
 
 import UIKit
 
-import WebSocketManagementHelperInterface
+import WebSocketManagementHelper
 import CoreUtil
 
 class AppDelegate: NSObject, UIApplicationDelegate {

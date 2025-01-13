@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-import BaseFeatureInterface
+import BaseFeature
 
 public struct RootView: View {
     

@@ -8,7 +8,7 @@
 import SwiftUI
 import Combine
 
-import BaseFeatureInterface
+import BaseFeature
 
 class TabBarViewModel: UDFObservableObject {
     

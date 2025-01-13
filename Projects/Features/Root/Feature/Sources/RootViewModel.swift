@@ -8,20 +8,17 @@
 import SwiftUI
 import Combine
 
-import BaseFeatureInterface
+import BaseFeature
 
 import CoreUtil
-import I18NInterface
-import WebSocketManagementHelperInterface
+import I18N
+import WebSocketManagementHelper
 
 class RootViewModel: UDFObservableObject {
-    
 
-    @Injected private var webSocketHelper: WebSocketManagementHelper
     @Injected private var i18NManager : I18NManager
-
-    private var webSocketHelper: WebSocketManagementHelper
-
+    
+    private let webSocketHelper: WebSocketManagementHelper
     
     
     // Public state interface

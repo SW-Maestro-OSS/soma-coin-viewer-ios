@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-import BaseFeatureInterface
+import BaseFeature
 
 class TabBarCoordinator: Coordinator {
     

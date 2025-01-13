@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-import WebSocketManagementHelperInterface
-import BaseFeatureInterface
+import WebSocketManagementHelper
+import BaseFeature
 import CoreUtil
 
 enum RootDestination: Hashable {

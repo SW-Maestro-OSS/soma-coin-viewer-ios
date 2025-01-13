@@ -8,7 +8,7 @@ import Combine
 
 import AllMarketTickerFeature
 
-import WebSocketManagementHelperInterface
+import WebSocketManagementHelper
 import DomainInterface
 
 public struct TestSortComparator: TickerSortComparator {
@@ -53,7 +53,7 @@ public class MockWebSocketHelper: WebSocketManagementHelper {
         
     }
     
-    public func requestConnection(connectionType: WebSocketManagementHelperInterface.ConnectionType) {
+    public func requestConnection(connectionType: ConnectionType) {
         
     }
 }

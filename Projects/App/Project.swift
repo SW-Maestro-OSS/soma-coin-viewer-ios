@@ -26,24 +26,19 @@ let project = Project(
                 // Features
                 D.Feature.RootFeature,
 
-                
                 // Domain
                 D.Domain.concrete,
                 D.Domain.interface,
-                
                 
                 // Data
                 D.Data.dataSource,
                 D.Data.repository,
                 
-                
                 // Util
                 D.Util.PresentationUtil,
                 
-                
                 // Shared
                 D.Shared.WebSocketManagementHelper,
-                D.Shared.WebSocketManagementHelperInterface,
             ]
         ),
     ]

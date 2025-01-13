@@ -6,8 +6,7 @@
 //
 
 import WebSocketManagementHelper
-import WebSocketManagementHelperInterface
-import I18NInterface
+import I18N
 
 import Swinject
 import I18N

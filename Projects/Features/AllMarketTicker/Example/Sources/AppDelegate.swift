@@ -8,11 +8,10 @@ import UIKit
 import SwiftUI
 
 import AllMarketTickerFeature
-import WebSocketManagementHelperInterface
+import WebSocketManagementHelper
 import CoreUtil
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {

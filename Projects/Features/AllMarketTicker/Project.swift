@@ -29,7 +29,7 @@ let project = Project(
                 
                 // Implements for demo app
                 D.Shared.WebSocketManagementHelper,
-                D.Shared.WebSocketManagementHelperInterface,
+                D.Shared.WebSocketManagementHelper,
                 
                 D.Data.dataSource,
                 D.Data.repository,
@@ -81,6 +81,7 @@ let project = Project(
                 D.ThirdParty.SimpleImageProvider,
                 
                 D.Shared.CommonUI,
+                D.Shared.WebSocketManagementHelper,
             ]
         ),
     ]

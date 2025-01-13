@@ -10,7 +10,7 @@ import Combine
 
 import BaseFeature
 
-import WebSocketManagementHelperInterface
+import WebSocketManagementHelper
 import DomainInterface
 import CoreUtil
 
