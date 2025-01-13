@@ -7,12 +7,17 @@
 
 import SwiftUI
 
-open class Router<ViewModel> {
+public protocol Routable: AnyObject {
+    
+    associatedtype ViewModel
+}
+
+open class Router<ViewModel>: Routable {
     
     public let view: AnyView
     public let viewModel: ViewModel
     
-    public private(set) var children: [Router] = []
+    public private(set) var children: [any Routable] = []
     
     public init(view: AnyView, viewModel: ViewModel) {
         
@@ -20,11 +25,11 @@ open class Router<ViewModel> {
         self.viewModel = viewModel
     }
     
-    public func attach(_ router: Router) {
+    public func attach(_ router: any Routable) {
         children.append(router)
     }
     
-    public func dettach(_ router: Router) {
+    public func dettach(_ router: any Routable) {
         
         let childIndex = children.firstIndex(where: { $0 === router })
         

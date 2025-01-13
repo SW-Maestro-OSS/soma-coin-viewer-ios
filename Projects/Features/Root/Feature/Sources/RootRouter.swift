@@ -68,6 +68,7 @@ extension RootRouter {
         case .mainTabBarPage:
             
             let tabBarRouter = tabBarBuilder.build()
+            attach(tabBarRouter)
             
             return tabBarRouter.view
             

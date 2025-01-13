@@ -15,7 +15,7 @@ import CoreUtil
 
 import SimpleImageProvider
 
-class TickerCellViewModel: Identifiable, UDFObservableObject {
+final class TickerCellViewModel: Identifiable, UDFObservableObject {
     
     public let id: String
     

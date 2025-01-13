@@ -26,11 +26,15 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     
     
     // Router
-    @Published var router: RootRouting?
+    @Published private var _router: WeakRootRouting = .init(nil)
+    var router: RootRouting? {
+        get { self._router.value }
+        set { self._router = WeakRootRouting(newValue) }
+    }
     
     
     // Publishers
-    public let action: PassthroughSubject<Action, Never> = .init()
+    let action: PassthroughSubject<Action, Never> = .init()
     
     var store: Set<AnyCancellable> = .init()
     
@@ -164,5 +168,19 @@ extension RootViewModel {
     struct State {
         var isWebSocketConnected: Bool?
         var isFirstAppear: Bool = true
+    }
+}
+
+
+// MARK: WeakRootRouting
+private extension RootViewModel {
+    
+    class WeakRootRouting {
+        
+        weak var value: RootRouting?
+        
+        init(_ value: RootRouting?) {
+            self.value = value
+        }
     }
 }
