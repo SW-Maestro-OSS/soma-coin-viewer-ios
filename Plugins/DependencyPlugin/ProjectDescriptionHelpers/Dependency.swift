@@ -44,17 +44,16 @@ public enum ModuleDependency {
         public static let CommonUI: TargetDependency = .project(target: "CommonUI", path: .relativeToRoot("Projects/Shared/DSKit"))
         
         public static let WebSocketManagementHelper: TargetDependency = .project(target: "WebSocketManagementHelper", path: .relativeToRoot("Projects/Shared/WebSocketManagementHelper"))
+        
         public static let WebSocketManagementHelperInterface: TargetDependency = .project(target: "WebSocketManagementHelperInterface", path: .relativeToRoot("Projects/Shared/WebSocketManagementHelper"))
+        
+        public static let I18N: TargetDependency = .project(target: "I18N", path: .relativeToRoot("Projects/Shared/I18N"))
     }
     
     public enum Util {
         public static let CoreUtil: TargetDependency = .project(target: "CoreUtil", path: .relativeToRoot("Projects/Utils/CoreUtil"))
         
         public static let PresentationUtil: TargetDependency = .project(target: "PresentationUtil", path: .relativeToRoot("Projects/Utils/PresentationUtil"))
-    }
-    
-    public enum I18N {
-        public static let I18N: TargetDependency = .project(target: "I18N", path: .relativeToRoot("Projects/I18N"))
     }
 }
 

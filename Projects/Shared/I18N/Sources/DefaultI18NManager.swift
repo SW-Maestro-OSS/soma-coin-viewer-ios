@@ -7,8 +7,9 @@
 
 import Foundation
 import Combine
-import I18NInterface
+
 import DomainInterface
+
 import CoreUtil
 
 public class DefaultI18NManager : I18NManager {

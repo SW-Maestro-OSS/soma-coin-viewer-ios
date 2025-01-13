@@ -27,6 +27,7 @@ struct SymbolImageView: View {
                         .resizable()
                         .scaledToFit()
                 }
+                .clipShape(Circle())
                 .task {
                     
                     guard let image = await SimpleImageProvider.shared
