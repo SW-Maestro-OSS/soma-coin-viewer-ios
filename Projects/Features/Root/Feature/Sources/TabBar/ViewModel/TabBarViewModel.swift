@@ -10,8 +10,6 @@ import Combine
 
 import BaseFeature
 
-
-
 class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     
     // State
