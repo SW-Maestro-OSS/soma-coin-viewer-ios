@@ -15,14 +15,6 @@ import CoreUtil
 public class DefaultI18NManager : I18NManager {
     
     @Injected private var repository : UserConfigurationRepository
-    @Injected private var usecase : PriceUseCase
-    
-    //I18N 상태정보
-    private let priceStateSubject  = PassthroughSubject<PriceState, Never>()
-    
-    public var state : AnyPublisher<PriceState, Never> {
-        priceStateSubject.eraseToAnyPublisher()
-    }
     
     private var store: Set<AnyCancellable> = .init()
     
@@ -42,29 +34,5 @@ public class DefaultI18NManager : I18NManager {
     
     public func setLanguageType(type: LanguageType) {
         repository.setLanguageType(type: type)
-    }
-    
-    public func getGridType() -> GridType {
-        return repository.getGridType()
-    }
-    
-    public func setGridType(type: GridType) {
-        repository.setGrideType(type: type)
-    }
-    
-    public func getExchangeRate(type: CurrencyType) -> PriceVO {
-        return usecase.getPrice(currency: type.savingValue)
-    }
-    
-    public func setExchangeRate() {
-        usecase.setPrice()
-            .sink { [weak self] priceState in
-                if priceState == .failed {
-                    self?.priceStateSubject.send(.failed)
-                } else {
-                    self?.priceStateSubject.send(.complete)
-                }
-            }
-            .store(in: &store)
     }
 }
