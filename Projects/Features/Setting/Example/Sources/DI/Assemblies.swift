@@ -27,7 +27,7 @@ public class Assemblies : Assembly {
         }
         
         container.register(ExchangeRateUseCase.self) { _ in
-            DefaultExchangeUseCase()
+            DefaultExchangeRateUseCase()
         }
         
         container.register(UserConfigurationService.self) { _ in

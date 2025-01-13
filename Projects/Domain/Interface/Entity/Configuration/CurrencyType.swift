@@ -22,4 +22,22 @@ public enum CurrencyType: String, CaseIterable {
             "USD"
         }
     }
+    
+    public var symbol: String {
+        switch self {
+        case .won:
+            "₩"
+        case .dollar:
+            "$"
+        }
+    }
+    
+    public var isPrefix: Bool {
+        switch self {
+        case .won:
+            false
+        case .dollar:
+            true
+        }
+    }
 }

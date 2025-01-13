@@ -21,6 +21,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
     private let webSocketManagementHelper: WebSocketManagementHelper
     private let i18NManager: I18NManager
     private let allMarketTickersUseCase: AllMarketTickersUseCase
+    private let exchangeUseCase: ExchangeRateUseCase
     private let userConfigurationRepository: UserConfigurationRepository
     
     
@@ -39,13 +40,15 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
     init(
         socketHelper: WebSocketManagementHelper,
         i18NManager: I18NManager,
-        useCase: AllMarketTickersUseCase,
+        allMarketTickersUseCase: AllMarketTickersUseCase,
+        exchangeUseCase: ExchangeRateUseCase,
         userConfigurationRepository: UserConfigurationRepository
     ) {
         
         self.webSocketManagementHelper = socketHelper
         self.i18NManager = i18NManager
-        self.allMarketTickersUseCase = useCase
+        self.allMarketTickersUseCase = allMarketTickersUseCase
+        self.exchangeUseCase = exchangeUseCase
         self.userConfigurationRepository = userConfigurationRepository
         
         
@@ -53,7 +56,10 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         let tickerDisplayType = userConfigurationRepository.getGridType()
         
         let initialState: State = .init(
-            tickerDisplayType: tickerDisplayType
+            sortComparator: TickerNoneComparator(),
+            tickerDisplayType: tickerDisplayType,
+            currencyType: nil,
+            exchangeRate: nil
         )
         self._state = Published(initialValue: initialState)
         
@@ -68,6 +74,16 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         
         // Subscribe to data stream
         subscribeToTickerDataStream()
+        
+        
+        // Get currency type
+        let currencyType: CurrencyType = i18NManager.getCurrencyType()
+        exchangeUseCase
+            .getExchangeRate(base: .dollar, to: currencyType)
+            .sink { [weak self] rate in
+                self?.action.send(.currencyTypeUpdated(type: currencyType, rate: rate))
+            }
+            .store(in: &store)
     }
     
     func reduce(_ action: Action, state: State) -> State {
@@ -76,17 +92,30 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         
         switch action {
         case .changeSortingCriteria(let comparator):
-            newState.currentSortComparator = comparator
             
             let sortedTickerViewModels = state.tickerCellViewModels.sorted(by: comparator)
             newState.tickerCellViewModels = sortedTickerViewModels
+            newState.sortComparator = comparator
             
         case .fetchList(let list):
             
-            let currentComparator = state.currentSortComparator
-            let tickerViewModels = list.map(TickerCellViewModel.init(tickerVO:))
+            let currentComparator = state.sortComparator
+            let tickerViewModels = list.map { tickerVO in
+                TickerCellViewModel(config: .init(
+                    tickerVO: tickerVO,
+                    currencyConfig: .init(
+                        type: state.currencyType ?? .dollar,
+                        rate: state.exchangeRate ?? 0.0
+                    )
+                ))
+            }
             let sortedTickerViewModels = tickerViewModels.sorted(by: currentComparator)
             newState.tickerCellViewModels = sortedTickerViewModels
+            
+        case .currencyTypeUpdated(let type, let rate):
+            
+            newState.currencyType = type
+            newState.exchangeRate = rate
             
         default:
             return state
@@ -101,22 +130,27 @@ extension AllMarketTickerViewModel {
     
     struct State {
         
-        // - 저장 프로퍼티
-        var tickerDisplayType: GridType
+        // Sort
+        var sortComparator: any TickerSortComparator
         
-        var currentSortComparator: any TickerSortComparator = TickerNoneComparator()
+        // Cell
+        var tickerDisplayType: GridType
         var tickerCellViewModels: [TickerCellViewModel] = []
         
-        // - 연산 프로퍼티
+        // Currency
+        var currencyType: CurrencyType?
+        var exchangeRate: Double?
+        
+        
         var isLoaded: Bool {
-            !tickerCellViewModels.isEmpty
+            !tickerCellViewModels.isEmpty && currencyType != nil && exchangeRate != nil
         }
     }
     
     enum Action {
         
         // Event
-        case updateCurrencyType(CurrencyType)
+        case currencyTypeUpdated(type: CurrencyType, rate: Double)
         case changeSortingCriteria(comparator: any TickerSortComparator)
         case fetchList(list: [Twenty4HourTickerForSymbolVO])
     }

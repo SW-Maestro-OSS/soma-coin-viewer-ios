@@ -28,10 +28,8 @@ class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
         self._state = Published(initialValue: initialState)
         self.state.currencyType = i18NManager.getCurrencyType()
         self.state.languageType = i18NManager.getLanguageType()
-        self.state.gridType = i18NManager.getGridType()
         self.state.settingCellViewModel = createSettingCellViewModels()
         
-        i18NManager.setExchangeRate()
         createStateStream()
         
         print(state)
@@ -49,7 +47,8 @@ class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
             case .language :
                 newState.languageType = i18NManager.getLanguageType()
             case .grid :
-                newState.gridType = i18NManager.getGridType()
+                break
+//                newState.gridType = i18NManager.getGridType()
             }
             return newState
         }
@@ -89,8 +88,9 @@ extension SettingViewModel {
             i18NManager.setLanguageType(type: languageType)
             action.send(.tap(.language))
         case .gridType(let gridType):
-            i18NManager.setGridType(type: gridType)
-            action.send(.tap(.grid))
+            break
+//            i18NManager.setGridType(type: gridType)
+//            action.send(.tap(.grid))
         }
     }
 }

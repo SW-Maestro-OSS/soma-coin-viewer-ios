@@ -18,6 +18,7 @@ public final class AllMarketTickerBuilder {
     // DI
     @Injected private var webSocketManagementHelper: WebSocketManagementHelper
     @Injected private var allMarketTickersUseCase: AllMarketTickersUseCase
+    @Injected private var exchangeRateUseCase: ExchangeRateUseCase
     @Injected private var userConfigurationRepository: UserConfigurationRepository
     @Injected private var i18NManager: I18NManager
     
@@ -28,7 +29,8 @@ public final class AllMarketTickerBuilder {
         let viewModel = AllMarketTickerViewModel(
             socketHelper: webSocketManagementHelper,
             i18NManager: i18NManager,
-            useCase: allMarketTickersUseCase,
+            allMarketTickersUseCase: allMarketTickersUseCase,
+            exchangeUseCase: exchangeRateUseCase,
             userConfigurationRepository: userConfigurationRepository
         )
         let view = AllMarketTickerView(viewModel: viewModel)

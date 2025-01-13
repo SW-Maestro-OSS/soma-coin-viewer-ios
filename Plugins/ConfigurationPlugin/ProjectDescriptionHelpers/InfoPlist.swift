@@ -34,7 +34,7 @@ extension InfoPlist {
         ],
         
         // API keys
-        "OPENEX_API_KEY": "$(KOREAEXIM_API_KEY)"
+        "OPENEX_API_KEY": "$(OPENEX_API_KEY)"
     ]
     
     public static func extended_app_plist(with: [String: ProjectDescription.Plist.Value]) -> InfoPlist {
