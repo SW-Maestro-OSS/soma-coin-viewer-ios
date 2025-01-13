@@ -14,16 +14,19 @@ import CoreUtil
 import I18N
 import WebSocketManagementHelper
 
-class RootViewModel: UDFObservableObject {
+final class RootViewModel: UDFObservableObject, RootViewModelable {
 
-    @Injected private var i18NManager : I18NManager
-    
+    // DI
+    private let i18NManager : I18NManager
     private let webSocketHelper: WebSocketManagementHelper
     
     
     // Public state interface
     @Published var state: State = .init()
     
+    
+    // Router
+    @Published var router: RootRouting?
     
     
     // Publishers
@@ -32,9 +35,10 @@ class RootViewModel: UDFObservableObject {
     var store: Set<AnyCancellable> = .init()
     
     
-    init(webSocketHelper: WebSocketManagementHelper) {
+    init(webSocketHelper: WebSocketManagementHelper, i18NManager : I18NManager) {
         
         self.webSocketHelper = webSocketHelper
+        self.i18NManager = i18NManager
         
         // Create state stream
         createStateStream()
@@ -45,6 +49,10 @@ class RootViewModel: UDFObservableObject {
         i18NManager.setExchangeRate()
     }
     
+    
+    func action(_ action: Action) {
+        self.action.send(action)
+    }
     
     
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
@@ -94,12 +102,23 @@ class RootViewModel: UDFObservableObject {
     
     func reduce(_ action: Action, state: State) -> State {
         
+        var newState = state
+        
         switch action {
         case .isWebSocketConnected(let isConnected):
             
-            var newState = state
             newState.isWebSocketConnected = isConnected
+            return newState
             
+        case .onAppear:
+            
+            if state.isFirstAppear {
+                
+                // 첫번째 appear인 경우 메인 화면을 표시
+                
+                newState.isFirstAppear = false
+                router?.presentMainTabBar()
+            }
             return newState
             
         default:
@@ -127,11 +146,14 @@ class RootViewModel: UDFObservableObject {
     }
 }
 
+
+// MARK: Action & State
 extension RootViewModel {
     
     enum Action {
         
         // Events
+        case onAppear
         case app_cycle_background
         case app_cycle_will_foreground
         
@@ -141,5 +163,6 @@ extension RootViewModel {
     
     struct State {
         var isWebSocketConnected: Bool?
+        var isFirstAppear: Bool = true
     }
 }
