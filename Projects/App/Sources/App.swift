@@ -14,13 +14,10 @@ struct CoinViewerApp: App {
     
     @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
     
-    private let rootCoordinator: RootCoordinator = .init()
-    
     var body: some Scene {
         
         WindowGroup {
-            
-            rootCoordinator.start()
+            appDelegate.rootRouter.view
         }
     }
 }

@@ -17,7 +17,6 @@ public class SharedAssembly: Assembly {
         
         // MARK: WebSocketManagementHelper
         container.register(WebSocketManagementHelper.self) { _ in
-            
             DefaultWebSocketManagementHelper()
         }
         .inObjectScope(.container)

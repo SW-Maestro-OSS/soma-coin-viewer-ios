@@ -10,12 +10,18 @@ import Combine
 
 import BaseFeature
 
-class TabBarViewModel: UDFObservableObject {
+class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     
+    // State
     @Published var state: State
     
     var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = .init()
+    
+    
+    // Router
+    @Published var router: TabBarRouting?
+    
     
     init() {
         

@@ -1,5 +1,5 @@
 //
-//  TabBarCoordinator.swift
+//  TabBarBuilder.swift
 //  RootModule
 //
 //  Created by choijunios on 12/16/24.
@@ -9,50 +9,14 @@ import SwiftUI
 
 import BaseFeature
 
-class TabBarCoordinator: Coordinator {
+class TabBarCoordinator {
     
-    var present: ((OutsideDestination) -> ())?
-    var children: [any Coordinator] = []
-    
-    weak var delegate: CoordinatorFinishDelegate?
-    
-    func start() -> TabBarView {
+    func build() -> TabBarRouter {
         
         let viewModel: TabBarViewModel = .init()
+        let view = TabBarView(viewModel: viewModel)
+        let router = TabBarRouter(view: view, viewModel: viewModel)
         
-        return TabBarView(
-            viewModel: viewModel,
-            destinationView: tabViews(page:)
-        )
-    }
-}
-
-
-// MARK: TabViews
-extension TabBarCoordinator {
-    
-    func tabViews(page: TabBarPage) -> any View {
-        
-        switch page {
-        case .allMarketTicker:
-            
-            // Coordinator
-            Text("allMarketTicker")
-            
-        case .setting:
-            
-            // Coordinator
-            Text("setting")
-            
-        }
-    }
-}
-
-
-// MARK: External navigaiton
-extension TabBarCoordinator {
-    
-    enum OutsideDestination {
-        
+        return router
     }
 }
