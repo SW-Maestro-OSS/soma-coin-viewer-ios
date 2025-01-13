@@ -50,7 +50,6 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
         // Subscribe to notifications
         setAppLifeCycleNotification()
         
-        i18NManager.setExchangeRate()
     }
     
     

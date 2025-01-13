@@ -43,17 +43,17 @@ struct TickerListCellView: View {
                         Spacer(minLength: 0)
                     }
                     .padding(.leading, 10)
-                    .frame(width: geo.size.width * 0.4)
+                    .frame(width: geo.size.width * 0.33)
                     
                     
                     // MARK: Price
                     HStack(spacing: 0) {
                         Spacer(minLength: 0)
                         CVText(text: $viewModel.state.priceText)
-                            .font(.body)
+                            .font(.footnote)
                             .lineLimit(1)
                     }
-                    .frame(width: geo.size.width * 0.2)
+                    .frame(width: geo.size.width * 0.33)
                     
                     
                     // MARK: 24h change percent
@@ -64,7 +64,7 @@ struct TickerListCellView: View {
                             .lineLimit(1)
                     }
                     .padding(.trailing, 10)
-                    .frame(width: geo.size.width * 0.4)
+                    .frame(width: geo.size.width * 0.33)
                 }
                 Spacer(minLength: 0)
             }

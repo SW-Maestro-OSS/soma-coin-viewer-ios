@@ -3,6 +3,8 @@ import UIKit
 
 import RootFeature
 
+import DomainInterface
+
 import WebSocketManagementHelper
 import CoreUtil
 
@@ -23,6 +25,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // 웹소켓 연결
         let webSocketHelper = DependencyInjector.shared.resolve(WebSocketManagementHelper.self)
         webSocketHelper.requestConnection(connectionType: .freshStart)
+        
+        
+        // 환율정보 Fetch
+        let exchangeRateUseCase = DependencyInjector.shared.resolve(ExchangeRateUseCase.self)
+        exchangeRateUseCase.prepare()
         
         
         // RootCoordinator할당

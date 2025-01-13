@@ -12,16 +12,16 @@ public struct CVNumber: Comparable, CustomStringConvertible, ExpressibleByFloatL
     public typealias FloatLiteralType = Double
     
     
-    private var wrappedNumber: Decimal
+    public private(set) var wrappedNumber: Decimal
     
     public init(_ wrappedNumber: Double) {
-        
         self.wrappedNumber = Decimal(wrappedNumber)
     }
-    
+    public init(_ wrappedNumber: Decimal) {
+        self.wrappedNumber = wrappedNumber
+    }
     public init(floatLiteral value: Double) {
-        
-        wrappedNumber = Decimal(value)
+        self.wrappedNumber = Decimal(value)
     }
     
     public func roundToTwoDecimalPlaces() -> String {

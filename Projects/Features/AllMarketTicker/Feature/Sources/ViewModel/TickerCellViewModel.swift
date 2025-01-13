@@ -17,22 +17,36 @@ import SimpleImageProvider
 
 final class TickerCellViewModel: Identifiable, UDFObservableObject {
     
+    // Id
     public let id: String
     
-    @Published public var state: State
     
+    // Configuration
+    let tickerVO: Twenty4HourTickerForSymbolVO
+    let currencyConfig: CurrencyConfig
+    
+    
+    // State
+    @Published public var state: State = .init(
+        firstSymbolImageURL: "",
+        pairSymbolNameText: "",
+        priceText: "",
+        percentText: ""
+    )
     private(set) var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
     
-    init(tickerVO: Twenty4HourTickerForSymbolVO) {
+    init(config: Configuration) {
         
-        self.id = tickerVO.pairSymbol
+        self.id = config.tickerVO.pairSymbol
+        self.tickerVO = config.tickerVO
+        self.currencyConfig = config.currencyConfig
         
         let initialState: State = .init(
-            firstSymbolImageURL: Self.createImageURL(tickerVO.firstSymbol),
+            firstSymbolImageURL: createImageURL(),
             pairSymbolNameText: tickerVO.pairSymbol,
-            priceText: tickerVO.price.roundToTwoDecimalPlaces(),
-            percentText: tickerVO.changedPercent.roundToTwoDecimalPlaces().getPlusText() + " %"
+            priceText: createPriceText(),
+            percentText: createPercentText()
         )
         
         self._state = Published(initialValue: initialState)
@@ -40,25 +54,79 @@ final class TickerCellViewModel: Identifiable, UDFObservableObject {
         createStateStream()
     }
     
+    
     func reduce(_ action: Action, state: State) -> State {
         
-        return state
-    }
-    
-    private static func createImageURL(_ symbol: String) -> String {
+        var newState = state
         
-        let baseURL = URL(string: "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/32/icon")!
-        let symbolImageURL = baseURL.appendingPathComponent(symbol.lowercased(), conformingTo: .png)
+        switch action {
+        case .updatePriceText(let text):
+            newState.priceText = text
+        }
         
-        return symbolImageURL.absoluteString
+        return newState
     }
 }
 
+
+// MARK: Configuration
+extension TickerCellViewModel {
+    
+    struct Configuration {
+        let tickerVO: Twenty4HourTickerForSymbolVO
+        let currencyConfig: CurrencyConfig
+    }
+    
+    struct CurrencyConfig {
+        let type: CurrencyType
+        let rate: Double
+    }
+}
+
+
+// MARK: Appearance
+private extension TickerCellViewModel {
+    
+    func createPriceText() -> String {
+        
+        let currencyType = currencyConfig.type
+        let currencySymbol = currencyType.symbol
+        let exchangeRate = currencyConfig.rate
+        
+        let dollarPrice: Decimal = tickerVO.price.wrappedNumber
+        let formattedPrice = CVNumber(dollarPrice * Decimal(exchangeRate))
+        var priceText = formattedPrice.roundToTwoDecimalPlaces()
+        
+        if currencyType.isPrefix {
+            priceText = "\(currencySymbol) \(priceText)"
+        } else {
+            priceText = "\(priceText) \(currencySymbol)"
+        }
+        
+        return priceText
+    }
+    
+    func createImageURL() -> String {
+        
+        guard let firstSymbol = tickerVO.firstSymbol else { return "" }
+        let baseURL = URL(string: "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/32/icon")!
+        let symbolImageURL = baseURL.appendingPathComponent(firstSymbol.lowercased(), conformingTo: .png)
+        
+        return symbolImageURL.absoluteString
+    }
+    
+    func createPercentText() -> String {
+        tickerVO.changedPercent.roundToTwoDecimalPlaces().getPlusText() + " %"
+    }
+}
+
+
+// MARK: Action & State
 extension TickerCellViewModel {
     
     enum Action {
             
-        
+        case updatePriceText(String)
     }
     
     struct State {
@@ -70,6 +138,8 @@ extension TickerCellViewModel {
     }
 }
 
+
+// MARK: String + Extension
 fileprivate extension String {
     
     func getPlusText() -> String {

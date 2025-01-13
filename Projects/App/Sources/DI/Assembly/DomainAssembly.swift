@@ -20,8 +20,9 @@ class DomainAssembly: Assembly {
             DefaultAllMarketTickersUseCase()
         }
         
-        container.register(PriceUseCase.self) { _ in
-            DefaultPriceUseCase()
+        container.register(ExchangeRateUseCase.self) { _ in
+            DefaultExchangeRateUseCase()
         }
+        .inObjectScope(.container)
     }
 }

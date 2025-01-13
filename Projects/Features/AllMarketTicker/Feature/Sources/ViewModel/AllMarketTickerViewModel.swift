@@ -13,12 +13,15 @@ import BaseFeature
 import WebSocketManagementHelper
 import DomainInterface
 import CoreUtil
+import I18N
 
 final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModelDelegate, AllMarketTickerViewModelable {
     
-    // Service locator
+    // DI
     private let webSocketManagementHelper: WebSocketManagementHelper
+    private let i18NManager: I18NManager
     private let allMarketTickersUseCase: AllMarketTickersUseCase
+    private let exchangeUseCase: ExchangeRateUseCase
     private let userConfigurationRepository: UserConfigurationRepository
     
     
@@ -34,10 +37,18 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
     var store: Set<AnyCancellable> = []
     
     
-    init(socketHelper: WebSocketManagementHelper, useCase: AllMarketTickersUseCase, userConfigurationRepository: UserConfigurationRepository) {
+    init(
+        socketHelper: WebSocketManagementHelper,
+        i18NManager: I18NManager,
+        allMarketTickersUseCase: AllMarketTickersUseCase,
+        exchangeUseCase: ExchangeRateUseCase,
+        userConfigurationRepository: UserConfigurationRepository
+    ) {
         
         self.webSocketManagementHelper = socketHelper
-        self.allMarketTickersUseCase = useCase
+        self.i18NManager = i18NManager
+        self.allMarketTickersUseCase = allMarketTickersUseCase
+        self.exchangeUseCase = exchangeUseCase
         self.userConfigurationRepository = userConfigurationRepository
         
         
@@ -45,7 +56,10 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         let tickerDisplayType = userConfigurationRepository.getGridType()
         
         let initialState: State = .init(
-            tickerDisplayType: tickerDisplayType
+            sortComparator: TickerNoneComparator(),
+            tickerDisplayType: tickerDisplayType,
+            currencyType: nil,
+            exchangeRate: nil
         )
         self._state = Published(initialValue: initialState)
         
@@ -60,61 +74,83 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         
         // Subscribe to data stream
         subscribeToTickerDataStream()
+        
+        
+        // Get currency type
+        let currencyType: CurrencyType = i18NManager.getCurrencyType()
+        exchangeUseCase
+            .getExchangeRate(base: .dollar, to: currencyType)
+            .sink { [weak self] rate in
+                self?.action.send(.currencyTypeUpdated(type: currencyType, rate: rate))
+            }
+            .store(in: &store)
     }
     
     func reduce(_ action: Action, state: State) -> State {
         
+        var newState = state
+        
         switch action {
         case .changeSortingCriteria(let comparator):
             
-            var newState = state
-            
-            newState.currentSortComparator = comparator
-            
-            let sortedTickerList = state.tickerList.sorted(by: comparator)
-            
-            newState.tickerList = sortedTickerList
-            newState.tickerCellViewModels = sortedTickerList.map(TickerCellViewModel.init)
-            
-            return newState
+            let sortedTickerViewModels = state.tickerCellViewModels.sorted(by: comparator)
+            newState.tickerCellViewModels = sortedTickerViewModels
+            newState.sortComparator = comparator
             
         case .fetchList(let list):
             
-            var newState = state
+            let currentComparator = state.sortComparator
+            let tickerViewModels = list.map { tickerVO in
+                TickerCellViewModel(config: .init(
+                    tickerVO: tickerVO,
+                    currencyConfig: .init(
+                        type: state.currencyType ?? .dollar,
+                        rate: state.exchangeRate ?? 0.0
+                    )
+                ))
+            }
+            let sortedTickerViewModels = tickerViewModels.sorted(by: currentComparator)
+            newState.tickerCellViewModels = sortedTickerViewModels
             
-            let currentComparator = state.currentSortComparator
+        case .currencyTypeUpdated(let type, let rate):
             
-            let sortedTickerList = list.sorted(by: currentComparator)
+            newState.currencyType = type
+            newState.exchangeRate = rate
             
-            newState.tickerList = sortedTickerList
-            newState.tickerCellViewModels = sortedTickerList.map(TickerCellViewModel.init)
-            
-            return newState
+        default:
+            return state
         }
+        return newState
     }
 }
+
 
 // MARK: State & Action
 extension AllMarketTickerViewModel {
     
     struct State {
         
-        // - 저장 프로퍼티
-        var tickerList: [Twenty4HourTickerForSymbolVO] = []
-        var tickerDisplayType: GridType
+        // Sort
+        var sortComparator: any TickerSortComparator
         
-        var currentSortComparator: any TickerSortComparator = TickerNoneComparator()
+        // Cell
+        var tickerDisplayType: GridType
         var tickerCellViewModels: [TickerCellViewModel] = []
         
-        // - 연산 프로퍼티
+        // Currency
+        var currencyType: CurrencyType?
+        var exchangeRate: Double?
+        
+        
         var isLoaded: Bool {
-            !tickerCellViewModels.isEmpty
+            !tickerCellViewModels.isEmpty && currencyType != nil && exchangeRate != nil
         }
     }
     
     enum Action {
         
         // Event
+        case currencyTypeUpdated(type: CurrencyType, rate: Double)
         case changeSortingCriteria(comparator: any TickerSortComparator)
         case fetchList(list: [Twenty4HourTickerForSymbolVO])
     }
@@ -192,13 +228,15 @@ extension AllMarketTickerViewModel {
 }
 
 
-extension Array where Element == Twenty4HourTickerForSymbolVO {
+// MARK: Array + Extension
+extension Array where Element == TickerCellViewModel {
     
     func sorted(by comparator: any TickerSortComparator) -> Self {
         
         self.sorted { lhs, rhs in
             
-            comparator.compare(lhs: lhs, rhs: rhs)
+            comparator.compare(lhs: lhs.tickerVO, rhs: rhs.tickerVO)
         }
     }
 }
+
