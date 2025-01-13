@@ -43,6 +43,7 @@ let project = Project(
             product: .framework,
             bundleId: "com.CoinViewer.I18N",
             sources: ["Sources/**"],
+            resources: ["Resources/**"],
             dependencies: [
                 
                 D.Domain.interface,
