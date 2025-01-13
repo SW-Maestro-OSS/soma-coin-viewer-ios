@@ -1,11 +1,10 @@
 {
-    // LaunchScreen
     "LaunchScreen_title" : {
         "en" : "CoinViewer",
         "kr" : "코인뷰어",
     },
     
-    // AllMarketTickerPage
+    
     "AllMarketTickerPage_comparator_symbol" : {
         "en" : "Symbol",
         "kr" : "심볼",

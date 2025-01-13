@@ -17,28 +17,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
         
-        
         // 의존성 주입
         dependencyInjection()
         
-        
-        // 웹소켓 연결
-        let webSocketHelper = DependencyInjector.shared.resolve(WebSocketManagementHelper.self)
-        webSocketHelper.requestConnection(connectionType: .freshStart)
-        
-        
-        // 환율정보 Fetch
-        let exchangeRateUseCase = DependencyInjector.shared.resolve(ExchangeRateUseCase.self)
-        exchangeRateUseCase.prepare()
-        
-        
         // RootCoordinator할당
         self.rootRouter = RootBuilder().build()
-        
-        
-        // 앱 런칭 후 2초동안 스플래쉬화면을 유지
-        sleep(2)
-        
         return true
     }
     

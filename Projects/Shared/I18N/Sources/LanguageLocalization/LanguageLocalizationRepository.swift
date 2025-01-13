@@ -23,12 +23,14 @@ public class DefaultLanguageLocalizationRepository: LanguageLocalizationReposito
             fatalError()
         }
         
-        guard
-            let jsonData = try? Data(contentsOf: url),
-            let decoded = try? JSONDecoder().decode([String: [String: String]].self, from: jsonData)
-        else { fatalError()}
+        do {
+            let jsonData = try Data(contentsOf: url)
+            let decoded = try JSONDecoder().decode([String: [String: String]].self, from: jsonData)
+            self.localizableTextData = decoded
+        } catch {
+            fatalError(error.localizedDescription)
+        }
         
-        self.localizableTextData = decoded
     }
     
     public func getString(key: String, lanCode: String) -> String {
