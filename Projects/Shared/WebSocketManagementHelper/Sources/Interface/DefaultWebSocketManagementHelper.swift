@@ -5,7 +5,6 @@
 
 import Foundation
 
-import WebSocketManagementHelperInterface
 import DataSource
 import CoreUtil
 
