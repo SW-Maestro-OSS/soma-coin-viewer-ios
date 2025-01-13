@@ -12,7 +12,7 @@ import WebSocketManagementHelper
 
 import CoreUtil
 
-public class AllMarketTickerBuilder {
+public final class AllMarketTickerBuilder {
     
     // DI
     @Injected private var webSocketManagementHelper: WebSocketManagementHelper

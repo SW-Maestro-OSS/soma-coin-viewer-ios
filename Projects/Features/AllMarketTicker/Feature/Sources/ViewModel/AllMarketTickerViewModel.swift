@@ -14,16 +14,12 @@ import WebSocketManagementHelper
 import DomainInterface
 import CoreUtil
 
-class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModelDelegate, AllMarketTickerViewModelable {
+final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModelDelegate, AllMarketTickerViewModelable {
     
     // Service locator
     private let webSocketManagementHelper: WebSocketManagementHelper
     private let allMarketTickersUseCase: AllMarketTickersUseCase
     private let userConfigurationRepository: UserConfigurationRepository
-    
-    
-    // Router
-    @Published var router: AllMarketTickerRouting?
     
     
     // Publishing state

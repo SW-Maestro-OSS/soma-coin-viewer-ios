@@ -9,11 +9,9 @@ import SwiftUI
 
 import BaseFeature
 
-protocol AllMarketTickerRouting: AnyObject {
-    
-}
+protocol AllMarketTickerRouting: AnyObject { }
 
-public class AllMarketTickerRouter: Router<AllMarketTickerViewModelable>, AllMarketTickerRouting {
+public final class AllMarketTickerRouter: Router<AllMarketTickerViewModelable>, AllMarketTickerRouting {
     
     init(view: AllMarketTickerView, viewModel: AllMarketTickerViewModel) {
         super.init(view: AnyView(view), viewModel: viewModel)
