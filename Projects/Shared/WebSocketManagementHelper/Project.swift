@@ -17,7 +17,7 @@ let project = Project(
         .target(
             name: "WebSocketManagementHelper",
             destinations: .iOS,
-            product: .staticLibrary,
+            product: .framework,
             bundleId: "com.choijunios.shared.WebSocketManagementHelper",
             sources: ["Sources/**"],
             dependencies: [
