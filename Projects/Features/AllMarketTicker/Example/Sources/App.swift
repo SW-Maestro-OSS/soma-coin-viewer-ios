@@ -9,7 +9,7 @@ import SwiftUI
 
 @testable import AllMarketTickerFeature
 
-import WebSocketManagementHelperInterface
+import WebSocketManagementHelper
 import DomainInterface
 import CoreUtil
 

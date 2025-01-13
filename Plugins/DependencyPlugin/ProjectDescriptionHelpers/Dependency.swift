@@ -45,8 +45,6 @@ public enum ModuleDependency {
         
         public static let WebSocketManagementHelper: TargetDependency = .project(target: "WebSocketManagementHelper", path: .relativeToRoot("Projects/Shared/WebSocketManagementHelper"))
         
-        public static let WebSocketManagementHelperInterface: TargetDependency = .project(target: "WebSocketManagementHelperInterface", path: .relativeToRoot("Projects/Shared/WebSocketManagementHelper"))
-        
         public static let I18N: TargetDependency = .project(target: "I18N", path: .relativeToRoot("Projects/Shared/I18N"))
     }
     

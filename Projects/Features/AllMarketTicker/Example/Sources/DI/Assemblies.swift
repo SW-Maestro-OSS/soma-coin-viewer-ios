@@ -14,7 +14,6 @@ import DomainInterface
 import Domain
 
 import WebSocketManagementHelper
-import WebSocketManagementHelperInterface
 
 
 import Swinject
@@ -36,7 +35,6 @@ public class Assemblies: Assembly {
         
         // MARK: Shared
         container.register(WebSocketManagementHelper.self) { _ in
-            
             DefaultWebSocketManagementHelper()
         }
         .inObjectScope(.container)

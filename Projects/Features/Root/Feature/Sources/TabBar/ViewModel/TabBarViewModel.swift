@@ -8,14 +8,24 @@
 import SwiftUI
 import Combine
 
-import BaseFeatureInterface
+import BaseFeature
 
-class TabBarViewModel: UDFObservableObject {
+class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     
+    // State
     @Published var state: State
     
     var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = .init()
+    
+    
+    // Router
+    @Published private var _router: WeakTabBarRouting = .init(nil)
+    var router: TabBarRouting? {
+        get { _router.value }
+        set { _router = WeakTabBarRouting(newValue) }
+    }
+    
     
     init() {
         
@@ -46,5 +56,18 @@ extension TabBarViewModel {
     enum Action {
         
         // 로컬라이제이션 관련 액션
+    }
+}
+
+
+private extension TabBarViewModel {
+ 
+    class WeakTabBarRouting {
+        
+        weak var value: TabBarRouting?
+        
+        init(_ value: TabBarRouting?) {
+            self.value = value
+        }
     }
 }

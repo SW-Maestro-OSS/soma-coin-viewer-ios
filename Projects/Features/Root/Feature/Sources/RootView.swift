@@ -7,25 +7,21 @@
 
 import SwiftUI
 
-import BaseFeatureInterface
+import BaseFeature
 
-public struct RootView: View {
+struct RootView: View {
     
+    // View model
     @StateObject private var viewModel: RootViewModel
     
-    @ObservedObject private var router: Router
-    
-    @ViewBuilder private var destinationView: (RootDestination) -> any View
-    
-    init(viewModel: RootViewModel, router: Router, destinationView: @escaping (RootDestination) -> any View) {
+    init(viewModel: RootViewModel) {
+        
         self._viewModel = StateObject(wrappedValue: viewModel)
-        self._router = ObservedObject(wrappedValue: router)
-        self.destinationView = destinationView
     }
     
-    public var body: some View {
+    var body: some View {
         
-        NavigationStack(path: $router.path) {
+        NavigationStack(path: viewModel.router?.getPath() ?? .constant(.init())) {
             
             VStack {
                 
@@ -36,11 +32,19 @@ public struct RootView: View {
                 }
                 
             }
-                .navigationDestination(for: RootDestination.self) { destination in
-                    
-                    AnyView(destinationView(destination))
+            .navigationDestination(for: RootDestination.self) { destination in
+                
+                if let router = viewModel.router {
+                    AnyView(router.destinationView(destination: destination))
                         .navigationBarBackButtonHidden()
+                } else {
+                    
+                    Text("Router not found")
                 }
+            }
+        }
+        .onAppear {
+            viewModel.action(.onAppear)
         }
     }
 }

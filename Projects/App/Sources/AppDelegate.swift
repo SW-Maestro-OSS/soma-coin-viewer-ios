@@ -1,24 +1,35 @@
 
 import UIKit
 
-import WebSocketManagementHelperInterface
+import RootFeature
+
+import WebSocketManagementHelper
 import CoreUtil
 
 class AppDelegate: NSObject, UIApplicationDelegate {
+    
+    private(set) var rootRouter: RootRouter!
     
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
     ) -> Bool {
         
-        // #1. 의존성 주입
+        
+        // 의존성 주입
         dependencyInjection()
         
-        // #2. 웹소켓 연결
+        
+        // 웹소켓 연결
         let webSocketHelper = DependencyInjector.shared.resolve(WebSocketManagementHelper.self)
         webSocketHelper.requestConnection(connectionType: .freshStart)
         
-        // #3. 앱 런칭 후 2초동안 스플래쉬화면을 유지
+        
+        // RootCoordinator할당
+        self.rootRouter = RootBuilder().build()
+        
+        
+        // 앱 런칭 후 2초동안 스플래쉬화면을 유지
         sleep(2)
         
         return true
@@ -35,7 +46,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     private func dependencyInjection() {
         
         DependencyInjector.shared.assemble([
-            
             DataAssembly(),
             SharedAssembly(),
             DomainAssembly()

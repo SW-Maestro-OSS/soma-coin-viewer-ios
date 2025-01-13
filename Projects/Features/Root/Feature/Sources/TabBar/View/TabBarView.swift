@@ -10,11 +10,9 @@ import SwiftUI
 struct TabBarView: View {
     
     @StateObject private var viewModel: TabBarViewModel
-    @ViewBuilder private var destinationView: (TabBarPage) -> any View
     
-    init(viewModel: TabBarViewModel, destinationView: @escaping (TabBarPage) -> any View) {
+    init(viewModel: TabBarViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
-        self.destinationView = destinationView
     }
     
     var body: some View {
@@ -25,7 +23,11 @@ struct TabBarView: View {
                 
                 Tab {
                     
-                    AnyView(destinationView(page))
+                    if let router = viewModel.router {
+                        AnyView(router.destinationView(page))
+                    } else {
+                        Text("Router not found")
+                    }
                     
                 } label: {
                     

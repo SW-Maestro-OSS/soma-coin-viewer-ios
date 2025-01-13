@@ -10,11 +10,11 @@ import Combine
 
 import BaseFeature
 
-import WebSocketManagementHelperInterface
+import WebSocketManagementHelper
 import DomainInterface
 import CoreUtil
 
-class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModelDelegate {
+final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModelDelegate, AllMarketTickerViewModelable {
     
     // Service locator
     private let webSocketManagementHelper: WebSocketManagementHelper

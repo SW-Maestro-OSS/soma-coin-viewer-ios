@@ -7,19 +7,34 @@
 
 import SwiftUI
 
-public class Router: ObservableObject  {
+public protocol Routable: AnyObject {
     
-    @Published public var path: NavigationPath = .init()
+    associatedtype ViewModel
+}
+
+open class Router<ViewModel>: Routable {
     
-    public init() { }
+    public let view: AnyView
+    public let viewModel: ViewModel
     
-    public func present<Destination: Hashable>(destination: Destination) {
+    public private(set) var children: [any Routable] = []
+    
+    public init(view: AnyView, viewModel: ViewModel) {
         
-        path.append(destination)
+        self.view = view
+        self.viewModel = viewModel
     }
     
-    public func pop() {
+    public func attach(_ router: any Routable) {
+        children.append(router)
+    }
+    
+    public func dettach(_ router: any Routable) {
         
-        path.removeLast()
+        let childIndex = children.firstIndex(where: { $0 === router })
+        
+        if let childIndex {
+            children.remove(at: childIndex)
+        }
     }
 }
