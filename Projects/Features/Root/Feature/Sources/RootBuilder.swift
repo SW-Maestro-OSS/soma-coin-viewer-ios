@@ -33,7 +33,12 @@ public final class RootBuilder {
             i18NManager: i18NManager
         )
         let view = RootView(viewModel: viewModel)
-        let router = RootRouter(view: view, viewModel: viewModel)
+        let tabBarBuilder = TabBarBuilder()
+        let router = RootRouter(
+            tabBarBuilder: tabBarBuilder,
+            view: view,
+            viewModel: viewModel
+        )
         
         return router
     }

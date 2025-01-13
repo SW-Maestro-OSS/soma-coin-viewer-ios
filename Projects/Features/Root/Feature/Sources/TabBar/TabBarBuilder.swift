@@ -9,7 +9,7 @@ import SwiftUI
 
 import BaseFeature
 
-class TabBarCoordinator {
+class TabBarBuilder {
     
     func build() -> TabBarRouter {
         

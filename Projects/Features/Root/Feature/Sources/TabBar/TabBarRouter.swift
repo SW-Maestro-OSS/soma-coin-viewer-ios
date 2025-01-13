@@ -18,6 +18,8 @@ class TabBarRouter: Router<TabBarViewModelable>, TabBarRouting {
     
     init(view: TabBarView, viewModel: TabBarViewModel) {
         super.init(view: AnyView(view), viewModel: viewModel)
+        
+        viewModel.router = self
     }
 }
 

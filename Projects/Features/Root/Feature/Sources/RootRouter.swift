@@ -22,7 +22,15 @@ public class RootRouter: Router<RootViewModelable>, RootRouting {
     
     @Published private var path: NavigationPath = .init()
     
-    init(view: RootView, viewModel: RootViewModel) {
+    
+    // Builder
+    private let tabBarBuilder: TabBarBuilder
+    
+    
+    init(tabBarBuilder: TabBarBuilder, view: RootView, viewModel: RootViewModel) {
+        
+        self.tabBarBuilder = tabBarBuilder
+        
         super.init(view: AnyView(view), viewModel: viewModel)
         
         viewModel.router = self
@@ -59,7 +67,9 @@ extension RootRouter {
         switch destination {
         case .mainTabBarPage:
             
-            return Text("Tab Bar")
+            let tabBarRouter = tabBarBuilder.build()
+            
+            return tabBarRouter.view
             
         case .coinDetailPage:
             
