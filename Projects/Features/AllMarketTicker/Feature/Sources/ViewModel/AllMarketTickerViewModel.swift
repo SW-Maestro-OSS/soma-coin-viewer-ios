@@ -13,11 +13,13 @@ import BaseFeature
 import WebSocketManagementHelper
 import DomainInterface
 import CoreUtil
+import I18N
 
 final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModelDelegate, AllMarketTickerViewModelable {
     
-    // Service locator
+    // DI
     private let webSocketManagementHelper: WebSocketManagementHelper
+    private let i18NManager: I18NManager
     private let allMarketTickersUseCase: AllMarketTickersUseCase
     private let userConfigurationRepository: UserConfigurationRepository
     
@@ -34,9 +36,15 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
     var store: Set<AnyCancellable> = []
     
     
-    init(socketHelper: WebSocketManagementHelper, useCase: AllMarketTickersUseCase, userConfigurationRepository: UserConfigurationRepository) {
+    init(
+        socketHelper: WebSocketManagementHelper,
+        i18NManager: I18NManager,
+        useCase: AllMarketTickersUseCase,
+        userConfigurationRepository: UserConfigurationRepository
+    ) {
         
         self.webSocketManagementHelper = socketHelper
+        self.i18NManager = i18NManager
         self.allMarketTickersUseCase = useCase
         self.userConfigurationRepository = userConfigurationRepository
         
@@ -64,35 +72,29 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
     
     func reduce(_ action: Action, state: State) -> State {
         
+        var newState = state
+        
         switch action {
         case .changeSortingCriteria(let comparator):
-            
-            var newState = state
-            
             newState.currentSortComparator = comparator
             
-            let sortedTickerList = state.tickerList.sorted(by: comparator)
-            
-            newState.tickerList = sortedTickerList
-            newState.tickerCellViewModels = sortedTickerList.map(TickerCellViewModel.init)
-            
-            return newState
+            let sortedTickerViewModels = state.tickerCellViewModels.sorted(by: comparator)
+            newState.tickerCellViewModels = sortedTickerViewModels
             
         case .fetchList(let list):
             
-            var newState = state
-            
             let currentComparator = state.currentSortComparator
+            let tickerViewModels = list.map(TickerCellViewModel.init(tickerVO:))
+            let sortedTickerViewModels = tickerViewModels.sorted(by: currentComparator)
+            newState.tickerCellViewModels = sortedTickerViewModels
             
-            let sortedTickerList = list.sorted(by: currentComparator)
-            
-            newState.tickerList = sortedTickerList
-            newState.tickerCellViewModels = sortedTickerList.map(TickerCellViewModel.init)
-            
-            return newState
+        default:
+            return state
         }
+        return newState
     }
 }
+
 
 // MARK: State & Action
 extension AllMarketTickerViewModel {
@@ -100,7 +102,6 @@ extension AllMarketTickerViewModel {
     struct State {
         
         // - 저장 프로퍼티
-        var tickerList: [Twenty4HourTickerForSymbolVO] = []
         var tickerDisplayType: GridType
         
         var currentSortComparator: any TickerSortComparator = TickerNoneComparator()
@@ -115,6 +116,7 @@ extension AllMarketTickerViewModel {
     enum Action {
         
         // Event
+        case updateCurrencyType(CurrencyType)
         case changeSortingCriteria(comparator: any TickerSortComparator)
         case fetchList(list: [Twenty4HourTickerForSymbolVO])
     }
@@ -192,13 +194,15 @@ extension AllMarketTickerViewModel {
 }
 
 
-extension Array where Element == Twenty4HourTickerForSymbolVO {
+// MARK: Array + Extension
+extension Array where Element == TickerCellViewModel {
     
     func sorted(by comparator: any TickerSortComparator) -> Self {
         
         self.sorted { lhs, rhs in
             
-            comparator.compare(lhs: lhs, rhs: rhs)
+            comparator.compare(lhs: lhs.tickerVO, rhs: rhs.tickerVO)
         }
     }
 }
+

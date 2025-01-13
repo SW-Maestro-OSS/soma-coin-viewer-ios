@@ -12,6 +12,7 @@ import SwiftUI
 import WebSocketManagementHelper
 import DomainInterface
 import CoreUtil
+import I18N
 
 @main
 struct CoinViewerApp: App {
@@ -25,6 +26,7 @@ struct CoinViewerApp: App {
             AllMarketTickerView(
                 viewModel: .init(
                     socketHelper: DependencyInjector.shared.resolve(WebSocketManagementHelper.self),
+                    i18NManager: DependencyInjector.shared.resolve(I18NManager.self),
                     useCase: DependencyInjector.shared.resolve(AllMarketTickersUseCase.self),
                     userConfigurationRepository: DependencyInjector.shared.resolve(UserConfigurationRepository.self)
                 )

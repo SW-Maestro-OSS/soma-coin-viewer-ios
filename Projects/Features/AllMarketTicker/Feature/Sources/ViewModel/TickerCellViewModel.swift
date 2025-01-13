@@ -24,8 +24,11 @@ final class TickerCellViewModel: Identifiable, UDFObservableObject {
     private(set) var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
     
+    let tickerVO: Twenty4HourTickerForSymbolVO
+    
     init(tickerVO: Twenty4HourTickerForSymbolVO) {
         
+        self.tickerVO = tickerVO
         self.id = tickerVO.pairSymbol
         
         let initialState: State = .init(
@@ -42,8 +45,16 @@ final class TickerCellViewModel: Identifiable, UDFObservableObject {
     
     func reduce(_ action: Action, state: State) -> State {
         
-        return state
+        var newState = state
+        
+        switch action {
+        case .updatePriceText(let text):
+            newState.priceText = text
+        }
+        
+        return newState
     }
+    
     
     private static func createImageURL(_ symbol: String) -> String {
         
@@ -54,11 +65,22 @@ final class TickerCellViewModel: Identifiable, UDFObservableObject {
     }
 }
 
+
+// MARK: Public interface
+extension TickerCellViewModel {
+    
+    func update(priceText: String) {
+        action.send(.updatePriceText(priceText))
+    }
+}
+
+
+// MARK: Action & State
 extension TickerCellViewModel {
     
     enum Action {
             
-        
+        case updatePriceText(String)
     }
     
     struct State {
@@ -70,6 +92,8 @@ extension TickerCellViewModel {
     }
 }
 
+
+// MARK: String + Extension
 fileprivate extension String {
     
     func getPlusText() -> String {

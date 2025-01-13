@@ -11,6 +11,7 @@ import DomainInterface
 import WebSocketManagementHelper
 
 import CoreUtil
+import I18N
 
 public final class AllMarketTickerBuilder {
     
@@ -18,7 +19,7 @@ public final class AllMarketTickerBuilder {
     @Injected private var webSocketManagementHelper: WebSocketManagementHelper
     @Injected private var allMarketTickersUseCase: AllMarketTickersUseCase
     @Injected private var userConfigurationRepository: UserConfigurationRepository
-    
+    @Injected private var i18NManager: I18NManager
     
     public init() { }
     
@@ -26,6 +27,7 @@ public final class AllMarketTickerBuilder {
         
         let viewModel = AllMarketTickerViewModel(
             socketHelper: webSocketManagementHelper,
+            i18NManager: i18NManager,
             useCase: allMarketTickersUseCase,
             userConfigurationRepository: userConfigurationRepository
         )
