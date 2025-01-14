@@ -109,7 +109,6 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
         case .onAppear:
             
             if isFirstAppear {
-                
                 isFirstAppear = false
                 
                 // 웹소켓 연결

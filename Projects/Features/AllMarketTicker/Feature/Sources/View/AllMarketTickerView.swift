@@ -33,5 +33,6 @@ struct AllMarketTickerView: View {
                 cellViewModels: viewModel.state.tickerCellViewModels
             )
         }
+        .onAppear { viewModel.action(.onAppear) }
     }
 }

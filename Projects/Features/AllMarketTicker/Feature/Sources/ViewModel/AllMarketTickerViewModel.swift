@@ -25,8 +25,9 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
     private let userConfigurationRepository: UserConfigurationRepository
     
     
-    // Publishing state
+    // State
     @Published var state: State
+    private var isFirstAppear: Bool = true
     
     
     // Sub ViewModel
@@ -55,10 +56,12 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         // Initial configuration
         let initialTickerDisplayType = userConfigurationRepository.getGridType()
         let initialLanguageType = i18NManager.getLanguageType()
+        let initialCurrencyType = i18NManager.getCurrencyType()
         let initialState: State = .init(
             sortComparator: TickerNoneComparator(),
             tickerDisplayType: initialTickerDisplayType,
-            languageType: initialLanguageType
+            languageType: initialLanguageType,
+            currencyType: initialCurrencyType
         )
         self._state = Published(initialValue: initialState)
         
@@ -69,21 +72,39 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         
         // Create state stream
         createStateStream()
-        
-        
-        // Subscribe to data stream
-        subscribeToTickerDataStream()
-        
-        
-        // Get currency type
-        let currencyType: CurrencyType = i18NManager.getCurrencyType()
-        exchangeUseCase
-            .getExchangeRate(base: .dollar, to: currencyType)
-            .sink { [weak self] rate in
-                self?.action.send(.currencyTypeUpdated(type: currencyType, rate: rate))
-            }
-            .store(in: &store)
     }
+    
+    
+    func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
+        switch action {
+        case .onAppear:
+            let currentState = self.state
+            if self.isFirstAppear {
+                self.isFirstAppear = false
+                
+                // AllMarketTicker스트림 구독
+                subscribeToTickerDataStream()
+                
+                // I18N 스트림 구독
+                subscribeToI18NMutation()
+                
+                // 환율정보 가져오기
+                if let currencyType = currentState.currencyType {
+                    return exchangeUseCase
+                        .getExchangeRate(base: .dollar, to: currencyType)
+                        .map { Action.currencyTypeUpdated(type: currencyType, rate: $0) }
+                        .eraseToAnyPublisher()
+                }
+                break
+            }
+            break
+            
+        default:
+            break
+        }
+        return Just(action).eraseToAnyPublisher()
+    }
+    
     
     func reduce(_ action: Action, state: State) -> State {
         
@@ -111,15 +132,26 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
             let sortedTickerViewModels = tickerViewModels.sorted(by: currentComparator)
             newState.tickerCellViewModels = sortedTickerViewModels
             
-        case .currencyTypeUpdated(let type, let rate):
-            
-            newState.currencyType = type
+        case .currencyTypeUpdated(let currenyType, let rate):
+            newState.currencyType = currenyType
             newState.exchangeRate = rate
+            
+        case .languageTypeUpdated(let languageType):
+            newState.languageType = languageType
             
         default:
             return state
         }
         return newState
+    }
+}
+
+
+// MARK: Public interface
+extension AllMarketTickerViewModel {
+    
+    func action(_ action: Action) {
+        self.action.send(action)
     }
 }
 
@@ -153,6 +185,7 @@ extension AllMarketTickerViewModel {
     enum Action {
         
         // Event
+        case onAppear
         case currencyTypeUpdated(type: CurrencyType, rate: Double)
         case languageTypeUpdated(type: LanguageType)
         case changeSortingCriteria(comparator: any TickerSortComparator)
@@ -161,6 +194,7 @@ extension AllMarketTickerViewModel {
 }
 
 
+// MARK: Private
 private extension AllMarketTickerViewModel {
     
     func subscribeToTickerDataStream() {
@@ -188,6 +222,41 @@ private extension AllMarketTickerViewModel {
         ]
         tickerSortSelectorViewModels.forEach { $0.delegate = self }
         self.sortCompartorViewModels = tickerSortSelectorViewModels
+    }
+    
+    func subscribeToI18NMutation() {
+        
+        // MARK: 화폐정보변경
+        i18NManager
+            .getChangePublisher()
+            .receive(on: RunLoop.main)
+            .compactMap({ $0.currencyType })
+            .unretained(self)
+            .flatMap { vm, mutatedCurrencyType in
+                
+                // NOTE: currencyType의 경우 즉시 환율 정보를 가져오도록 한다.
+                
+                vm.exchangeUseCase
+                    .getExchangeRate(base: .dollar, to: mutatedCurrencyType)
+                    .map({ (mutatedCurrencyType, $0) })
+            }
+            .sink { [weak self] currencyType, rate in
+                guard let self else { return }
+                action.send(.currencyTypeUpdated(type: currencyType, rate: rate))
+            }
+            .store(in: &store)
+        
+        
+        // MARK: 언어정보 변경
+        i18NManager
+            .getChangePublisher()
+            .receive(on: RunLoop.main)
+            .compactMap({ $0.languageType })
+            .sink { [weak self] mutatedLanguage in
+                guard let self else { return }
+                action.send(.languageTypeUpdated(type: mutatedLanguage))
+            }
+            .store(in: &store)
     }
 }
 
