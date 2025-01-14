@@ -53,13 +53,12 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         
         
         // Initial configuration
-        let tickerDisplayType = userConfigurationRepository.getGridType()
-        
+        let initialTickerDisplayType = userConfigurationRepository.getGridType()
+        let initialLanguageType = i18NManager.getLanguageType()
         let initialState: State = .init(
             sortComparator: TickerNoneComparator(),
-            tickerDisplayType: tickerDisplayType,
-            currencyType: nil,
-            exchangeRate: nil
+            tickerDisplayType: initialTickerDisplayType,
+            languageType: initialLanguageType
         )
         self._state = Published(initialValue: initialState)
         
@@ -138,12 +137,16 @@ extension AllMarketTickerViewModel {
         var tickerCellViewModels: [TickerCellViewModel] = []
         
         // Currency
+        var languageType: LanguageType?
         var currencyType: CurrencyType?
         var exchangeRate: Double?
         
         
         var isLoaded: Bool {
-            !tickerCellViewModels.isEmpty && currencyType != nil && exchangeRate != nil
+            !tickerCellViewModels.isEmpty &&
+            languageType != nil &&
+            currencyType != nil &&
+            exchangeRate != nil
         }
     }
     
@@ -151,6 +154,7 @@ extension AllMarketTickerViewModel {
         
         // Event
         case currencyTypeUpdated(type: CurrencyType, rate: Double)
+        case languageTypeUpdated(type: LanguageType)
         case changeSortingCriteria(comparator: any TickerSortComparator)
         case fetchList(list: [Twenty4HourTickerForSymbolVO])
     }
@@ -177,36 +181,13 @@ private extension AllMarketTickerViewModel {
     
     func createTickerSortSelectorViewModels() {
         
-        let viewModels = [
-            
-            TickerSortSelectorViewModel(
-                id: "symbol_sort",
-                title: "Symbol",
-                ascendingComparator: TickerSymbolAscendingComparator(),
-                descendingComparator: TickerSymbolDescendingComparator()
-            ),
-            
-            TickerSortSelectorViewModel(
-                id: "price_sort",
-                title: "Price($)",
-                ascendingComparator: TickerPriceAscendingComparator(),
-                descendingComparator: TickerPriceDescendingComparator()
-            ),
-            
-            TickerSortSelectorViewModel(
-                id: "24hchange_sort",
-                title: "24h Changes(%)",
-                ascendingComparator: Ticker24hChangeAscendingComparator(),
-                descendingComparator: Ticker24hChangeDescendingComparator()
-            )
+        let tickerSortSelectorViewModels = [
+            SymbolSortingViewModel(),
+            PriceSortingViewModel(),
+            ChangeIn24hViewModel()
         ]
-        
-        viewModels.forEach { viewModel in
-            
-            viewModel.delegate = self
-        }
-        
-        self.sortCompartorViewModels = viewModels
+        tickerSortSelectorViewModels.forEach { $0.delegate = self }
+        self.sortCompartorViewModels = tickerSortSelectorViewModels
     }
 }
 
@@ -218,7 +199,7 @@ extension AllMarketTickerViewModel {
         
         // 정렬 버튼 UI에게 현재 선택된 정렬기준을 전파
         sortCompartorViewModels.forEach { sortViewModel in
-            
+
             sortViewModel.notifySelectedComparator(comparator)
         }
         
