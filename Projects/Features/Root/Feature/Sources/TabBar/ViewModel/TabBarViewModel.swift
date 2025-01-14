@@ -64,6 +64,7 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
             if isFirstAppear {
                 isFirstAppear = false
                 let languageType = i18NManager.getLanguageType()
+                subscribeToI18NMutation()
                 return Just(.applyLanguageType(languageType)).eraseToAnyPublisher()
             }
             break
@@ -82,6 +83,23 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
             return state
         }
         return newState
+    }
+}
+
+
+// MARK: Private
+private extension TabBarViewModel {
+    
+    func subscribeToI18NMutation() {
+        i18NManager
+            .getChangePublisher()
+            .compactMap({ $0.languageType })
+            .receive(on: RunLoop.main)
+            .sink { [weak self] mutatedLanType in
+                guard let self else { return }
+                action.send(.applyLanguageType(mutatedLanType))
+            }
+            .store(in: &store)
     }
 }
 
