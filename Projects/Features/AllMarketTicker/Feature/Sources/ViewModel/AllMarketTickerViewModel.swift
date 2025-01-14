@@ -17,6 +17,10 @@ import I18N
 
 final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModelDelegate, AllMarketTickerViewModelable {
     
+    // Stream
+    private let gridTypeChangePublisher: AnyPublisher<GridType, Never>
+    
+    
     // DI
     private let webSocketManagementHelper: WebSocketManagementHelper
     private let i18NManager: I18NManager
@@ -39,13 +43,15 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
     
     
     init(
+        gridTypeChangePublisher: AnyPublisher<GridType, Never>,
         socketHelper: WebSocketManagementHelper,
         i18NManager: I18NManager,
         allMarketTickersUseCase: AllMarketTickersUseCase,
         exchangeUseCase: ExchangeRateUseCase,
         userConfigurationRepository: UserConfigurationRepository
     ) {
-        
+       
+        self.gridTypeChangePublisher = gridTypeChangePublisher
         self.webSocketManagementHelper = socketHelper
         self.i18NManager = i18NManager
         self.allMarketTickersUseCase = allMarketTickersUseCase
@@ -87,6 +93,9 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
                 
                 // I18N 스트림 구독
                 subscribeToI18NMutation()
+                
+                // GridType변경 구독
+                subscribeToGridTypeChange()
                 
                 // 환율정보 가져오기
                 if let currencyType = currentState.currencyType {
@@ -139,6 +148,9 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         case .languageTypeUpdated(let languageType):
             newState.languageType = languageType
             
+        case .gridTypeUpdated(let gridType):
+            newState.tickerDisplayType = gridType
+            
         default:
             return state
         }
@@ -186,6 +198,7 @@ extension AllMarketTickerViewModel {
         
         // Event
         case onAppear
+        case gridTypeUpdated(type: GridType)
         case currencyTypeUpdated(type: CurrencyType, rate: Double)
         case languageTypeUpdated(type: LanguageType)
         case changeSortingCriteria(comparator: any TickerSortComparator)
@@ -255,6 +268,18 @@ private extension AllMarketTickerViewModel {
             .sink { [weak self] mutatedLanguage in
                 guard let self else { return }
                 action.send(.languageTypeUpdated(type: mutatedLanguage))
+            }
+            .store(in: &store)
+    }
+    
+    
+    func subscribeToGridTypeChange() {
+        
+        gridTypeChangePublisher
+            .receive(on: RunLoop.main)
+            .sink { [weak self] gridType in
+                guard let self else { return }
+                action.send(.gridTypeUpdated(type: gridType))
             }
             .store(in: &store)
     }

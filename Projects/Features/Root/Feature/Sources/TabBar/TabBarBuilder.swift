@@ -6,18 +6,28 @@
 //
 
 import SwiftUI
+import Combine
+
+import DomainInterface
 
 import AllMarketTickerFeature
+import SettingFeature
 import BaseFeature
 
 class TabBarBuilder {
     
     func build() -> TabBarRouter {
         
-        let viewModel: TabBarViewModel = .init()
+        let gridTypeChangePublisher = PassthroughSubject<GridType, Never>()
+        
+        let viewModel = TabBarViewModel(gridTypeChangePublisher: gridTypeChangePublisher)
         let view = TabBarView(viewModel: viewModel)
-        let allMarketTickerBuilder = AllMarketTickerBuilder()
+        let allMarketTickerBuilder = AllMarketTickerBuilder(
+            gridTypeChangePublisher: gridTypeChangePublisher.eraseToAnyPublisher()
+        )
+        let settingBuilder = SettingBuilder()
         let router = TabBarRouter(
+            settingBuilder: settingBuilder,
             allMarketTickerBuilder: allMarketTickerBuilder,
             view: view,
             viewModel: viewModel

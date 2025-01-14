@@ -9,16 +9,31 @@ import SwiftUI
 import Combine
 
 import BaseFeature
+
 import DomainInterface
+
 import I18N
 import CoreUtil
 
-class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
-    //Service Locator
-    @Injected var i18NManager: I18NManager
+public protocol SettingViewModelListener: AnyObject {
     
-    //Publishing State
+    func mutation(gridType: GridType)
+}
+
+class SettingViewModel : UDFObservableObject, SettingViewModelable, SettingViewModelDelegate {
+    
+    // DI
+    @Injected private var i18NManager: I18NManager
+    @Injected private var userConfigurationRepository: UserConfigurationRepository
+    
+    
+    // Listener
+    weak var listener: SettingViewModelListener?
+    
+    
+    // State
     @Published var state : State
+    
     
     var action : PassthroughSubject<Action, Never> = .init()
     var store : Set<AnyCancellable> = []
@@ -42,13 +57,12 @@ class SettingViewModel : UDFObservableObject, SettingViewModelDelegate {
             var newState = state
             
             switch type {
-            case .currency :
+            case .currency:
                 newState.currencyType = i18NManager.getCurrencyType()
-            case .language :
+            case .language:
                 newState.languageType = i18NManager.getLanguageType()
-            case .grid :
-                break
-//                newState.gridType = i18NManager.getGridType()
+            case .grid:
+                newState.gridType = userConfigurationRepository.getGridType()
             }
             return newState
         }
@@ -88,14 +102,15 @@ extension SettingViewModel {
             i18NManager.setLanguageType(type: languageType)
             action.send(.tap(.language))
         case .gridType(let gridType):
-            break
-//            i18NManager.setGridType(type: gridType)
-//            action.send(.tap(.grid))
+            userConfigurationRepository.setGrideType(type: gridType)
+            listener?.mutation(gridType: gridType)
+            action.send(.tap(.grid))
         }
     }
 }
 
 extension SettingViewModel {
+    
     func createSettingCellViewModels() -> [SettingCellViewModel] {
         let viewModels = [
             SettingCellViewModel(title: "Price Currency Unit", cellValue: CellType.currencyType(state.currencyType), option: "Dollar | Won", isSelected: state.currencyType == .won),
@@ -109,10 +124,4 @@ extension SettingViewModel {
         
         return viewModels
     }
-}
-
-enum CellType {
-    case currencyType(CurrencyType)
-    case languageType(LanguageType)
-    case gridType(GridType)
 }
