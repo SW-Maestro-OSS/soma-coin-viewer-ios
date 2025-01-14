@@ -26,4 +26,32 @@
         "en" : "Setting",
         "kr" : "세팅",
     },
+    
+    
+    "Setting_price_title" : {
+        "en" : "Price currency unit",
+        "kr" : "가격 표시 화폐 설정",
+    },
+    "Setting_price_option" : {
+        "en" : "Dollar | Won",
+        "kr" : "달러 | 원",
+    },
+    
+    "Setting_language_title" : {
+        "en" : "Language",
+        "kr" : "언어",
+    },
+    "Setting_language_option" : {
+        "en" : "English | Korean",
+        "kr" : "영어 | 한국어",
+    },
+    
+    "Setting_grid_title" : {
+        "en" : "Shows symbols with 2x2 grid",
+        "kr" : "코인들이 표시되는 방식",
+    },
+    "Setting_grid_option" : {
+        "en" : "2x2 | List",
+        "kr" : "2x2 | 리스트",
+    },
 }

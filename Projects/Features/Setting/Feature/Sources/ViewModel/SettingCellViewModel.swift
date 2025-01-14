@@ -9,37 +9,71 @@ import SwiftUI
 import Combine
 
 import BaseFeature
+
 import DomainInterface
+
+import I18N
 import CoreUtil
 
 class SettingCellViewModel: UDFObservableObject, Identifiable {
-    let id : String
     
-    @Published var state : State
+    // DI
+    @Injected private var i18NManager: I18NManager
     
+    
+    // Id
+    let id: UUID = .init()
+    
+    
+    // State
+    @Published var state : State = .init(
+        cellType: .currencyType(.dollar),
+        titleKey: "",
+        optionKey: "",
+        isSelected: false,
+        languageType: .english
+    )
+    
+    
+    // Delegage
     weak var delegate : SettingViewModelDelegate?
+    
     
     var action : PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
     
-    init(title : String, cellValue : CellType, option : String, isSelected : Bool) {
+    init(cellValue : CellType, titleKey : String, optionKey : String, isSelected : Bool) {
+        
+        let initialLanType = i18NManager.getLanguageType()
         let initialState : State = .init(
             cellType: cellValue,
-            title: title,
-            option: option,
-            isSelected: isSelected
+            titleKey: titleKey,
+            optionKey: optionKey,
+            isSelected: isSelected,
+            languageType: initialLanType
         )
         self._state = .init(initialValue: initialState)
-        self.id = title
-        
+
         createStateStream()
+        
+        i18NManager
+            .getChangePublisher()
+            .compactMap(\.languageType)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] mutatedLanType in
+                self?.action.send(.lanTypeUpdated(lanType: mutatedLanType))
+            }
+            .store(in: &store)
     }
     
-    //Action처리
+    
     func reduce(_ action: Action, state: State) -> State {
+        
+        var newState = state
         switch action {
+        case .lanTypeUpdated(let lanType):
+            newState.languageType = lanType
         case .tap :
-            var newState = state
             newState.isSelected.toggle()
             switch newState.cellType {
             case .currencyType(let currencyType):
@@ -56,25 +90,25 @@ class SettingCellViewModel: UDFObservableObject, Identifiable {
             }
             
             delegate?.updateSetting(cellType: newState.cellType)
-            return newState
         }
+        return newState
     }
 }
 
+
+// MARK: Action & State
 extension SettingCellViewModel {
+    
     enum Action {
-        //Event
         case tap
+        case lanTypeUpdated(lanType: LanguageType)
     }
     
     struct State {
-        //저장 프로퍼티
-        public var cellType : CellType
-        public var title : String
-        public var option : String
-        public var isSelected : Bool
-        
-        //연산 프로퍼티
-        
+        var cellType: CellType
+        var titleKey: String
+        var optionKey: String
+        var isSelected: Bool
+        var languageType: LanguageType
     }
 }
