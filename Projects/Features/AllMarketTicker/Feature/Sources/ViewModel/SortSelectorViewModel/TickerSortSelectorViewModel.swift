@@ -16,40 +16,43 @@ import CoreUtil
 
 class TickerSortSelectorViewModel: Identifiable, UDFObservableObject {
     
-    let id: String
+    // Identifiable
+    let id: UUID = .init()
     
+    
+    // State
     @Published var state: State
+    private let config: Configuration
+    private let ascendingComparator: TickerSortComparator
+    private let descendingComparator: TickerSortComparator
     
+    
+    // Delegate
     weak var delegate: TickerSortSelectorViewModelDelegate?
     
-    private let ascendingComparator: any TickerSortComparator
-    private let descendingComparator: any TickerSortComparator
     
+    // Event
     private(set) var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
     
     
-    init(id: String, title: String, ascendingComparator: any TickerSortComparator, descendingComparator: any TickerSortComparator) {
+    init(config: Configuration) {
         
-        self.id = id
-        self.ascendingComparator = ascendingComparator
-        self.descendingComparator = descendingComparator
+        self.config = config
+        self.ascendingComparator = config.ascending
+        self.descendingComparator = config.descending
         
+        
+        // Initial state
         let initialState: State = .init(
             sortDirection: .unselected,
-            title: title
+            title: config.intialTitleText
         )
-        
         self._state = .init(initialValue: initialState)
+        
         
         // Create state stream
         createStateStream()
-    }
-    
-    
-    public func notifySelectedComparator(_ comparator: any TickerSortComparator) {
-        
-        action.send(.sortComparatorChangedOutside(comparator: comparator))
     }
     
     
@@ -90,22 +93,28 @@ class TickerSortSelectorViewModel: Identifiable, UDFObservableObject {
         }
     }
     
+    
     func reduce(_ action: Action, state: State) -> State {
         
+        var newState = state
         switch action {
         case .changeSortDirection(let direction):
-            
-            var newState = state
             newState.sortDirection = direction
-            
-            return newState
-            
+        case .changeTitleText(let text):
+            newState.title = text
         default:
             return state
         }
+        return newState
+    }
+    
+    func notifySelectedComparator(_ comparator: any TickerSortComparator) {
+        action.send(.sortComparatorChangedOutside(comparator: comparator))
     }
 }
 
+
+// MARK: Action & State
 extension TickerSortSelectorViewModel {
     
     enum Action {
@@ -116,17 +125,16 @@ extension TickerSortSelectorViewModel {
         
         // SideEffect
         case changeSortDirection(direction: SortDirection)
+        case changeTitleText(String)
     }
     
     struct State {
         
-        // - 저장 프로퍼티
-        fileprivate var sortDirection: SortDirection = .unselected
+        var sortDirection: SortDirection = .unselected
+        var title: String
         
-        public var title: String
-        
-        // - 연산 프로퍼티
-        public var imageName: String {
+        var isLoading: Bool { title.isEmpty }
+        var imageName: String {
             
             switch sortDirection {
             case .unselected:
@@ -146,6 +154,18 @@ extension TickerSortSelectorViewModel {
         case descending
     }
 }
+
+
+// MARK: Configuration
+extension TickerSortSelectorViewModel {
+    
+    struct Configuration {
+        let intialTitleText: String
+        let ascending: TickerSortComparator
+        let descending: TickerSortComparator
+    }
+}
+
 
 private extension TickerSortSelectorViewModel {
     

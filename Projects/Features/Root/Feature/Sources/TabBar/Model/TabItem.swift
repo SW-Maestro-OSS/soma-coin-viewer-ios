@@ -9,6 +9,6 @@ import SwiftUI
 
 struct TabItem {
     
-    let titleText: String
+    let titleKey: String
     let systemIconName: String
 }

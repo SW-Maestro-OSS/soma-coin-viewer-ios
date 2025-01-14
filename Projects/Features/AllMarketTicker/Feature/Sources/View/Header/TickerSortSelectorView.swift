@@ -28,44 +28,37 @@ struct TickerSortSelectorView: View {
     var body: some View {
         
         ZStack {
-            
-            Rectangle()
-                .foregroundStyle(.gray.opacity(0.5))
-                .opacity(backgroundOpacity)
-            
-            HStack(spacing: 10) {
-                
-                Image(systemName: viewModel.state.imageName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 10)
-                
-                CVText(text: $viewModel.state.title)
-                    .font(.caption)
-                    .lineLimit(1)
+            if viewModel.state.isLoading {
+                SkeletonUI()
+            } else {
+                Group {
+                    Rectangle()
+                        .foregroundStyle(.gray.opacity(0.5))
+                        .opacity(backgroundOpacity)
+                    
+                    HStack(spacing: 10) {
+                        
+                        Image(systemName: viewModel.state.imageName)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 10)
+                        
+                        CVText(text: $viewModel.state.title)
+                            .font(.caption)
+                            .lineLimit(1)
+                    }
+                    .foregroundStyle(.black)
+                }
             }
-            .foregroundStyle(.black)
         }
         .onTapGesture {
             
+            // Send action
             viewModel.action.send(.tap)
             
             // Click animation
             backgroundOpacity = 1.0
-            withAnimation {
-                backgroundOpacity = 0.0
-            }
+            withAnimation { backgroundOpacity = 0.0 }
         }
     }
-}
-
-#Preview {
-    TickerSortSelectorView(
-        viewModel: .init(
-            id: "test",
-            title: "Symbol",
-            ascendingComparator: TickerSymbolAscendingComparator(),
-            descendingComparator: TickerSymbolDescendingComparator()
-        )
-    )
 }

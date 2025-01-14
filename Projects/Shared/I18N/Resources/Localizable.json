@@ -1,0 +1,29 @@
+{
+    "LaunchScreen_title" : {
+        "en" : "CoinViewer",
+        "kr" : "코인뷰어",
+    },
+    
+    
+    "AllMarketTickerPage_comparator_symbol" : {
+        "en" : "Symbol",
+        "kr" : "심볼",
+    },
+    "AllMarketTickerPage_comparator_price" : {
+        "en" : "Price",
+        "kr" : "가격",
+    },
+    "AllMarketTickerPage_comparator_24hchange" : {
+        "en" : "24h change",
+        "kr" : "24시간 변동",
+    },
+    
+    "AllMarketTickerPage_tabBar_market" : {
+        "en" : "Market",
+        "kr" : "마켓",
+    },
+    "AllMarketTickerPage_tabBar_setting" : {
+        "en" : "Setting",
+        "kr" : "세팅",
+    },
+}

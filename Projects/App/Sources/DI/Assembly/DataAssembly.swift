@@ -7,16 +7,13 @@
 
 import Foundation
 
-// Domain
 import Domain
 import DomainInterface
 
-// Data
 import Repository
 import DataSource
 
-// Utils
-
+import I18N
 
 import Swinject
 
@@ -53,5 +50,10 @@ public class DataAssembly: Assembly {
             DefaultExchangeRateRepository()
         }
         
+        // I18N
+        container.register(LanguageLocalizationRepository.self) { _ in
+            DefaultLanguageLocalizationRepository()
+        }
+        .inObjectScope(.container)
     }
 }

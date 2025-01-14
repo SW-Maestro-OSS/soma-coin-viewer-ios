@@ -61,6 +61,9 @@ public class Assemblies: Assembly {
         container.register(ExchangeRateRepository.self) { _ in
             DefaultExchangeRateRepository()
         }
+        container.register(LanguageLocalizationRepository.self) { _ in
+            DefaultLanguageLocalizationRepository()
+        }
         
         
         // MARK: UseCase

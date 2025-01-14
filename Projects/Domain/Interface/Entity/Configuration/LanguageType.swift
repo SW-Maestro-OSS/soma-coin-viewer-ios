@@ -13,4 +13,13 @@ public enum LanguageType: String {
     public var savingValue: String {
         self.rawValue
     }
+    
+    public var lanCode: String {
+        switch self {
+        case .korean:
+            "kr"
+        case .english:
+            "en"
+        }
+    }
 }
