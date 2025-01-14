@@ -21,7 +21,7 @@ public enum UserConfiguration: String {
         case .gridType:
             GridType.list.savingValue
         case .language:
-            LanguageType.korean.savingValue
+            LanguageType.english.savingValue
         }
     }
     

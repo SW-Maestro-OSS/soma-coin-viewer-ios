@@ -32,30 +32,55 @@ class SettingViewModel : UDFObservableObject, SettingViewModelable, SettingViewM
     
     
     // State
-    @Published var state : State
+    @Published var state : State = .init(
+        currencyType: .dollar,
+        languageType: .english,
+        gridType: .list
+    )
     
     
     var action : PassthroughSubject<Action, Never> = .init()
     var store : Set<AnyCancellable> = []
     
     init() {
-        let initialState : State = .init()
+        
+        let initialCurrencyType = i18NManager.getCurrencyType()
+        let initialLanType = i18NManager.getLanguageType()
+        let initialGridType = userConfigurationRepository.getGridType()
+        let initialState: State = .init(
+            currencyType: initialCurrencyType,
+            languageType: initialLanType,
+            gridType: initialGridType
+        )
         self._state = Published(initialValue: initialState)
-        self.state.currencyType = i18NManager.getCurrencyType()
-        self.state.languageType = i18NManager.getLanguageType()
-        self.state.settingCellViewModel = createSettingCellViewModels()
         
         createStateStream()
-        
-        print(state)
+    }
+    
+    private var isFirstAppear: Bool = true
+    
+    func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
+        switch action {
+        case .onAppear:
+            
+            if isFirstAppear {
+                isFirstAppear = false
+                let viewModels = createSettingCellViewModels()
+                return Just(Action.cellViewModelsCreated(viewModels))
+                    .eraseToAnyPublisher()
+            }
+            break
+        default:
+            break
+        }
+        return Just(action).eraseToAnyPublisher()
     }
     
     //Action 처리
     func reduce(_ action : Action, state : State) -> State {
+        var newState = state
         switch action {
-        case .tap(let type) :
-            var newState = state
-            
+        case .tap(let type):
             switch type {
             case .currency:
                 newState.currencyType = i18NManager.getCurrencyType()
@@ -64,17 +89,25 @@ class SettingViewModel : UDFObservableObject, SettingViewModelable, SettingViewM
             case .grid:
                 newState.gridType = userConfigurationRepository.getGridType()
             }
-            return newState
+        case .cellViewModelsCreated(let cellViewModels):
+            newState.settingCellViewModel = cellViewModels
+        default:
+            return state
         }
+        return newState
+    }
+    
+    func action(_ action: Action) {
+        self.action.send(action)
     }
 }
 
 extension SettingViewModel {
     struct State {
         //Store Property
-        var currencyType : CurrencyType = CurrencyType.dollar
-        var languageType : LanguageType = LanguageType.english
-        var gridType : GridType = GridType.list
+        var currencyType: CurrencyType
+        var languageType: LanguageType
+        var gridType: GridType
         var settingCellViewModel : [SettingCellViewModel] = []
         //Operate Property
         
@@ -82,6 +115,8 @@ extension SettingViewModel {
     
     enum Action {
         case tap(ActionType)
+        case onAppear
+        case cellViewModelsCreated([SettingCellViewModel])
     }
     
     enum ActionType {
@@ -112,10 +147,26 @@ extension SettingViewModel {
 extension SettingViewModel {
     
     func createSettingCellViewModels() -> [SettingCellViewModel] {
+        let currentState = state
         let viewModels = [
-            SettingCellViewModel(title: "Price Currency Unit", cellValue: CellType.currencyType(state.currencyType), option: "Dollar | Won", isSelected: state.currencyType == .won),
-            SettingCellViewModel(title: "Language", cellValue: CellType.languageType(state.languageType), option: "English | Korean", isSelected: state.languageType == .korean),
-            SettingCellViewModel(title: "Show symbols with 2x2 grid", cellValue: CellType.gridType(state.gridType), option: "2x2 | List", isSelected: state.gridType == .list)
+            SettingCellViewModel(
+                cellValue: CellType.currencyType(state.currencyType),
+                titleKey: "Setting_price_title",
+                optionKey: "Setting_price_option",
+                isSelected: currentState.currencyType == .won
+            ),
+            SettingCellViewModel(
+                cellValue: CellType.languageType(currentState.languageType),
+                titleKey: "Setting_language_title",
+                optionKey: "Setting_language_option",
+                isSelected: currentState.languageType == .korean
+            ),
+            SettingCellViewModel(
+                cellValue: CellType.gridType(currentState.gridType),
+                titleKey: "Setting_grid_option",
+                optionKey: "Setting_grid_option",
+                isSelected: currentState.gridType == .list
+            )
         ]
         
         viewModels.forEach{ viewModel in

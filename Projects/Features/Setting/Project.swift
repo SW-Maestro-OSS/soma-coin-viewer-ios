@@ -72,6 +72,8 @@ let project = Project(
             dependencies: [
                 D.Feature.BaseFeature,
                 
+                D.Domain.interface,
+                
                 D.Shared.CommonUI,
                 D.Shared.I18N,
             ]
