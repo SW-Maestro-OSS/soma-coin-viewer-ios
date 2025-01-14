@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+import SettingFeature
 import AllMarketTickerFeature
 import BaseFeature
 
@@ -19,9 +20,15 @@ class TabBarRouter: Router<TabBarViewModelable>, TabBarRouting {
     
     // Builder
     private let allMarketTickerBuilder: AllMarketTickerBuilder
+    private let settingBuilder: SettingBuilder
     
-    init(allMarketTickerBuilder: AllMarketTickerBuilder, view: TabBarView, viewModel: TabBarViewModel) {
+    init(
+        settingBuilder: SettingBuilder,
+        allMarketTickerBuilder: AllMarketTickerBuilder,
+        view: TabBarView,
+        viewModel: TabBarViewModel) {
         
+        self.settingBuilder = settingBuilder
         self.allMarketTickerBuilder = allMarketTickerBuilder
         
         super.init(view: AnyView(view), viewModel: viewModel)
@@ -44,7 +51,9 @@ extension TabBarRouter {
             
         case .setting:
             
-            return Text("setting")
+            let router = settingBuilder.build(listener: viewModel)
+            attach(router)
+            return router.view
         }
     }
 }

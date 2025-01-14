@@ -11,6 +11,9 @@ import Combine
 
 public protocol I18NManager {
     
+    // 변경 스트림을 획득
+    func getChangePublisher() -> AnyPublisher<I18NConfigMutation, Never>
+    
     //화페 타입 획득
     func getCurrencyType() -> CurrencyType
     

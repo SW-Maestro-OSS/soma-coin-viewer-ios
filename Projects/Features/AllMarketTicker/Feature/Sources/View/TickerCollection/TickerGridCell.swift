@@ -44,11 +44,11 @@ struct TickerGridCell: View {
                     
                     VStack(alignment: .trailing) {
                         CVText(text: $viewModel.state.priceText)
-                            .font(.largeTitle)
+                            .font(.title2)
                             .lineLimit(1)
                         
                         CVText(text: $viewModel.state.percentText)
-                            .font(.largeTitle)
+                            .font(.title3)
                             .lineLimit(1)
                     }
                 }

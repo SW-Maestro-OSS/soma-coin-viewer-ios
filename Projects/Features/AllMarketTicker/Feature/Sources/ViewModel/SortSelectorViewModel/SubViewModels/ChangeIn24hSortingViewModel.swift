@@ -5,6 +5,8 @@
 //  Created by choijunios on 1/14/25.
 //
 
+import Foundation
+
 import DomainInterface
 
 import I18N
@@ -24,6 +26,16 @@ final class ChangeIn24hViewModel: TickerSortSelectorViewModel {
         
         let languageType = i18NManager.getLanguageType()
         updateText(languageType: languageType)
+        
+        i18NManager
+            .getChangePublisher()
+            .compactMap({ $0.languageType })
+            .receive(on: RunLoop.main)
+            .sink { [weak self] mutatedLanType in
+                guard let self else { return }
+                updateText(languageType: mutatedLanType)
+            }
+            .store(in: &store)
     }
     
     func updateText(languageType: LanguageType) {
