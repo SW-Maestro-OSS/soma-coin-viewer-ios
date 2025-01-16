@@ -41,8 +41,8 @@ jobs:
       - name: fetch Secrets
         uses: actions/checkout@v4
         with:
-          repository: ${{ secrets.XCCONFIG_REPO }}
-          token: ${{ secrets.XCCONFIG_REPO_TOKEN }}
+          repository: ${{ secrets.SECRETS_REPO }}
+          token: ${{ secrets.SECRETS_REPO_TOKEN }}
           path: '${{ github.workspace }}/Secrets'
 
       - name: check secret files
