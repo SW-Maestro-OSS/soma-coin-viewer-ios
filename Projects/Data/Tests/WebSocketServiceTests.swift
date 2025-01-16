@@ -1,7 +1,7 @@
 import XCTest
 @testable import DataSource
 
-class WebSocketServiceTests: XCTestCase {
+//class WebSocketServiceTests: XCTestCase {
 
     // MARK: 웹소켓 연결/해제 테스트
 //    func testWebSocketConnectAndDisconnect() throws {
@@ -121,4 +121,4 @@ class WebSocketServiceTests: XCTestCase {
 //        // Test timeouts
 //        wait(for: [connectExpectation, disconnectExpectation], timeout: 15.0)
 //    }
-}
+//}
