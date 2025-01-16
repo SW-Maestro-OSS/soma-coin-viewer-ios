@@ -84,14 +84,14 @@ jobs:
             echo "is_same=false" >> $GITHUB_ENV
           fi
       
-      #8. tuist install & cache
-      - name: Tuist install & cache
+      #8. tuist install
+      - name: Tuist install
         if: >
           (steps.check-diff-package-swift.outputs.is_same != 'true') || 
           (steps.cache-spm-build.outputs.cache-hit != 'true') || 
           (steps.cache-package-swift.outputs.cache-hit != 'true')
         run: |
-          tuist install && tuist cache
+          tuist install
           mkdir -p /Users/runner/spm_builds
           cp -r '${{ github.workspace }}/Tuist/.build' /Users/runner/spm_builds/.build
           cp '${{ github.workspace }}/Tuist/Package.swift' /Users/runner/spm_builds/Package.swift
