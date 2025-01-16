@@ -39,7 +39,22 @@ let project = Project(
                 
                 // Shared
                 D.Shared.WebSocketManagementHelper,
-            ]
+            ],
+            settings: .settings(
+                base: [
+                    "OPENEX_API_KEY" : "$(inherited)"
+                ],
+                configurations: [
+                    .debug(
+                        name: "Debug",
+                        xcconfig: .relativeToRoot("Secrets/xcconfigs/Debug.xcconfig")
+                    ),
+                    .release(
+                        name: "Release",
+                        xcconfig: .relativeToRoot("Secrets/xcconfigs/Release.xcconfig")
+                    )
+                ]
+            )
         ),
     ]
 )

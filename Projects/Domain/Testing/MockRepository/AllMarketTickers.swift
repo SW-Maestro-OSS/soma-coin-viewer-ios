@@ -31,10 +31,10 @@ fileprivate extension Twenty4HourTickerForSymbolVO {
     static func createMock(index: Int) -> Twenty4HourTickerForSymbolVO {
         
         Twenty4HourTickerForSymbolVO(
-            symbol: "symbol\(index)",
+            pairSymbol: "symbol\(index)",
             price: CVNumber(100.0 * Double(index)),
-            totalTradedQuoteAssetVolume: 100.0 * Double(index),
-            changedPercent: Double(index % 100)
+            totalTradedQuoteAssetVolume: CVNumber(100.0 * Double(index)),
+            changedPercent: CVNumber(Double(index % 100))
         )
     }
 }

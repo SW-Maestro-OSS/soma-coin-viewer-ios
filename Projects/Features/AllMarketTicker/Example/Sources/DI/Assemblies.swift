@@ -7,6 +7,8 @@
 
 import Foundation
 
+@testable import AllMarketTickerFeatureTesting
+
 import DataSource
 import Repository
 
@@ -14,7 +16,7 @@ import DomainInterface
 import Domain
 
 import WebSocketManagementHelper
-
+import I18N
 
 import Swinject
 
@@ -26,7 +28,9 @@ public class Assemblies: Assembly {
         container.register(UserConfigurationService.self) { _ in
             DefaultUserConfigurationService()
         }
-        
+        container.register(ExchangeRateService.self) { _ in
+            DefaultExchangeRateService()
+        }
         container.register(WebSocketService.self) { _ in
             BinanceWebSocketService()
         }
@@ -36,6 +40,11 @@ public class Assemblies: Assembly {
         // MARK: Shared
         container.register(WebSocketManagementHelper.self) { _ in
             DefaultWebSocketManagementHelper()
+        }
+        .inObjectScope(.container)
+        
+        container.register(I18NManager.self) { _ in
+            DefaultI18NManager()
         }
         .inObjectScope(.container)
         
@@ -49,11 +58,20 @@ public class Assemblies: Assembly {
         container.register(AllMarketTickersRepository.self) { _ in
             BinanceAllMarketTickersRepository()
         }
+        container.register(ExchangeRateRepository.self) { _ in
+            DefaultExchangeRateRepository()
+        }
+        container.register(LanguageLocalizationRepository.self) { _ in
+            DefaultLanguageLocalizationRepository()
+        }
         
         
         // MARK: UseCase
         container.register(AllMarketTickersUseCase.self) { _ in
             DefaultAllMarketTickersUseCase()
+        }
+        container.register(ExchangeRateUseCase.self) { _ in
+            FakeExchangeRateUseCase()
         }
     }
 }

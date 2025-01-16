@@ -10,6 +10,8 @@ import Combine
 
 import BaseFeature
 
+import DomainInterface
+
 import CoreUtil
 import I18N
 import WebSocketManagementHelper
@@ -19,10 +21,11 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     // DI
     private let i18NManager : I18NManager
     private let webSocketHelper: WebSocketManagementHelper
+    private let exchangeRateUseCase: ExchangeRateUseCase
     
     
     // Public state interface
-    @Published var state: State = .init()
+    @Published var state: State
     
     
     // Router
@@ -33,24 +36,29 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     }
     
     
+    // State
+    private var isFirstAppear: Bool = true
+    
+    
     // Publishers
     let action: PassthroughSubject<Action, Never> = .init()
-    
     var store: Set<AnyCancellable> = .init()
     
     
-    init(webSocketHelper: WebSocketManagementHelper, i18NManager : I18NManager) {
+    init(i18NManager : I18NManager, webSocketHelper: WebSocketManagementHelper, exchangeRateUseCase: ExchangeRateUseCase) {
         
-        self.webSocketHelper = webSocketHelper
         self.i18NManager = i18NManager
+        self.webSocketHelper = webSocketHelper
+        self.exchangeRateUseCase = exchangeRateUseCase
+        
+        let initailState: State = .init(isLoading: true)
+        self._state = Published(wrappedValue: initailState)
         
         // Create state stream
         createStateStream()
         
         // Subscribe to notifications
         setAppLifeCycleNotification()
-        
-        i18NManager.setExchangeRate()
     }
     
     
@@ -98,6 +106,22 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
                 .map { _ in Action.isWebSocketConnected(false) }
                 .eraseToAnyPublisher()
             
+        case .onAppear:
+            
+            if isFirstAppear {
+                isFirstAppear = false
+                
+                // 웹소켓 연결
+                webSocketHelper.requestConnection(connectionType: .freshStart)
+                
+                // 환율정보 Fetch
+                exchangeRateUseCase.prepare()
+            }
+            
+            return Just(.appIsLoaded)
+                .delay(for: 2, scheduler: RunLoop.main)
+                .eraseToAnyPublisher()
+            
         default:
             return Just(action).eraseToAnyPublisher()
         }
@@ -110,24 +134,16 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
         
         switch action {
         case .isWebSocketConnected(let isConnected):
-            
             newState.isWebSocketConnected = isConnected
-            return newState
-            
-        case .onAppear:
-            
-            if state.isFirstAppear {
-                
-                // 첫번째 appear인 경우 메인 화면을 표시
-                
-                newState.isFirstAppear = false
-                router?.presentMainTabBar()
-            }
-            return newState
+        case .appIsLoaded:
+            newState.isLoading = false
+            router?.presentMainTabBar()
             
         default:
             return state
         }
+        
+        return newState
     }
     
     private func setAppLifeCycleNotification() {
@@ -160,14 +176,15 @@ extension RootViewModel {
         case onAppear
         case app_cycle_background
         case app_cycle_will_foreground
+        case appIsLoaded
         
         // Side effects
         case isWebSocketConnected(Bool)
     }
     
     struct State {
+        var isLoading: Bool
         var isWebSocketConnected: Bool?
-        var isFirstAppear: Bool = true
     }
 }
 

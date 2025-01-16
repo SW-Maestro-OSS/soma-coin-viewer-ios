@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+import I18N
+
 struct TabBarView: View {
     
     @StateObject private var viewModel: TabBarViewModel
@@ -31,9 +33,20 @@ struct TabBarView: View {
                     
                 } label: {
                     
-                    TabBarItemView(tabItem: viewModel.state.tabItem[page]!)
+                    let tabItem = viewModel.state.tabItem[page]!
+                    
+                    VStack {
+                        Image(systemName: tabItem.systemIconName)
+                        LocalizableText(
+                            key: tabItem.titleKey,
+                            languageType: $viewModel.state.languageType
+                        )
+                    }
                 }
             }
+        }
+        .onAppear {
+            viewModel.action(.onAppear)
         }
     }
 }

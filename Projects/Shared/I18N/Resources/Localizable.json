@@ -1,0 +1,57 @@
+{
+    "LaunchScreen_title" : {
+        "en" : "CoinViewer",
+        "kr" : "코인뷰어",
+    },
+    
+    
+    "AllMarketTickerPage_comparator_symbol" : {
+        "en" : "Symbol",
+        "kr" : "심볼",
+    },
+    "AllMarketTickerPage_comparator_price" : {
+        "en" : "Price",
+        "kr" : "가격",
+    },
+    "AllMarketTickerPage_comparator_24hchange" : {
+        "en" : "24h change",
+        "kr" : "24시간 변동",
+    },
+    
+    "AllMarketTickerPage_tabBar_market" : {
+        "en" : "Market",
+        "kr" : "마켓",
+    },
+    "AllMarketTickerPage_tabBar_setting" : {
+        "en" : "Setting",
+        "kr" : "세팅",
+    },
+    
+    
+    "Setting_price_title" : {
+        "en" : "Price currency unit",
+        "kr" : "가격 표시 화폐 설정",
+    },
+    "Setting_price_option" : {
+        "en" : "Dollar | Won",
+        "kr" : "달러 | 원",
+    },
+    
+    "Setting_language_title" : {
+        "en" : "Language",
+        "kr" : "언어",
+    },
+    "Setting_language_option" : {
+        "en" : "English | Korean",
+        "kr" : "영어 | 한국어",
+    },
+    
+    "Setting_grid_title" : {
+        "en" : "Shows symbols with 2x2 grid",
+        "kr" : "코인들이 표시되는 방식",
+    },
+    "Setting_grid_option" : {
+        "en" : "2x2 | List",
+        "kr" : "2x2 | 리스트",
+    },
+}

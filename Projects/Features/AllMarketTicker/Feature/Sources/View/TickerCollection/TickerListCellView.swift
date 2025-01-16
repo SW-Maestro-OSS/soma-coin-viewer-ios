@@ -29,31 +29,35 @@ struct TickerListCellView: View {
                 HStack(spacing: 0) {
                     
                     // MARK: Symbol image + text
-                    HStack(spacing: 5) {
-                        
-                        // Symbol image view
-                        SymbolImageView(imageURL: $viewModel.state.firstSymbolImageURL)
-                            .frame(width: 40, height: 40)
-                        
-                        // Pair symbol text
-                        CVText(text: $viewModel.state.pairSymbolNameText)
-                            .font(.subheadline)
-                            .lineLimit(1)
+                    
+                    GeometryReader { geo1 in
+                        HStack(alignment: .center, spacing: 5) {
                             
-                        Spacer(minLength: 0)
+                            // Symbol image view
+                            SymbolImageView(imageURL: $viewModel.state.firstSymbolImageURL)
+                                .frame(width: geo1.size.width*0.2, height: geo1.size.width*0.2)
+                            
+                            // Pair symbol text
+                            CVText(text: $viewModel.state.pairSymbolNameText)
+                                .font(.subheadline)
+                                .lineLimit(1)
+                                
+                            Spacer(minLength: 0)
+                        }
+                        .frame(width: geo1.size.width, height: geo1.size.height)
                     }
                     .padding(.leading, 10)
-                    .frame(width: geo.size.width * 0.4)
+                    .frame(width: geo.size.width * 0.33)
                     
                     
                     // MARK: Price
                     HStack(spacing: 0) {
                         Spacer(minLength: 0)
                         CVText(text: $viewModel.state.priceText)
-                            .font(.body)
+                            .font(.footnote)
                             .lineLimit(1)
                     }
-                    .frame(width: geo.size.width * 0.2)
+                    .frame(width: geo.size.width * 0.33)
                     
                     
                     // MARK: 24h change percent
@@ -64,7 +68,7 @@ struct TickerListCellView: View {
                             .lineLimit(1)
                     }
                     .padding(.trailing, 10)
-                    .frame(width: geo.size.width * 0.4)
+                    .frame(width: geo.size.width * 0.33)
                 }
                 Spacer(minLength: 0)
             }

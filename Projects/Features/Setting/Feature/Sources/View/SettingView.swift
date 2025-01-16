@@ -21,8 +21,13 @@ struct SettingView : View {
     
     var body: some View {
         
-        VStack {
-            SettingListView(listItems: $viewModel.state.settingCellViewModel)
+        ScrollView {
+            VStack {
+                ForEach(viewModel.state.settingCellViewModel) { viewModel in
+                    SettingCellView(viewModel: viewModel)
+                }
+            }
         }
+        .onAppear { viewModel.action(.onAppear) }
     }
 }

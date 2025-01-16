@@ -12,11 +12,13 @@ import CommonUI
 import DomainInterface
 import CoreUtil
 
+import I18N
+
 struct SettingCellView : View {
     
-    @ObservedObject private var viewModel : SettingCellViewModel
+    @ObservedObject private var viewModel: SettingCellViewModel
     
-    init(viewModel : SettingCellViewModel) {
+    init(viewModel: SettingCellViewModel) {
         self._viewModel = ObservedObject(wrappedValue: viewModel)
     }
     
@@ -25,26 +27,30 @@ struct SettingCellView : View {
             Spacer().frame(width : 16)
             
             VStack {
-                CVText(text : $viewModel.state.title)
-                    .font(.body)
-                    .foregroundColor(.black)
+                
+                LocalizableText(
+                    key: viewModel.state.titleKey,
+                    languageType: $viewModel.state.languageType
+                )
+                .font(.body)
+                .foregroundColor(.black)
             }
             
             Spacer()
             
             VStack (alignment : .trailing) {
-                CVText(text: $viewModel.state.option)
-                    .font(.body)
-                    .foregroundColor(.gray)
+                
+                LocalizableText(
+                    key: viewModel.state.optionKey,
+                    languageType: $viewModel.state.languageType
+                )
+                .font(.body)
+                .foregroundColor(.gray)
                 
                 HStack {
                     Toggle("",isOn : Binding(
-                        get : {
-                            viewModel.state.isSelected
-                        },
-                        set : { newValue in
-                            viewModel.action.send(.tap)
-                        }
+                        get : { viewModel.state.isSelected },
+                        set : { _ in viewModel.action.send(.tap) }
                     ))
                         .labelsHidden()
                         .toggleStyle(SwitchToggleStyle(tint: .gray))
@@ -67,7 +73,3 @@ struct SettingCellView : View {
         )
     }
 }
-
-//#Preview {
-//    SettingCellViewTests(viewModel: SettingCellViewModel(type: "preview", title: "PreviewTitle", cellValue: CellType.currencyType(CurrencyType.dollar), option: "Dollar | Won", isSelected: false))
-//}

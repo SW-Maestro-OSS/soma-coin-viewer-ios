@@ -9,8 +9,6 @@ import Combine
 
 public protocol AllMarketTickersUseCase {
     
-    typealias SortOperator = (Twenty4HourTickerForSymbolVO, Twenty4HourTickerForSymbolVO) -> Bool
-    
     /// AllMarketTicker리스트를 획득합니다.
     func requestTickers() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never>
 }

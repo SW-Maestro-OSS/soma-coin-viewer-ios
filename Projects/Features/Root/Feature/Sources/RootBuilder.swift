@@ -6,6 +6,9 @@
 //
 
 import SwiftUI
+import Combine
+
+import DomainInterface
 
 import I18N
 import WebSocketManagementHelper
@@ -23,14 +26,16 @@ public final class RootBuilder {
     // Dependency inject
     @Injected private var webSocketHelper: WebSocketManagementHelper
     @Injected private var i18NManager: I18NManager
+    @Injected private var exchangeRateUseCase: ExchangeRateUseCase
 
     public init() { }
     
     public func build() -> RootRouter {
         
         let viewModel = RootViewModel(
+            i18NManager: i18NManager,
             webSocketHelper: webSocketHelper,
-            i18NManager: i18NManager
+            exchangeRateUseCase: exchangeRateUseCase
         )
         let view = RootView(viewModel: viewModel)
         let tabBarBuilder = TabBarBuilder()

@@ -18,16 +18,16 @@ import Swinject
 public class Assemblies : Assembly {
     public func assemble(container: Container) {
         //MARK: DataSource
-        container.register(PriceService.self) { _ in
-            DefaultPriceService()
+        container.register(ExchangeRateService.self) { _ in
+            DefaultExchangeRateService()
         }
         
-        container.register(PriceRepository.self) { _ in
-            DefaultPriceRepository()
+        container.register(ExchangeRateRepository.self) { _ in
+            DefaultExchangeRateRepository()
         }
         
-        container.register(PriceUseCase.self) { _ in
-            DefaultPriceUseCase()
+        container.register(ExchangeRateUseCase.self) { _ in
+            DefaultExchangeRateUseCase()
         }
         
         container.register(UserConfigurationService.self) { _ in
