@@ -8,7 +8,7 @@ let project = Project(
         .target(
             name: "Repository",
             destinations: .iOS,
-            product: .framework,
+            product: .staticFramework,
             bundleId: "com.CoinViewer.Data.Repository",
             sources: ["Repository/Sources/**"],
             resources: ["Repository/Resources/**"],
