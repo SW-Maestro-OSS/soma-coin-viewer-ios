@@ -13,7 +13,6 @@ let project = Project(
     name: "WebSocketManagementHelper",
     targets: [
 
-        // Implements
         .target(
             name: "WebSocketManagementHelper",
             destinations: .iOS,

@@ -47,7 +47,7 @@ let project = Project(
         .target(
             name: "BaseFeatureTesting",
             destinations: .iOS,
-            product: .framework,
+            product: .staticLibrary,
             bundleId: "com.choijunios.feature.Base.testing",
             sources: ["Testing/**"],
             dependencies: [

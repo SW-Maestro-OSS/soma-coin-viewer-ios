@@ -22,7 +22,7 @@ let project = Project(
         .target(
             name: "Domain",
             destinations: .iOS,
-            product: .framework,
+            product: .staticLibrary,
             bundleId: "com.CoinViewer.Domain",
             sources: ["Concrete/**"],
             dependencies: [
@@ -48,7 +48,7 @@ let project = Project(
         .target(
             name: "DomainTesting",
             destinations: .iOS,
-            product: .framework,
+            product: .staticLibrary,
             bundleId: "com.CoinViewer.Domain.testing",
             sources: ["Testing/**"],
             dependencies: [
