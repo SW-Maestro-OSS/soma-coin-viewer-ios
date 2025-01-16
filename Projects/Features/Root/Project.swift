@@ -47,7 +47,7 @@ let project = Project(
         .target(
             name: "RootFeatureTesting",
             destinations: .iOS,
-            product: .framework,
+            product: .staticLibrary,
             bundleId: "com.choijunios.feature.Root.testing",
             sources: ["Testing/**"],
             dependencies: [
@@ -60,7 +60,7 @@ let project = Project(
         .target(
             name: "RootFeature",
             destinations: .iOS,
-            product: .framework,
+            product: .staticFramework,
             bundleId: "com.choijunios.feature.Root",
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
@@ -68,8 +68,6 @@ let project = Project(
                 
                 D.Feature.AllMarketTickerFeature,
                 D.Feature.SettingFeature,
-                
-                D.Util.PresentationUtil,
             ]
         ),
     ]

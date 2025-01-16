@@ -56,7 +56,7 @@ let project = Project(
         .target(
             name: "AllMarketTickerFeatureTesting",
             destinations: .iOS,
-            product: .framework,
+            product: .staticLibrary,
             bundleId: "com.choijunios.feature.AllMarketTicker.testing",
             sources: ["Testing/**"],
             dependencies: [
@@ -69,7 +69,7 @@ let project = Project(
         .target(
             name: "AllMarketTickerFeature",
             destinations: .iOS,
-            product: .framework,
+            product: .staticFramework,
             bundleId: "com.choijunios.feature.AllMarketTicker",
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
@@ -77,7 +77,6 @@ let project = Project(
                 
                 D.Feature.BaseFeature,
                 
-                D.Shared.CommonUI,
                 D.Shared.WebSocketManagementHelper,
                 D.Shared.I18N,
                 

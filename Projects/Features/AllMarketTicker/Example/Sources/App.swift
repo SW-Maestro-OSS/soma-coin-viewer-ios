@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 @testable import AllMarketTickerFeature
 
@@ -19,12 +20,15 @@ struct CoinViewerApp: App {
     
     @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
     
+    private let stubGridTypePublisher = Just(GridType.list).eraseToAnyPublisher()
+    
     var body: some Scene {
         
         WindowGroup {
           
             AllMarketTickerView(
                 viewModel: .init(
+                    gridTypeChangePublisher: stubGridTypePublisher,
                     socketHelper: DependencyInjector.shared.resolve(WebSocketManagementHelper.self),
                     i18NManager: DependencyInjector.shared.resolve(I18NManager.self),
                     allMarketTickersUseCase: DependencyInjector.shared.resolve(AllMarketTickersUseCase.self),

@@ -52,7 +52,7 @@ let project = Project(
         .target(
             name: "SettingFeatureTesting",
             destinations: .iOS,
-            product: .framework,
+            product: .staticLibrary,
             bundleId: "com.choijunios.feature.Setting.testing",
             sources: ["Testing/**"],
             dependencies: [
@@ -65,7 +65,7 @@ let project = Project(
         .target(
             name: "SettingFeature",
             destinations: .iOS,
-            product: .framework,
+            product: .staticFramework,
             bundleId: "com.choijunios.feature.Setting",
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
@@ -74,7 +74,6 @@ let project = Project(
                 
                 D.Domain.interface,
                 
-                D.Shared.CommonUI,
                 D.Shared.I18N,
             ]
         ),
