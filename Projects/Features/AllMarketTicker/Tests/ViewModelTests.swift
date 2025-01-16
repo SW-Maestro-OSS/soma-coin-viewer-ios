@@ -44,10 +44,8 @@ struct AllMarketTickerViewModelTests {
             Twenty4HourTickerForSymbolVO(pairSymbol: "test3USDT", price: 200.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
             Twenty4HourTickerForSymbolVO(pairSymbol: "test4USDT", price: 300.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
         ].map { ticker in
-            var newTicker = ticker
-            newTicker.setSymbols(closure: { _ in ("test", "USDT") })
-            return TickerCellViewModel(config: .init(
-                tickerVO: newTicker,
+            TickerCellViewModel(config: .init(
+                tickerVO: ticker,
                 currencyConfig: .init(type: .dollar, rate: 1.0))
             )
         }
