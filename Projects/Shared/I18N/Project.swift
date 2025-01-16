@@ -28,7 +28,7 @@ let project = Project(
         .target(
             name: "I18NTesting",
             destinations: .iOS,
-            product: .framework,
+            product: .staticLibrary,
             bundleId: "com.CoinViewer.I18N.testing",
             sources: ["Testing/**"],
             dependencies: [
