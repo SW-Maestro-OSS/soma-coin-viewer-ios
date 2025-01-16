@@ -1,0 +1,103 @@
+name: BuildAndTest
+on: 
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  test:
+    runs-on: macos-latest
+    env: 
+      TUIST_VERSION: 4.12.1
+    steps:
+
+      #1. mise툴을 로드
+      - uses: jdx/mise-action@v2
+
+      #2. Tuist 캐싱정보 확인
+      - name: cache tuist
+        id: cache-tuist
+        uses: actions/cache@v4
+        with:
+          path: /Users/runner/.local/share/mise/installs/tuist/${{ env.TUIST_VERSION }}
+          key: ${{ runner.os }}-tuist@${{ env.TUIST_VERSION }}
+    
+      #3. Tuist 설치, 캐싱 정보확인 실패시 실행
+      - name: install tuist
+        if: steps.cache-tuist.outputs.cache-hit != 'true'
+        run: |
+          mise install tuist@${{ env.TUIST_VERSION }}
+          mise use -g tuist@${{ env.TUIST_VERSION }}
+          mise where tuist
+
+      - name: check paths
+        run: |
+          echo "tuist in installed in $(which tuist)"
+      
+      #4. 프로젝트 다운로드
+      - name: checkout project
+        uses: actions/checkout@v4
+      
+      #5. XCConfig파일 및 유출금지파일 다운로드
+      - name: fetch Secrets
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.XCCONFIG_REPO }}
+          token: ${{ secrets.XCCONFIG_REPO_TOKEN }}
+          path: '${{ github.workspace }}/Secrets'
+
+      - name: check secret files
+        run: |
+          echo "Checking configurations are loaded..."
+
+      #6-1. 캐싱된 .build파일이 있는 지 확인하기
+      - name: checkout package builds
+        id: cache-spm-build
+        uses: actions/cache@v4
+        with:
+          path: /Users/runner/spm_builds/.build
+          key: spm-build
+      
+      #6-2. 캐싱된 .build파일이 있는 경우 해당 파일을 .build디렉토리로 링킹
+      - name: Link Cached Build to Project
+        if: steps.cache-spm-build.outputs.cache-hit == 'true'
+        run: |
+          cd Tuist
+          rsync -a /Users/runner/spm_builds/.build/ .build
+      
+      #7-1. 캐싱된 Package.swift가 있는지 확인
+      - name: checkout Package.swift
+        id: cache-package-swift
+        uses: actions/cache@v4
+        with:
+          path: /Users/runner/spm_builds/Package.swift
+          key: spm-package
+
+      #7-2. 캐싱된 Package.swift와 현재 레포지토리의 파일을 비교
+      - name: Link Cached Packages.swift
+        id: check-diff-package-swift
+        if: steps.cache-package-swift.outputs.cache-hit == 'true'
+        run: |
+          cd Tuist
+          if diff /Users/runner/spm_builds/Package.swift Package.swift > /dev/null; then
+            echo "is_same=true" >> $GITHUB_ENV
+          else
+            echo "is_same=false" >> $GITHUB_ENV
+          fi
+      
+      #8. tuist install & cache
+      - name: Tuist install & cache
+        if: >
+          (steps.check-diff-package-swift.outputs.is_same != 'true') || 
+          (steps.cache-spm-build.outputs.cache-hit != 'true') || 
+          (steps.cache-package-swift.outputs.cache-hit != 'true')
+        run: |
+          tuist install && tuist cache
+          mkdir -p /Users/runner/spm_builds
+          cp -r '${{ github.workspace }}/Tuist/.build' /Users/runner/spm_builds/.build
+          cp '${{ github.workspace }}/Tuist/Package.swift' /Users/runner/spm_builds/Package.swift
+          ls -l /Users/runner/spm_builds
+
+      #9. 프로젝트 테스트 시작
+      - name: Test project
+        run: |
+          tuist test
