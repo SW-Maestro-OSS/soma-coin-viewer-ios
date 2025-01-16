@@ -1,17 +1,17 @@
 //
-//  Testing.swift
+//  StubWebSocketHelper.swift
 //
 //
 
 import Combine
 
-import WebSocketManagementHelperInterface
-import BaseFeatureInterface
+import WebSocketManagementHelper
+import BaseFeature
 
 import Swinject
 
 
-public class MockWebSocketHelper: WebSocketManagementHelper {
+public class StubWebSocketHelper: WebSocketManagementHelper {
     
     public init() { }
     
@@ -29,7 +29,7 @@ public class MockWebSocketHelper: WebSocketManagementHelper {
         
     }
     
-    public func requestConnection(connectionType: WebSocketManagementHelperInterface.ConnectionType) {
+    public func requestConnection(connectionType: ConnectionType) {
         
     }
 }

@@ -13,57 +13,67 @@ import DomainInterface
 import Domain
 import CoreUtil
 
-import DomainTesting
+@testable import DomainTesting
 
 
+// MARK: AllMarketTickerUseCaseTests
 struct AllMarketTickerUseCaseTests {
     
-    let allMarketTickersUseCase: DefaultAllMarketTickersUseCase
-    
-    init() {
+    func checkSortedArrayIsReturning() async {
         
-        /// 테스트 레포지토리는 "symbol+index"이름을 가지는 정보들을 반환합니다.
-        /// index의 범위는 0..<100입니다.
-        /// 해당 레퍼지토리가 반환하는 데이터의 프로퍼티 값은 인덱스에 비례합니다.
-        DependencyInjector.shared.register(AllMarketTickersRepository.self, MockAllMarketTickersRepository())
-        
-        self.allMarketTickersUseCase = .init()
-    }
-    
-    @Test
-    func fromTheBeginTest() async {
-        
-        for await list in allMarketTickersUseCase
-            .requestTickers(
-                maxCount: 5,
-                cuttingStyle: .begining,
-                sortOperator: {
-                    $0.price < $1.price
-                }
-            ).values {
-            
-            let symbols = list.map({ $0.symbol })
-            
-            #expect(symbols == ["symbol0", "symbol1", "symbol2", "symbol3", "symbol4"])
+        // Given
+        let usdtTickers = (0..<30).map { index in
+            Twenty4HourTickerForSymbolVO(
+                pairSymbol: "symbol\(index)USDT",
+                price: .init(100.0),
+                totalTradedQuoteAssetVolume: .init(100 + index)!,
+                changedPercent: .init(50.0)
+            )
         }
-    }
-    
-    
-    @Test
-    func fromTheEndTest() async {
+        let anonymousTickers = (0..<30).map { index in
+            Twenty4HourTickerForSymbolVO(
+                pairSymbol: "symbol\(index)CJY",
+                price: .init(100.0),
+                totalTradedQuoteAssetVolume: .init(100 + index)!,
+                changedPercent: .init(50.0)
+            )
+        }
+        let givenTickers = usdtTickers + anonymousTickers
         
-        for await list in allMarketTickersUseCase
-            .requestTickers(
-                maxCount: 5,
-                cuttingStyle: .end,
-                sortOperator: {
-                    $0.price < $1.price
-                }
-            ).values {
+        DependencyInjector.shared.register(
+            AllMarketTickersRepository.self,
+            StubAllMarketTickersRepository(stubTickerEntities: givenTickers)
+        )
+        let defaultAllMarketTickersUseCase = DefaultAllMarketTickersUseCase()
+
+        
+        // When
+        // 티커 요청시
+        for await fetchedTickers in defaultAllMarketTickersUseCase.requestTickers().values {
             
-            let symbols = list.map({ $0.symbol })
+            // Then
             
-            #expect(symbols == ["symbol95", "symbol96", "symbol97", "symbol98", "symbol99"])
+            // #1. 30개가 반홨됬는지 확인합니다.
+            #expect(fetchedTickers.count <= 30)
+            
+            
+            // #2. 30개의 티커 객체가 USDT를 포함하는 지 확인합니다.
+            fetchedTickers.forEach { ticker in
+                #expect(ticker.secondSymbol == "USDT")
+            }
+            
+            
+            // #3. totalTradedQuoteAssetVolume을 기준으로 올바르게 정렬됬는지 확인합니다.
+            let expectedTickers = fetchedTickers.sorted {
+                $0.totalTradedQuoteAssetVolume > $1.totalTradedQuoteAssetVolume
+            }
+            for index in 0..<fetchedTickers.count {
+                #expect(
+                    expectedTickers[index].totalTradedQuoteAssetVolume ==
+                    fetchedTickers[index].totalTradedQuoteAssetVolume
+                )
+            }
+            
         }
     }
 }

@@ -7,8 +7,8 @@
 
 import RootFeatureTesting
 
-import BaseFeatureInterface
-import WebSocketManagementHelperInterface
+import BaseFeature
+import WebSocketManagementHelper
 
 import Swinject
 
@@ -16,12 +16,8 @@ class Assemblies: Assembly {
     
     func assemble(container: Container) {
         
-        container.register(Router.self) { _ in
-            Router()
-        }
-        
         container.register(WebSocketManagementHelper.self) { _ in
-            MockWebSocketHelper()
+            StubWebSocketHelper()
         }
     }
 }

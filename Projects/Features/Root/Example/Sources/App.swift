@@ -8,7 +8,7 @@
 import SwiftUI
 
 import RootFeature
-import BaseFeatureInterface
+import BaseFeature
 import CoreUtil
 
 @main
@@ -19,14 +19,14 @@ struct RootModuleApp: App {
     var body: some Scene {
         
         WindowGroup {
-            appDelegate.rootCoordinator.start()
+            appDelegate.rootRouter.view
         }
     }
 }
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     
-    var rootCoordinator: RootCoordinator!
+    var rootRouter: RootRouter!
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
@@ -34,7 +34,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             Assemblies()
         ])
         
-        self.rootCoordinator = .init()
+        self.rootRouter = RootBuilder().build()
         
         return true
     }

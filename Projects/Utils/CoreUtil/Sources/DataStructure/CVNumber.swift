@@ -20,6 +20,12 @@ public struct CVNumber: Comparable, CustomStringConvertible, ExpressibleByFloatL
     public init(_ wrappedNumber: Decimal) {
         self.wrappedNumber = wrappedNumber
     }
+    public init?(_ integer: any BinaryInteger) {
+        if let integer = Decimal(exactly: integer) {
+            self.wrappedNumber = integer
+        }
+        return nil
+    }
     public init(floatLiteral value: Double) {
         self.wrappedNumber = Decimal(value)
     }
