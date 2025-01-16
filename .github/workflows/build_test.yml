@@ -86,8 +86,11 @@ jobs:
 
       #8. Xcode버전 확인 및 변경
       - name: Check installed Xcode version
-        run: xcodebuild -version && sudo xcode-select -switch /Applications/Xcode_16.1.app && xcodebuild -version
-      
+        run: |
+          xcodebuild -version
+          sudo xcode-select -switch /Applications/Xcode_16.1.app
+          xcodebuild -version
+        
       #9. tuist install
       - name: Tuist install
         if: >
