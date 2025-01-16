@@ -13,7 +13,7 @@ import CoreUtil
 
 public class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     
-    @Injected private var repository: AllMarketTickersRepository
+    @Injected private var allMarketTickersRepository: AllMarketTickersRepository
     
     private let throttleTimerQueue: DispatchQueue = .init(
         label: "com.AllMarketTickersUseCase",
@@ -26,7 +26,7 @@ public class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     
     public func requestTickers() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> {
         
-        repository
+        allMarketTickersRepository
             .request24hTickerForAllSymbols()
             .throttle(for: 0.3, scheduler: throttleTimerQueue, latest: true)
             .map { [standardSymbol] fetchedTickers in
