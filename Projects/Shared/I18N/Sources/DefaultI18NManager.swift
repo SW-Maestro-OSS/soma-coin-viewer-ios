@@ -17,7 +17,6 @@ public class DefaultI18NManager: I18NManager {
     @Injected private var repository : UserConfigurationRepository
     
     private let changePublisher: PassthroughSubject<I18NConfigMutation, Never> = .init()
-    private var store: Set<AnyCancellable> = .init()
     
     public init() { }
     

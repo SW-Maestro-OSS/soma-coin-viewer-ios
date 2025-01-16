@@ -1,5 +1,5 @@
 //
-//  StubUserConfigurationRepository.swift
+//  FakeUserConfigurationRepository.swift
 //  AllMarketTickerModule
 //
 //  Created by choijunios on 1/13/25.
@@ -7,7 +7,7 @@
 
 import DomainInterface
 
-class StubUserConfigurationRepository: UserConfigurationRepository {
+class FakeUserConfigurationRepository: UserConfigurationRepository {
     
     private var fakeDB: [String: String] = [
         UserConfiguration.currency.savingKey: CurrencyType.dollar.savingValue,

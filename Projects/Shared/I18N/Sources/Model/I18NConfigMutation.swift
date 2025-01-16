@@ -11,4 +11,9 @@ public struct I18NConfigMutation {
     
     public var languageType: LanguageType?
     public var currencyType: CurrencyType?
+    
+    public init(languageType: LanguageType? = nil, currencyType: CurrencyType? = nil) {
+        self.languageType = languageType
+        self.currencyType = currencyType
+    }
 }

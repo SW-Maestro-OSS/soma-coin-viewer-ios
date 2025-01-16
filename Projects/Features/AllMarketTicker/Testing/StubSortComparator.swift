@@ -7,7 +7,7 @@ import Foundation
 
 import AllMarketTickerFeature
 
-struct StubSortComparator: TickerSortComparator {
+struct AscendingPriceSortComparator: TickerSortComparator {
     
     var id: String
     
