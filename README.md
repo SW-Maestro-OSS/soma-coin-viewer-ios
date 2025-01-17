@@ -79,3 +79,21 @@
         </td>
     </tr>
 </table>
+
+# How to use
+
+해당 프로젝트는 다운로드 후 실행할 수 있습니다.
+
+1. 레포지토리를 다운로드 합니다.
+2. `tuist install`을 통해 외부의존성을 install합니다.
+3. 요구하는 xcconfig파일을 생성합니다.
+4. `tuist generate`를 CLI에 입력합니다.
+
+※ xcconfig파일이 해당 레포지토리에 포함되어 있지않아 따로 생성이 필요합니다. 
+  
+  (./Secrets/xcconfigs/Release and Debug.xcconfig) **Debug**빌드시 xcconfig파일내 값을 사용하지 않기 때문에 실행시 Debug스킴을 사용하시길 바랍니다.
+  
+  두 xcconfig파일에 "OPENEX_API_KEY"키을 할당해야합니다. [환율 API 사이트(Open exchange rates)](https://openexchangerates.org/)의 API_KEY값을 할당해주면 프로젝트가 정상적으로 실행됩니다.
+```
+OPENEX_API_KEY="API Key for open exchange rates"
+```
