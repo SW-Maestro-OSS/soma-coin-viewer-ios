@@ -97,3 +97,29 @@
 ```
 OPENEX_API_KEY="API Key for open exchange rates"
 ```
+
+# Tech features
+
+## 웹소켓과 클린아키텍처
+
+soma-coin-viewer앱은 현재 `Binance API`를 사용합니다. 하지만 WebSocketService 및 Repository는 클린아키텍처를 따르는 추상화된 객체로 구체타입 변경을 통해 다른 API에도 대응이 가능합니다.
+
+## 웹소켓 연결
+
+웹소켓연결은 다소 시간이 걸리는 작업으로 특정화면 진입 후 연결 시도시 TTI가 오래걸리게됩니다. 따라서 `WebSocketManagementHelper`객체에게 웹소켓 연결과 스트림 관리 책임을 수행하도록 합니다.
+
+웹소켓의 연결은 앱이 론칭시 곧바로 진행됩니다. (이를 위해 스플래쉬 화면을 의도적으로 2초동안 표출되도록 설정했습니다.)
+
+`WebSocketManagementHelper`객체로 해당 책음을 분리함으로써 **어플리케이션의 상태에 따른 웹소켓 연결 관리**를 효과적으로 처리했습니다.
+
+해당 객체는 최근까지 구독했던 스트림에 대한 정보를 관리함으로써 재연결 후에 연결이 해제되기 직전까지 진행중인던 작업을 완벽하게 복원합니다.
+
+<img src="https://github.com/user-attachments/assets/1c1000d7-c1b3-4494-85f9-98ef53169823" width=700 />
+
+
+`WebSocketManagementHelper`객체와 협력하는 객체들은 아래 그림처럼 협력하게 됩니다.
+
+<img src="https://github.com/user-attachments/assets/527cf558-7148-4cf0-bcff-8063fd6fb976" width=700 />
+
+
+※ Presentation --> WebSocketManagementHelper 메세지중 **데이터 스트림**이란 웹소켓 API에게 구독을 요청하는 스트림을 의미합니다. (Ex, all market tickers, orderbook)
