@@ -134,3 +134,19 @@ soma-coin-viewer앱은 현재 `Binance API`를 사용합니다. 하지만 WebSoc
 
 
 ※ Presentation --> WebSocketManagementHelper 메세지중 **데이터 스트림**이란 웹소켓 API에게 구독을 요청하는 스트림을 의미합니다. (Ex, all market tickers, orderbook)
+
+## 국제화 대응(I18N)
+
+어플리케이션 UI에 사용되는 언어 와 코인가격을 나타내는 화폐가 동적으로 변경되는 구조를 구축했습니다.
+
+해당 **Configuration**들은 세팅 화면을 통해서 설정이 가능하며 `I18NManager`타입을 통해 관리됩니다.
+
+실시간으로 변경사항을 UI에 반영하기 위해 아래 사진과 같은 시스템을 구축했습니다.
+
+<img src="https://github.com/user-attachments/assets/d68d7fbb-2ac5-4074-8a4b-19c11c0c0a40" width=500 />
+
+### strings파일을 사용하지 않은 이유
+
+`strings파일`을 사용해서 시스템 언어를 기반으로 텍스트를 가져올 수 있습니다. 하지만 해당 기능의 경우 동적으로 언어를 변경할 수 없어 지역 및 시스템 언어와 무관한 언어 설정이 까다롭습니다.
+
+시스템 언어와 무관하게 유저가 언어를 선택하게 함으로써 한층 높아진 국제화 대응을 구현했습니다.
