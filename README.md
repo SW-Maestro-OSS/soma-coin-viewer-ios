@@ -100,6 +100,17 @@ OPENEX_API_KEY="API Key for open exchange rates"
 
 # Tech features
 
+## Tuist
+
+사용한 이유
+- 빌드세팅을 `Swift코드`로 관리
+- 프레임워크 `Embed여부` 자동화
+- 타겟의 `Mach-O`타입 설정 간편화
+- 템플릿을 사용한 모듈 생성
+- `tuist graph`를 사용한 의존성 시각화
+
+<img src="./graph.png" width=800 />
+
 ## 클린아키텍처
 
 해당 프로젝트는 Presentation, Domain, Data 총 3가지로 이루어진 계층으로 분리되었습니다.
