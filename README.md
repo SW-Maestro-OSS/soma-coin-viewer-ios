@@ -100,11 +100,22 @@ OPENEX_API_KEY="API Key for open exchange rates"
 
 # Tech features
 
+## 클린아키텍처
+
+해당 프로젝트는 Presentation, Domain, Data 총 3가지로 이루어진 계층으로 분리되었습니다.
+
+변경 가능성이 높은 UI와 데이터 소스의 경우 Domain계층과 직접적인 의존관계를 지정하지 않고 `protocol`인터페이스를 통해서 가능하도록 설계했습니다.
+
+`protocol`타입의 구현체는 런타임에 의존성을 주입하여, 객체간 유연한 협력이 가능하도록 했습니다.
+
+<img src="https://github.com/user-attachments/assets/422b8e12-0d04-4f8b-87f9-1d5eaaf49b94" width=500 />
+
+
 ## 웹소켓과 클린아키텍처
 
 soma-coin-viewer앱은 현재 `Binance API`를 사용합니다. 하지만 WebSocketService 및 Repository는 클린아키텍처를 따르는 추상화된 객체로 구체타입 변경을 통해 다른 API에도 대응이 가능합니다.
 
-## 웹소켓 연결
+## 웹소켓 Connect & Disconnect
 
 웹소켓연결은 다소 시간이 걸리는 작업으로 특정화면 진입 후 연결 시도시 TTI가 오래걸리게됩니다. 따라서 `WebSocketManagementHelper`객체에게 웹소켓 연결과 스트림 관리 책임을 수행하도록 합니다.
 
@@ -114,12 +125,12 @@ soma-coin-viewer앱은 현재 `Binance API`를 사용합니다. 하지만 WebSoc
 
 해당 객체는 최근까지 구독했던 스트림에 대한 정보를 관리함으로써 재연결 후에 연결이 해제되기 직전까지 진행중인던 작업을 완벽하게 복원합니다.
 
-<img src="https://github.com/user-attachments/assets/1c1000d7-c1b3-4494-85f9-98ef53169823" width=700 />
+<img src="https://github.com/user-attachments/assets/1c1000d7-c1b3-4494-85f9-98ef53169823" width=500 />
 
 
 `WebSocketManagementHelper`객체와 협력하는 객체들은 아래 그림처럼 협력하게 됩니다.
 
-<img src="https://github.com/user-attachments/assets/527cf558-7148-4cf0-bcff-8063fd6fb976" width=700 />
+<img src="https://github.com/user-attachments/assets/527cf558-7148-4cf0-bcff-8063fd6fb976" width=500 />
 
 
 ※ Presentation --> WebSocketManagementHelper 메세지중 **데이터 스트림**이란 웹소켓 API에게 구독을 요청하는 스트림을 의미합니다. (Ex, all market tickers, orderbook)
