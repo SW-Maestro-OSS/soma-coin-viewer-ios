@@ -141,7 +141,7 @@ soma-coin-viewer앱은 현재 `Binance API`를 사용합니다. 하지만 WebSoc
 
 `WebSocketManagementHelper`객체와 협력하는 객체들은 아래 그림처럼 협력하게 됩니다.
 
-<img src="https://github.com/user-attachments/assets/527cf558-7148-4cf0-bcff-8063fd6fb976" width=500 />
+<img src="https://github.com/user-attachments/assets/08fb804b-aa11-493d-ba0e-68db0b73d164" width=500 />
 
 
 ※ Presentation --> WebSocketManagementHelper 메세지중 **데이터 스트림**이란 웹소켓 API에게 구독을 요청하는 스트림을 의미합니다. (Ex, all market tickers, orderbook)
