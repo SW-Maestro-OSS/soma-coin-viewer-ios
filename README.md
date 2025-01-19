@@ -67,7 +67,7 @@
             <b>외부 의존성</b>
         </td>
         <td>
-            <b>Swinject</b>
+            <b>Swinject, SimpleImageProvider(자체구현 라이브러리)</b>
         </td>
     </tr>
     <tr>
