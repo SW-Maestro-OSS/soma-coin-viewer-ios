@@ -59,7 +59,7 @@
             <b>디자인 패턴</b>
         </td>
         <td>
-            <b>MVVM, MVI(단방향 플로우)</b>
+            <b>MVVM, 커스텀 MVI</b>
         </td>
     </tr>
     <tr>
