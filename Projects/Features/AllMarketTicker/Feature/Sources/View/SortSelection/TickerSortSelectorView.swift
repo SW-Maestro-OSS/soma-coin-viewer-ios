@@ -48,10 +48,20 @@ struct TickerSortSelectorView: View {
             }
             .foregroundStyle(.black)
         }
-//        .onTapGesture {
-//            // Click animation
-//            backgroundOpacity = 1.0
-//            withAnimation { backgroundOpacity = 0.0 }
-//        }
+        .background {
+            Rectangle()
+                .foregroundStyle(.gray.opacity(0.3))
+                .background { Rectangle().foregroundStyle(.white) }
+                .padding(.vertical, 1)
+                .background { Rectangle().foregroundStyle(.black) }
+        }
+        .simultaneousGesture(
+            TapGesture()
+                .onEnded {
+                    // Click animation
+                    backgroundOpacity = 1.0
+                    withAnimation { backgroundOpacity = 0.0 }
+                }
+        )
     }
 }
