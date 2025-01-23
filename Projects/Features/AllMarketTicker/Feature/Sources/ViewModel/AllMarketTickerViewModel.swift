@@ -30,7 +30,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     
     
     // State
-    @Published var state: State = .init(tickerDisplayType: .list)
+    @Published var state: State = .init()
     private var isFirstAppear: Bool = true
     
     
@@ -224,12 +224,32 @@ extension AllMarketTickerViewModel {
         var currencyType: CurrencyType?
         var exchangeRate: Double?
         
-        
+
         var isLoaded: Bool {
             !tickerCellRO.isEmpty &&
             languageType != nil &&
             currencyType != nil &&
             exchangeRate != nil
+        }
+        
+        init(
+            sortSelectionCellROs: [SortSelectionCellType: SortSelectionCellRO] = [:],
+            sortComparator: TickerSortComparator=TickerNoneComparator(),
+            tickerCellVO: [Twenty4HourTickerForSymbolVO] = [],
+            tickerDisplayType: GridType = .list,
+            tickerCellRO: [TickerCellRO] = [],
+            languageType: LanguageType? = nil,
+            currencyType: CurrencyType? = nil,
+            exchangeRate: Double? = nil
+        ) {
+            self.sortSelectionCellROs = sortSelectionCellROs
+            self.sortComparator = sortComparator
+            self.tickerCellVO = tickerCellVO
+            self.tickerDisplayType = tickerDisplayType
+            self.tickerCellRO = tickerCellRO
+            self.languageType = languageType
+            self.currencyType = currencyType
+            self.exchangeRate = exchangeRate
         }
     }
     

@@ -5,6 +5,7 @@
 
 import Combine
 import Testing
+import Foundation
 
 @testable import AllMarketTickerFeatureTesting
 @testable import AllMarketTickerFeature
@@ -27,7 +28,7 @@ struct AllMarketTickerViewModelTests {
     }
     
     @Test
-    func testSortingComparator() {
+    func checkPriceSortingComparator() async {
         
         // Given
         let viewModel = AllMarketTickerViewModel(
@@ -38,40 +39,39 @@ struct AllMarketTickerViewModelTests {
             exchangeUseCase: StubExchangeUseCase(),
             userConfigurationRepository: FakeUserConfigurationRepository()
         )
-        let givenTickerCellViewModels: [TickerCellViewModel] = [
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test1USDT", price: 400.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test2USDT", price: 100.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test3USDT", price: 200.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test4USDT", price: 300.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
-        ].map { ticker in
-            TickerCellViewModel(config: .init(
-                tickerVO: ticker,
-                currencyConfig: .init(type: .dollar, rate: 1.0))
-            )
+        let givenTickerVOs: [Twenty4HourTickerForSymbolVO] = [
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test1USDT", price: 100.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test2USDT", price: 200.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 2.0),
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test3USDT", price: 300.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 3.0),
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test4USDT", price: 400.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 4.0),
+        ].map { vo in
+            var newVO = vo
+            newVO.setSymbols(closure: { pairSymbol in
+                let firstSymbol = pairSymbol.replacingOccurrences(of: "USDT", with: "")
+                let secondSymbol = "USDT"
+                return (firstSymbol, secondSymbol)
+            })
+            return newVO
         }
-        let initialState: AllMarketTickerViewModel.State = .init(
-            sortComparator: AscendingPriceSortComparator(),
-            tickerDisplayType: .list,
-            tickerCellViewModels: givenTickerCellViewModels
-        )
-        let ascendingPriceSortComparator = AscendingPriceSortComparator()
+        viewModel.action.send(.currencyTypeUpdated(type: .dollar, rate: 1.0))
+        viewModel.action.send(.tickerListFetched(list: givenTickerVOs))
         
         
-        // When
+        // #1. When
         // - 정렬 기준을 가격에 의한 오름차순으로 설정
-        let resultState = viewModel.reduce(
-            .changeSortingCriteria(comparator: ascendingPriceSortComparator),
-            state: initialState
-        )
+        viewModel.action.send(.sortSelectionButtonTapped(type: .price))
         
         
-        // Then
-        // - 정렬이 올바르게 진행됬는지 확인
-        let expectedResult = initialState.tickerCellViewModels
-            .map { $0.tickerVO.price }
-            .sorted(by: { $0.wrappedNumber < $01.wrappedNumber })
-        let priceList = resultState.tickerCellViewModels.map { $0.tickerVO.price }
-        #expect(expectedResult == priceList)
+        // #1. Then
+        // - 정렬이 올바르게 진행됬는지 확인, descending price sort
+        let expectedSymbolArray = givenTickerVOs.sorted { lhs, rhs in
+            lhs.price > rhs.price
+        }.map({ $0.pairSymbol.uppercased() })
+        for await state in viewModel.$state.dropFirst(3).values {
+            let sortedSymbols = state.tickerCellRO.map({ $0.symbolText.uppercased() })
+            #expect(sortedSymbols == expectedSymbolArray)
+            break
+        }
     }
 }
 
