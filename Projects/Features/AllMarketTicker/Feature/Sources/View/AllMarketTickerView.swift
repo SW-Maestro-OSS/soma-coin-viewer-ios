@@ -32,7 +32,7 @@ struct AllMarketTickerView: View {
         
         VStack(spacing: 0) {
             
-            // MARK: Sort selection
+            // MARK: Sort selection view
             LazyVGrid(columns: columns, spacing: 0) {
                 ForEach(viewModel.state.displayingSortSelectionCellROs) { ro in
                     Group {
