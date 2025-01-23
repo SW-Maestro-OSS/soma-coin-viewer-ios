@@ -55,7 +55,7 @@ struct AllMarketTickerView: View {
             
             // MARK: Ticker collection view
             ScrollView {
-                let displayType = viewModel.state.tickerDisplayType
+                let displayType = viewModel.state.tickerGridType
                 if viewModel.state.isLoaded {
                     switch displayType {
                     case .list:
