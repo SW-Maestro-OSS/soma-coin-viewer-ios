@@ -11,10 +11,10 @@ import CommonUI
 
 struct TickerGridCell: View {
     
-    @ObservedObject private var viewModel: TickerCellViewModel
+    private let renderObject: TickerCellRO
     
-    init(viewModel: TickerCellViewModel) {
-        self._viewModel = ObservedObject(wrappedValue: viewModel)
+    init(renderObject: TickerCellRO) {
+        self.renderObject = renderObject
     }
     
     var body: some View {
@@ -27,11 +27,11 @@ struct TickerGridCell: View {
                 HStack(spacing: 5) {
                     
                     // Symbol image view
-                    SymbolImageView(imageURL: $viewModel.state.firstSymbolImageURL)
+                    SymbolImageView(imageURL: .constant(renderObject.symbolImageURL))
                         .frame(width: 40, height: 40)
                     
                     // Pair symbol text
-                    CVText(text: $viewModel.state.pairSymbolNameText)
+                    Text(renderObject.symbolText)
                         .font(.title3)
                         .lineLimit(1)
                     
@@ -43,12 +43,13 @@ struct TickerGridCell: View {
                     Spacer(minLength: 0)
                     
                     VStack(alignment: .trailing) {
-                        CVText(text: $viewModel.state.priceText)
+                        Text(renderObject.displayPriceText)
                             .font(.title2)
                             .lineLimit(1)
                         
-                        CVText(text: $viewModel.state.percentText)
+                        Text(renderObject.displayChangePercentText)
                             .font(.title3)
+                            .foregroundStyle(renderObject.displayChangePercentTextColor)
                             .lineLimit(1)
                     }
                 }
