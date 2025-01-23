@@ -17,10 +17,8 @@ import BaseFeature
 class TabBarBuilder {
     
     func build() -> TabBarRouter {
-        
-        let gridTypeChangePublisher = PassthroughSubject<GridType, Never>()
-        
-        let viewModel = TabBarViewModel(gridTypeChangePublisher: gridTypeChangePublisher)
+    
+        let viewModel = TabBarViewModel()
         let view = TabBarView(viewModel: viewModel)
         let allMarketTickerBuilder = AllMarketTickerBuilder()
         let settingBuilder = SettingBuilder()

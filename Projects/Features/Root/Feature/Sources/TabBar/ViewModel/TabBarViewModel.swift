@@ -18,11 +18,7 @@ import I18N
 import CoreUtil
 
 class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
-    
-    // Stream
-    private let gridTypeChangePublisher: PassthroughSubject<GridType, Never>
-    
-    
+
     // DI
     @Injected private var i18NManager: I18NManager
     
@@ -43,9 +39,7 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     }
     
     
-    init(gridTypeChangePublisher: PassthroughSubject<GridType, Never>) {
-        
-        self.gridTypeChangePublisher = gridTypeChangePublisher
+    init() {
         
         // Initial state
         self.state = .init(
@@ -132,15 +126,6 @@ extension TabBarViewModel {
         
         case onAppear
         case applyLanguageType(LanguageType)
-    }
-}
-
-
-// MARK: SettingViewModelListenr
-extension TabBarViewModel {
-    
-    func mutation(gridType: GridType) {
-        gridTypeChangePublisher.send(gridType)
     }
 }
 

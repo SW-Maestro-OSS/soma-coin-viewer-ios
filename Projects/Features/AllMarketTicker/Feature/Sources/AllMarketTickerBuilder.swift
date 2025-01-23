@@ -22,19 +22,16 @@ public final class AllMarketTickerBuilder {
     @Injected private var exchangeRateUseCase: ExchangeRateUseCase
     @Injected private var userConfigurationRepository: UserConfigurationRepository
     @Injected private var i18NManager: I18NManager
+    @Injected private var languageLocalizationRepository: LanguageLocalizationRepository
     
-    private let gridTypeChangePublisher: AnyPublisher<GridType, Never>
-    
-    public init(gridTypeChangePublisher: AnyPublisher<GridType, Never>) {
-        self.gridTypeChangePublisher = gridTypeChangePublisher
-    }
+    public init() { }
     
     public func build() -> AllMarketTickerRouter {
         
         let viewModel = AllMarketTickerViewModel(
-            gridTypeChangePublisher: gridTypeChangePublisher,
             socketHelper: webSocketManagementHelper,
             i18NManager: i18NManager,
+            languageLocalizationRepository: languageLocalizationRepository,
             allMarketTickersUseCase: allMarketTickersUseCase,
             exchangeUseCase: exchangeRateUseCase,
             userConfigurationRepository: userConfigurationRepository
