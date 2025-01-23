@@ -15,7 +15,7 @@ import DomainInterface
 import CoreUtil
 import I18N
 
-final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModelDelegate, AllMarketTickerViewModelable {
+final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewModelable {
     
     // Stream
     private let gridTypeChangePublisher: AnyPublisher<GridType, Never>
@@ -30,12 +30,8 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
     
     
     // State
-    @Published var state: State
+    @Published var state: State = .init(tickerDisplayType: .list)
     private var isFirstAppear: Bool = true
-    
-    
-    // Sub ViewModel
-    private(set) var sortCompartorViewModels: [TickerSortSelectorViewModel] = []
     
     
     var action: PassthroughSubject<Action, Never> = .init()
@@ -63,17 +59,16 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         let initialTickerDisplayType = userConfigurationRepository.getGridType()
         let initialLanguageType = i18NManager.getLanguageType()
         let initialCurrencyType = i18NManager.getCurrencyType()
+        let initialSortSelectionROs = createInitialSortSelectonROs()
+        
         let initialState: State = .init(
+            sortSelectionCellROs: initialSortSelectionROs,
             sortComparator: TickerNoneComparator(),
             tickerDisplayType: initialTickerDisplayType,
             languageType: initialLanguageType,
             currencyType: initialCurrencyType
         )
         self._state = Published(initialValue: initialState)
-        
-        
-        // Create sort selection view models
-        createTickerSortSelectorViewModels()
         
         
         // Create state stream
@@ -120,13 +115,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         var newState = state
         
         switch action {
-        case .changeSortingCriteria(let comparator):
-            
-            let sortedTickerViewModels = state.tickerCellViewModels.sorted(by: comparator)
-            newState.tickerCellViewModels = sortedTickerViewModels
-            newState.sortComparator = comparator
-            
-        case .fetchList(let list):
+        case .tickerListFetched(let list):
             
             let currentComparator = state.sortComparator
             let tickerViewModels = list.map { tickerVO in
@@ -151,6 +140,47 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         case .gridTypeUpdated(let gridType):
             newState.tickerDisplayType = gridType
             
+        case .sortSelectionButtonTapped(let selectedType):
+            // #1. UI update
+            var newSelectionRO: SortSelectionCellRO!
+            state.sortSelectionCellROs.forEach { type, ro in
+                if type == selectedType {
+                    // 선택된 타입인 경우
+                    newSelectionRO = ro
+                    switch ro.sortState {
+                    case .neutral:
+                        // neutral --> descending
+                        newSelectionRO.sortState = .descending
+                    case .ascending:
+                        // ascending --> descending
+                        newSelectionRO.sortState = .descending
+                    case .descending:
+                        // descending --> ascending
+                        newSelectionRO.sortState = .ascending
+                    }
+                    newState.sortSelectionCellROs[type] = newSelectionRO
+                } else {
+                    // 선택되지 않은 타입인 경우
+                    var newSelectionRO = ro
+                    newSelectionRO.sortState = .neutral
+                    newState.sortSelectionCellROs[type] = newSelectionRO
+                }
+            }
+            
+            // #2. Sort current
+            var newSortComparator: TickerSortComparator!
+            switch newSelectionRO.sortState {
+            case .neutral:
+                fatalError()
+            case .ascending:
+                newSortComparator = selectedType.getSortComparator(type: .ascending)
+            case .descending:
+                newSortComparator = selectedType.getSortComparator(type: .descending)
+            }
+            newState.sortComparator = newSortComparator
+            let sortedTickerViewModels = state.tickerCellViewModels.sorted(by: newSortComparator)
+            newState.tickerCellViewModels = sortedTickerViewModels
+            
         default:
             return state
         }
@@ -174,9 +204,14 @@ extension AllMarketTickerViewModel {
     struct State {
         
         // Sort
-        var sortComparator: any TickerSortComparator
+        fileprivate var sortSelectionCellROs: [SortSelectionCellType: SortSelectionCellRO] = [:]
+        var sortComparator: TickerSortComparator = TickerNoneComparator()
+        var displayingSortSelectionCellROs: [SortSelectionCellRO] {
+            let order: [SortSelectionCellType] = [.symbol, .price, .changeIn24h]
+            return order.compactMap({ sortSelectionCellROs[$0] })
+        }
         
-        // Cell
+        // Ticker cell
         var tickerDisplayType: GridType
         var tickerCellViewModels: [TickerCellViewModel] = []
         
@@ -196,28 +231,31 @@ extension AllMarketTickerViewModel {
     
     enum Action {
         
-        // Event
+        // View event
         case onAppear
+        case sortSelectionButtonTapped(type: SortSelectionCellType)
+        
+        
+        // Side effect
+        case tickerListFetched(list: [Twenty4HourTickerForSymbolVO])
+        
+        
+        // Configuration changed
         case gridTypeUpdated(type: GridType)
         case currencyTypeUpdated(type: CurrencyType, rate: Double)
         case languageTypeUpdated(type: LanguageType)
-        case changeSortingCriteria(comparator: any TickerSortComparator)
-        case fetchList(list: [Twenty4HourTickerForSymbolVO])
     }
 }
 
 
-// MARK: Private
+// MARK: Websocket stream subscription
 private extension AllMarketTickerViewModel {
     
     func subscribeToTickerDataStream() {
         
         allMarketTickersUseCase
             .requestTickers()
-            .map { tickers in
-                
-                return Action.fetchList(list: tickers)
-            }
+            .map { Action.tickerListFetched(list: $0) }
             .subscribe(action)
             .store(in: &store)
         
@@ -225,17 +263,11 @@ private extension AllMarketTickerViewModel {
         // Subscribe to webSocketStream
         webSocketManagementHelper.requestSubscribeToStream(streams: ["!ticker@arr"])
     }
-    
-    func createTickerSortSelectorViewModels() {
-        
-        let tickerSortSelectorViewModels = [
-            SymbolSortingViewModel(),
-            PriceSortingViewModel(),
-            ChangeIn24hViewModel()
-        ]
-        tickerSortSelectorViewModels.forEach { $0.delegate = self }
-        self.sortCompartorViewModels = tickerSortSelectorViewModels
-    }
+}
+
+
+// MARK: I18N stream subscription
+private extension AllMarketTickerViewModel {
     
     func subscribeToI18NMutation() {
         
@@ -271,7 +303,11 @@ private extension AllMarketTickerViewModel {
             }
             .store(in: &store)
     }
-    
+}
+
+
+// MARK: User configuarion changes
+private extension AllMarketTickerViewModel {
     
     func subscribeToGridTypeChange() {
         
@@ -286,25 +322,21 @@ private extension AllMarketTickerViewModel {
 }
 
 
-// MARK: TickerSortSelectorViewModelDelegate
-extension AllMarketTickerViewModel {
+// MARK: Create sort selection cell render objects
+private extension AllMarketTickerViewModel {
     
-    func sortSelector(selection comparator: any TickerSortComparator) {
-        
-        // 정렬 버튼 UI에게 현재 선택된 정렬기준을 전파
-        sortCompartorViewModels.forEach { sortViewModel in
-
-            sortViewModel.notifySelectedComparator(comparator)
-        }
-        
-        // 현재 선택된 정렬기준을 리스트에 적용하기 위해 액션으로 전달
-        action.send(.changeSortingCriteria(comparator: comparator))
+    func createInitialSortSelectonROs() -> [SortSelectionCellType: SortSelectionCellRO] {
+        var sortSelectionROs: [SortSelectionCellType: SortSelectionCellRO] = [:]
+        sortSelectionROs[.symbol] = .init(type: .symbol, sortState: .neutral)
+        sortSelectionROs[.price] = .init(type: .price, sortState: .neutral)
+        sortSelectionROs[.changeIn24h] = .init(type: .changeIn24h, sortState: .neutral)
+        return sortSelectionROs
     }
 }
 
 
 // MARK: Array + Extension
-extension Array where Element == TickerCellViewModel {
+fileprivate extension Array where Element == TickerCellViewModel {
     
     func sorted(by comparator: any TickerSortComparator) -> Self {
         
