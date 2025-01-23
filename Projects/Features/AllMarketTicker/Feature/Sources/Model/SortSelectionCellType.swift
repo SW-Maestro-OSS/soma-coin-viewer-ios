@@ -41,6 +41,17 @@ enum SortSelectionCellType: String, Identifiable {
                 Ticker24hChangeDescendingComparator()
             }
         }
-        
+    }
+    
+    
+    var displayTextKey: String {
+        switch self {
+        case .symbol:
+            "AllMarketTickerPage_comparator_symbol"
+        case .price:
+            "AllMarketTickerPage_comparator_price"
+        case .changeIn24h:
+            "AllMarketTickerPage_comparator_24hchange"
+        }
     }
 }
