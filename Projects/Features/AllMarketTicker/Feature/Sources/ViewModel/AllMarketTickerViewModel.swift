@@ -115,21 +115,18 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
         var newState = state
         
         switch action {
-        case .tickerListFetched(let list):
+        case .tickerListFetched(let tickerVOs):
             
             let currentComparator = state.sortComparator
-            let tickerViewModels = list.map { tickerVO in
-                TickerCellViewModel(config: .init(
-                    tickerVO: tickerVO,
-                    currencyConfig: .init(
-                        type: state.currencyType ?? .dollar,
-                        rate: state.exchangeRate ?? 0.0
-                    )
+            let sortedTickerVOs = tickerVOs.sorted(by: currentComparator.compare)
+            guard let currencyType = state.currencyType, let exchangeRate = state.exchangeRate else { break }
+            newState.tickerCellVO = sortedTickerVOs
+            newState.tickerCellRO = sortedTickerVOs.map {
+                createRO($0, currencyConfig: .init(
+                    type: currencyType,
+                    rate: exchangeRate
                 ))
             }
-            let sortedTickerViewModels = tickerViewModels.sorted(by: currentComparator)
-            newState.tickerCellViewModels = sortedTickerViewModels
-            
         case .currencyTypeUpdated(let currenyType, let rate):
             newState.currencyType = currenyType
             newState.exchangeRate = rate
@@ -178,8 +175,14 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
                 newSortComparator = selectedType.getSortComparator(type: .descending)
             }
             newState.sortComparator = newSortComparator
-            let sortedTickerViewModels = state.tickerCellViewModels.sorted(by: newSortComparator)
-            newState.tickerCellViewModels = sortedTickerViewModels
+            let sortedTickerVOs = state.tickerCellVO.sorted(by: newSortComparator.compare)
+            guard let currencyType = state.currencyType, let exchangeRate = state.exchangeRate else { break }
+            newState.tickerCellRO = sortedTickerVOs.map {
+                createRO($0, currencyConfig: .init(
+                    type: currencyType,
+                    rate: exchangeRate
+                ))
+            }
             
         default:
             return state
@@ -212,8 +215,9 @@ extension AllMarketTickerViewModel {
         }
         
         // Ticker cell
+        fileprivate var tickerCellVO: [Twenty4HourTickerForSymbolVO] = []
         var tickerDisplayType: GridType
-        var tickerCellViewModels: [TickerCellViewModel] = []
+        var tickerCellRO: [TickerCellRO] = []
         
         // Currency
         var languageType: LanguageType?
@@ -222,7 +226,7 @@ extension AllMarketTickerViewModel {
         
         
         var isLoaded: Bool {
-            !tickerCellViewModels.isEmpty &&
+            !tickerCellRO.isEmpty &&
             languageType != nil &&
             currencyType != nil &&
             exchangeRate != nil
@@ -322,6 +326,70 @@ private extension AllMarketTickerViewModel {
 }
 
 
+// MARK: Create ticker cell render object
+private extension AllMarketTickerViewModel {
+    
+    func createRO(_ vo: Twenty4HourTickerForSymbolVO, currencyConfig: CurrencyConfig) -> TickerCellRO {
+        
+        let symbolImageURL = createSymbolImageURL(symbol: vo.firstSymbol)
+        let (changePercentText, changePercentColor) = createChangePercentTextConfig(percent: vo.changedPercent)
+        let displayPriceText = createPriceText(
+            price: vo.price,
+            config: currencyConfig
+        )
+        
+        return TickerCellRO(
+            symbolText: vo.pairSymbol,
+            symbolImageURL: symbolImageURL,
+            displayPriceText: displayPriceText,
+            displayChangePercentText: changePercentText,
+            displayChangePercentTextColor: changePercentColor
+        )
+    }
+    
+    func createSymbolImageURL(symbol: String) -> String {
+        let baseURL = URL(string: "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/32/icon")!
+        let symbolImageURL = baseURL.appendingPathComponent(symbol.lowercased(), conformingTo: .png)
+        return symbolImageURL.absoluteString
+    }
+    
+    func createChangePercentTextConfig(percent: CVNumber) -> (String, Color) {
+        let percentText = percent.roundToTwoDecimalPlaces()+"%"
+        var displayText: String = percentText
+        var displayColor: Color = .red
+        if percent >= 0.0 {
+            displayText = "+"+displayText
+            displayColor = .green
+        }
+        return (displayText, displayColor)
+    }
+    
+    struct CurrencyConfig {
+        let type: CurrencyType
+        let rate: Double
+    }
+    
+    func createPriceText(price: CVNumber, config: CurrencyConfig) -> String {
+        
+        let currencyType = config.type
+        let currencySymbol = currencyType.symbol
+        let exchangeRate = config.rate
+        
+        let dollarPrice: Decimal = price.wrappedNumber
+        let formattedPrice = CVNumber(dollarPrice * Decimal(exchangeRate))
+        var priceText = formattedPrice.roundToTwoDecimalPlaces()
+        
+        if currencyType.isPrefix {
+            priceText = "\(currencySymbol) \(priceText)"
+        } else {
+            priceText = "\(priceText) \(currencySymbol)"
+        }
+        
+        return priceText
+    }
+}
+
+
 // MARK: Create sort selection cell render objects
 private extension AllMarketTickerViewModel {
     
@@ -333,17 +401,3 @@ private extension AllMarketTickerViewModel {
         return sortSelectionROs
     }
 }
-
-
-// MARK: Array + Extension
-fileprivate extension Array where Element == TickerCellViewModel {
-    
-    func sorted(by comparator: any TickerSortComparator) -> Self {
-        
-        self.sorted { lhs, rhs in
-            
-            comparator.compare(lhs: lhs.tickerVO, rhs: rhs.tickerVO)
-        }
-    }
-}
-
