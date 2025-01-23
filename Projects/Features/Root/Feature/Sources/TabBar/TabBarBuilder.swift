@@ -22,9 +22,7 @@ class TabBarBuilder {
         
         let viewModel = TabBarViewModel(gridTypeChangePublisher: gridTypeChangePublisher)
         let view = TabBarView(viewModel: viewModel)
-        let allMarketTickerBuilder = AllMarketTickerBuilder(
-            gridTypeChangePublisher: gridTypeChangePublisher.eraseToAnyPublisher()
-        )
+        let allMarketTickerBuilder = AllMarketTickerBuilder()
         let settingBuilder = SettingBuilder()
         let router = TabBarRouter(
             settingBuilder: settingBuilder,
