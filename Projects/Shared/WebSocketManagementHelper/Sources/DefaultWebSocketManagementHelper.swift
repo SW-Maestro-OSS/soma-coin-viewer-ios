@@ -14,7 +14,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     
     public typealias Stream = String
     
-    @Injected private var webSocketService: WebSocketService
+    private let webSocketService: WebSocketService
     
     
     // Pulbic interface
@@ -25,8 +25,9 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     private let subscribedStreamManageQueue: DispatchQueue = .init(label: "com.WebSocketManagementHelper")
     private var store: Set<AnyCancellable> = .init()
     
-    public init() {
+    public init(webSocketService: WebSocketService) {
         
+        self.webSocketService = webSocketService
         
         // 외부에 상태전파
         self.isWebSocketConnected = webSocketService
