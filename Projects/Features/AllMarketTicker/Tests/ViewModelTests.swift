@@ -33,18 +33,18 @@ struct AllMarketTickerViewModelTests {
         
         // Given
         let viewModel = AllMarketTickerViewModel(
-            gridTypeChangePublisher: Just(GridType.list).eraseToAnyPublisher(),
             socketHelper: FakeWebSocketHelper(),
             i18NManager: FakeI18NManager(),
+            languageLocalizationRepository: StubLanguageLocalizationRepository(),
             allMarketTickersUseCase: FakeAllMarketTickersUseCase(),
             exchangeUseCase: StubExchangeUseCase(),
             userConfigurationRepository: FakeUserConfigurationRepository()
         )
         let givenTickerVOs: [Twenty4HourTickerForSymbolVO] = [
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test1USDT", price: 400.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test2USDT", price: 300.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 2.0),
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test3USDT", price: 100.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 3.0),
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test4USDT", price: 200.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 4.0),
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test4USDT", price: 200.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test3USDT", price: 100.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 2.0),
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test2USDT", price: 300.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 3.0),
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test1USDT", price: 400.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 4.0),
         ].map { vo in
             var newVO = vo
             newVO.setSymbols(closure: { pairSymbol in
@@ -54,14 +54,21 @@ struct AllMarketTickerViewModelTests {
             })
             return newVO
         }
-        viewModel.action.send(.currencyTypeUpdated(type: .dollar, rate: 1.0))
+        // emit(2)
+        viewModel.action.send(.i18NUpdated(
+            languageType: .english,
+            currenyType: .dollar,
+            exchangeRate: 1.0)
+        )
+        // emit(3)
         viewModel.action.send(.tickerListFetched(list: givenTickerVOs))
         
         
         // #1. When
         // - 정렬 기준을 가격에 의한 오름차순으로 설정
+        // emit(4)
         viewModel.action.send(.sortSelectionButtonTapped(type: .price))
-        
+
         
         // #1. Then
         // - 정렬이 올바르게 진행됬는지 확인, descending price sort

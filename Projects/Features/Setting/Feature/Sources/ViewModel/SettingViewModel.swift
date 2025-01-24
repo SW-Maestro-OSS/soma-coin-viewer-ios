@@ -15,10 +15,7 @@ import DomainInterface
 import I18N
 import CoreUtil
 
-public protocol SettingViewModelListener: AnyObject {
-    
-    func mutation(gridType: GridType)
-}
+public protocol SettingViewModelListener: AnyObject { }
 
 class SettingViewModel : UDFObservableObject, SettingViewModelable, SettingViewModelDelegate {
     
@@ -138,7 +135,6 @@ extension SettingViewModel {
             action.send(.tap(.language))
         case .gridType(let gridType):
             userConfigurationRepository.setGrideType(type: gridType)
-            listener?.mutation(gridType: gridType)
             action.send(.tap(.grid))
         }
     }

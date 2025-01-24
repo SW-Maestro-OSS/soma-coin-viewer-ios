@@ -28,9 +28,9 @@ struct CoinViewerApp: App {
           
             AllMarketTickerView(
                 viewModel: .init(
-                    gridTypeChangePublisher: stubGridTypePublisher,
                     socketHelper: DependencyInjector.shared.resolve(WebSocketManagementHelper.self),
                     i18NManager: DependencyInjector.shared.resolve(I18NManager.self),
+                    languageLocalizationRepository: DependencyInjector.shared.resolve(LanguageLocalizationRepository.self),
                     allMarketTickersUseCase: DependencyInjector.shared.resolve(AllMarketTickersUseCase.self),
                     exchangeUseCase: DependencyInjector.shared.resolve(ExchangeRateUseCase.self),
                     userConfigurationRepository: DependencyInjector.shared.resolve(UserConfigurationRepository.self)

@@ -1,17 +1,11 @@
 //
-//  LanguageLocalizationRepository.swift
+//  DefaultLanguageLocalizationRepository.swift
 //  I18N
 //
 //  Created by choijunios on 1/14/25.
 //
 
 import Foundation
-
-public protocol LanguageLocalizationRepository {
-    
-    func getString(key: String, lanCode: String) -> String
-}
-
 
 public class DefaultLanguageLocalizationRepository: LanguageLocalizationRepository {
     
