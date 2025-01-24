@@ -38,8 +38,10 @@ public class Assemblies: Assembly {
         
         
         // MARK: Shared
-        container.register(WebSocketManagementHelper.self) { _ in
-            DefaultWebSocketManagementHelper()
+        container.register(WebSocketManagementHelper.self) { resolver in
+            DefaultWebSocketManagementHelper(
+                webSocketService: resolver.resolve(WebSocketService.self)!
+            )
         }
         .inObjectScope(.container)
         
