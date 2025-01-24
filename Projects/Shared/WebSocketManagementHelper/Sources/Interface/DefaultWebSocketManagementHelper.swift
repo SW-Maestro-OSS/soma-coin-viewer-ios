@@ -21,7 +21,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     public private(set) var isWebSocketConnected: AnyPublisher<Bool, Never> = Empty().eraseToAnyPublisher()
     
     
-    private var subscribtions: Set<Stream> = []
+    private var currentSubscribtions: Set<Stream> = []
     private let subscribedStreamManageQueue: DispatchQueue = .init(label: "com.WebSocketManagementHelper")
     private var store: Set<AnyCancellable> = .init()
     
@@ -79,33 +79,26 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
         subscribedStreamManageQueue.async { [weak self] in
             
             guard let self else { return }
-            
-            let newStreams = streams.filter { stream in
-                
-                !self.subscribtions.contains(stream)
-            }
-            
+        
             // 스트림 구독 메세지 전송
-            webSocketService.subscribeTo(message: newStreams) { [weak self] result in
+            webSocketService.subscribeTo(message: streams) { [weak self] result in
                 
                 guard let self else { return }
                 
                 switch result {
                 case .success:
-                    
-                    printIfDebug("WebSocketManagementHelper: 구독 메세지 전송 성공")
-                    
-                    // 리커버리 리스트에 구독된 리스트들을 추가합니다.
-                    addSubscriptionsToRecoveryList(streams: newStreams)
+                    streams.forEach { stream in
+                        printIfDebug("\(Self.self): ✅\(stream)구독 성공")
+                    }
+                    // 구독에 성공한 스트림들을 기록합니다.
+                    add(streams: streams)
                     
                 case .failure(let webSocketError):
-                    
                     switch webSocketError {
-                    case .messageTransferFailure(let message):
-                        
-                        // MARK: 매세지 전송 실패 대처
-                        printIfDebug("WebSocketManagementHelper: 스트림 구독 메세지 전송 실패")
-                        
+                    case .messageTransferFailure(_):
+                        streams.forEach { stream in
+                            printIfDebug("\(Self.self): ❌\(stream)구독 실패")
+                        }
                         return
                     default:
                         return
@@ -130,8 +123,8 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
                     
                     guard let self else { return }
                     
-                    self.subscribtions = subscribtions.filter { stream in
-                        
+                    // 현재 구독중인 스트림에서 구독취소한 스트림 제거
+                    currentSubscribtions = currentSubscribtions.filter { stream in
                         !willRemoveStreams.contains(stream)
                     }
                 }
@@ -139,10 +132,9 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
             case .failure(let webSocketError):
                 
                 switch webSocketError {
-                case .messageTransferFailure(let message):
+                case .messageTransferFailure( _ ):
                     
-                    // MARK: 매세지 전송 실패 대처
-                    printIfDebug("WebSocketManagementHelper: 스트림 구독 해제 메세지 전송 실패")
+                    printIfDebug("\(Self.self): 스트림 구독 해제 메세지 전송 실패")
                     
                     return
                 default:
@@ -153,7 +145,6 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     }
     
     public func requestDisconnection() {
-        
         webSocketService.disconnect()
     }
     
@@ -175,6 +166,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
             case .failure(let error):
                 
                 // MARK: 웹소켓 연결 실패 대처
+                printIfDebug("\(Self.self) 웹소켓 연결실패 \(error.localizedDescription)")
                 
                 return
             }
@@ -184,25 +176,35 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
 
 private extension DefaultWebSocketManagementHelper {
     
-    func addSubscriptionsToRecoveryList(streams: [Stream]) {
-        
+    /// 스트림을 기록합니다.
+    func add(streams: [Stream]) {
         subscribedStreamManageQueue.async(flags: .barrier) { [weak self] in
-            
-            streams.forEach { stream in
-                
-                self?.subscribtions.insert(stream)
+            guard let self else { return }
+            for stream in streams {
+                currentSubscribtions.insert(stream)
             }
         }
     }
     
-    func recoverPreviouslySubscribedStreams() {
-        
-        subscribedStreamManageQueue.async { [weak self] in
-            
+    
+    /// 스트림을 제거합니다.
+    func remove(streams: [Stream]) {
+        subscribedStreamManageQueue.async(flags: .barrier) { [weak self] in
             guard let self else { return }
-            
-            let recoveringStreamList = Array(subscribtions)
-            
+            for stream in streams {
+                if let index = currentSubscribtions.firstIndex(of: stream) {
+                    currentSubscribtions.remove(at: index)
+                }
+            }
+        }
+    }
+    
+    
+    func recoverPreviouslySubscribedStreams() {
+        subscribedStreamManageQueue.async { [weak self] in
+            guard let self else { return }
+            printIfDebug("\(Self.self) 스트림 복구 실행 \(currentSubscribtions)")
+            let recoveringStreamList = Array(currentSubscribtions)
             self.requestSubscribeToStream(streams: recoveringStreamList)
         }
     }

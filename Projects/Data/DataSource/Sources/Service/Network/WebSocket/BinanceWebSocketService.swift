@@ -185,7 +185,19 @@ extension BinanceWebSocketService: URLSessionWebSocketDelegate {
             webSocketMessagePublisher.send(result)
             
             // 재귀호출
-            listenToMessage()
+            switch result {
+            case .success:
+                listenToMessage()
+            case .failure(let error):
+                let nsError = error as NSError
+                // NSPOSIXErrorDomain: 네트워크 소켓 및 저수준 POSIX 관련 에러
+                if nsError.domain == NSPOSIXErrorDomain && nsError.code == 57 {
+                    // CODE=57, 웹소켓 연결이 끊어짐 메세지 수신요청 종료
+                    break
+                }
+                listenToMessage()
+            }
+            
         })
     }
     
