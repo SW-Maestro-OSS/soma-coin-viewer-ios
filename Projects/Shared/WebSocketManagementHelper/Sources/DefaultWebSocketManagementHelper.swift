@@ -14,6 +14,8 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     
     public typealias Stream = String
     
+    
+    // DI
     private let webSocketService: WebSocketService
     
     
@@ -30,17 +32,13 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
         self.webSocketService = webSocketService
         
         // 외부에 상태전파
-        self.isWebSocketConnected = webSocketService
-            .state
-            .map { state in
-                state == .connected
-            }
+        self.isWebSocketConnected = webSocketService.state
+            .map { $0 == .connected }
             .eraseToAnyPublisher()
         
         
         // 웹소켓 상태 수신 및 회복처리
-        webSocketService
-            .state
+        webSocketService.state
             .sink { [weak self] state in
                 
                 guard let self else { return }
