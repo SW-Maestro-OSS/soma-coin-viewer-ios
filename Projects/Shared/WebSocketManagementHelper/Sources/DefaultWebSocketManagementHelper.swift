@@ -210,3 +210,15 @@ private extension DefaultWebSocketManagementHelper {
         }
     }
 }
+
+
+// MARK: For Test
+internal extension DefaultWebSocketManagementHelper {
+    
+    @available(*, deprecated, message: "테스트 목적이외에 방식으로 사용되면 안됩니다.")
+    func getSavedStreams() -> [Stream] {
+        subscribedStreamManageQueue.sync {
+            return Array(currentSubscribtions)
+        }
+    }
+}
