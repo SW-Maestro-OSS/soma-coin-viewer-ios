@@ -46,7 +46,10 @@ let project = Project(
             dependencies: [
                 
                 D.Data.dataSource,
+                
                 D.Util.CoreUtil,
+                
+                D.ThirdParty.SwiftStructures,
             ]
         ),
     ]
