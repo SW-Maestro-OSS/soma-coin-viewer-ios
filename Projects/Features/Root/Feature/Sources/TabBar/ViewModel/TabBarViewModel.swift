@@ -19,7 +19,7 @@ import CoreUtil
 
 class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
 
-    // DI
+    // Service locator
     @Injected private var i18NManager: I18NManager
     
     

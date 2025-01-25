@@ -15,7 +15,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     public typealias Stream = String
     
     
-    // DI
+    // Service locator
     private let webSocketService: WebSocketService
     
     

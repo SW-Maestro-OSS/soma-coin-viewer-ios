@@ -18,7 +18,7 @@ import SwiftStructures
 
 public class DefaultExchangeRateRepository: ExchangeRateRepository {
     
-    // DI
+    // Service locator
     @Injected private var priceService: ExchangeRateService
     
     // Cache (base: [to: rate])

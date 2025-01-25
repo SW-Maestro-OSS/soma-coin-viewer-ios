@@ -16,7 +16,7 @@ import I18N
 
 public final class AllMarketTickerBuilder {
     
-    // DI
+    // Service locator
     @Injected private var webSocketManagementHelper: WebSocketManagementHelper
     @Injected private var allMarketTickersUseCase: AllMarketTickersUseCase
     @Injected private var exchangeRateUseCase: ExchangeRateUseCase

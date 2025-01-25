@@ -12,7 +12,7 @@ import CoreUtil
 
 public struct LocalizableText: View {
     
-    // DI
+    // Service locator
     @Injected private var repository: LanguageLocalizationRepository
     
     private let key: String

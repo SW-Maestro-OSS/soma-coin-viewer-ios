@@ -19,7 +19,7 @@ public protocol SettingViewModelListener: AnyObject { }
 
 class SettingViewModel : UDFObservableObject, SettingViewModelable, SettingViewModelDelegate {
     
-    // DI
+    // Service locator
     @Injected private var i18NManager: I18NManager
     @Injected private var userConfigurationRepository: UserConfigurationRepository
     

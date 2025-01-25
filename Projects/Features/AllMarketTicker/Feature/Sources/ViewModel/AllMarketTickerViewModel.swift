@@ -17,7 +17,7 @@ import I18N
 
 final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewModelable {
     
-    // DI
+    // Service locator
     private let webSocketManagementHelper: WebSocketManagementHelper
     private let i18NManager: I18NManager
     private let languageLocalizationRepository: LanguageLocalizationRepository
