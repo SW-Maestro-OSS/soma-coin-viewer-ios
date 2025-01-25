@@ -35,7 +35,7 @@ struct AllMarketTickerViewModelTests {
         let viewModel = AllMarketTickerViewModel(
             i18NManager: FakeI18NManager(),
             languageLocalizationRepository: StubLanguageLocalizationRepository(),
-            allMarketTickersUseCase: FakeAllMarketTickersUseCase(),
+            allMarketTickersUseCase: StubEmptyAllMarketTickerUseCase(),
             exchangeUseCase: StubExchangeUseCase(),
             userConfigurationRepository: FakeUserConfigurationRepository()
         )
