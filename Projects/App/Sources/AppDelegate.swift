@@ -24,6 +24,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // RootRouter참조
         self.rootRouter = RootBuilder().build()
         
+        // 최초 작업 실행
+        executeInitialTask()
+        
         return true
     }
 
@@ -44,5 +47,23 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             SharedAssembly(),
             DomainAssembly()
         ])
+    }
+}
+
+
+// MARK: Initial tasks
+extension AppDelegate {
+    
+    func executeInitialTask() {
+        
+        // Service locator
+        let webSocketManagementHelper: WebSocketManagementHelper = DependencyInjector.shared.resolve()
+        let exchangeRateUseCase: ExchangeRateUseCase = DependencyInjector.shared.resolve()
+        
+        // 웹소켓 최초연결 시도
+        webSocketManagementHelper.requestConnection(connectionType: .freshStart)
+        
+        // 환율정보 Fetch 시도
+        exchangeRateUseCase.prepare()
     }
 }
