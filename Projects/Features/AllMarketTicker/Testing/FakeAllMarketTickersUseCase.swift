@@ -13,6 +13,8 @@ class FakeAllMarketTickersUseCase: AllMarketTickersUseCase {
     
     init() { }
     
+    func prepareStream() { }
+    
     func requestTickers() -> AnyPublisher<[DomainInterface.Twenty4HourTickerForSymbolVO], Never> {
         
         Just([]).eraseToAnyPublisher()
