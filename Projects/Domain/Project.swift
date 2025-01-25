@@ -29,6 +29,8 @@ let project = Project(
                 .target(name: "DomainInterface"),
                 
                 D.Util.CoreUtil,
+                
+                D.Shared.WebSocketManagementHelper,
             ]
         ),
         
