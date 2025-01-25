@@ -8,6 +8,7 @@ import DomainInterface
 import WebSocketManagementHelper
 import CoreUtil
 
+@MainActor
 class AppDelegate: NSObject, UIApplicationDelegate {
     
     private(set) var rootRouter: RootRouter!
@@ -20,12 +21,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // 의존성 주입
         dependencyInjection()
         
-        // RootCoordinator할당
+        // RootRouter참조
         self.rootRouter = RootBuilder().build()
+        
         return true
     }
-    
-    // MARK: UISceneSession Lifecycle
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         // Called when a new scene session is being created.
