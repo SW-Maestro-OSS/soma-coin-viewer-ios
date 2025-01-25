@@ -1,5 +1,5 @@
 //
-//  asd.swift
+//  StubAllwaysConnectedWebSocketHelper.swift
 //  Domain
 //
 //  Created by choijunios on 1/25/25.
@@ -15,19 +15,8 @@ class StubAllwaysConnectedWebSocketHelper: WebSocketManagementHelper {
     
     init() { }
     
-    func requestSubscribeToStream(streams: [String]) {
-        
-    }
-    
-    func requestUnsubscribeToStream(streams: [String]) {
-        
-    }
-    
-    func requestDisconnection() {
-        
-    }
-    
-    func requestConnection(connectionType: ConnectionType) {
-        
-    }
+    func requestSubscribeToStream(streams: [String]) { }
+    func requestUnsubscribeToStream(streams: [String]) { }
+    func requestDisconnection() { }
+    func requestConnection(connectionType: ConnectionType) { }
 }
