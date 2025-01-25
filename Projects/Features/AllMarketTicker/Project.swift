@@ -77,7 +77,6 @@ let project = Project(
                 
                 D.Feature.BaseFeature,
                 
-                D.Shared.WebSocketManagementHelper,
                 D.Shared.I18N,
                 
                 D.ThirdParty.SimpleImageProvider,

@@ -10,7 +10,6 @@ import Combine
 
 import BaseFeature
 
-import WebSocketManagementHelper
 import DomainInterface
 import CoreUtil
 import I18N
@@ -18,7 +17,6 @@ import I18N
 final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewModelable {
     
     // Service locator
-    private let webSocketManagementHelper: WebSocketManagementHelper
     private let i18NManager: I18NManager
     private let languageLocalizationRepository: LanguageLocalizationRepository
     private let allMarketTickersUseCase: AllMarketTickersUseCase
@@ -36,15 +34,12 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     
     
     init(
-        socketHelper: WebSocketManagementHelper,
         i18NManager: I18NManager,
         languageLocalizationRepository: LanguageLocalizationRepository,
         allMarketTickersUseCase: AllMarketTickersUseCase,
         exchangeUseCase: ExchangeRateUseCase,
         userConfigurationRepository: UserConfigurationRepository
     ) {
-       
-        self.webSocketManagementHelper = socketHelper
         self.i18NManager = i18NManager
         self.languageLocalizationRepository = languageLocalizationRepository
         self.allMarketTickersUseCase = allMarketTickersUseCase
@@ -334,15 +329,15 @@ private extension AllMarketTickerViewModel {
     
     func subscribeToTickerDataStream() {
         
+        // 스트림 준비
+        allMarketTickersUseCase.prepareStream()
+        
+        // 스트림 메시지 구독
         allMarketTickersUseCase
             .requestTickers()
             .map { Action.tickerListFetched(list: $0) }
             .subscribe(action)
             .store(in: &store)
-        
-        
-        // Subscribe to webSocketStream
-        webSocketManagementHelper.requestSubscribeToStream(streams: ["!ticker@arr"])
     }
 }
 
