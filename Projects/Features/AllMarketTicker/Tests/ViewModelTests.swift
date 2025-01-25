@@ -33,7 +33,6 @@ struct AllMarketTickerViewModelTests {
         
         // Given
         let viewModel = AllMarketTickerViewModel(
-            socketHelper: FakeWebSocketHelper(),
             i18NManager: FakeI18NManager(),
             languageLocalizationRepository: StubLanguageLocalizationRepository(),
             allMarketTickersUseCase: FakeAllMarketTickersUseCase(),
