@@ -1,19 +1,19 @@
 //
-//  FakeWebSocketHelper.swift
-//  AllMarketTickerModule
+//  asd.swift
+//  Domain
 //
-//  Created by choijunios on 1/13/25.
+//  Created by choijunios on 1/25/25.
 //
 
 import Combine
 
 import WebSocketManagementHelper
 
-class FakeWebSocketHelper: WebSocketManagementHelper {
+class StubAllwaysConnectedWebSocketHelper: WebSocketManagementHelper {
+    
+    var isWebSocketConnected: AnyPublisher<Bool, Never> = Just(true).eraseToAnyPublisher()
     
     init() { }
-    
-    var isWebSocketConnected: AnyPublisher<Bool, Never> = Just(false).eraseToAnyPublisher()
     
     func requestSubscribeToStream(streams: [String]) {
         
