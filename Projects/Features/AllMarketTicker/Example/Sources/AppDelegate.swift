@@ -11,7 +11,6 @@ import AllMarketTickerFeature
 
 import DomainInterface
 
-import WebSocketManagementHelper
 import CoreUtil
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -23,15 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         DependencyInjector.shared.assemble([
             Assemblies()
         ])
-        
-        // 웹소켓 연결
-        let helper = DependencyInjector.shared.resolve(WebSocketManagementHelper.self)
-        helper.requestConnection(connectionType: .freshStart)
-        
-        let exchangeRateUseCase = DependencyInjector.shared.resolve(ExchangeRateUseCase.self)
-        exchangeRateUseCase.prepare()
-        
-        sleep(2)
         
         return true
     }
