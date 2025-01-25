@@ -54,6 +54,7 @@ let project = Project(
             bundleId: "com.CoinViewer.Domain.testing",
             sources: ["Testing/**"],
             dependencies: [
+                .target(name: "Domain"),
                 .target(name: "DomainInterface"),
             ]
         ),
