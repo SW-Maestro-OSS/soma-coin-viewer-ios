@@ -16,7 +16,5 @@ class FakeExchangeRateUseCase: ExchangeRateUseCase {
         return Just(1.0).eraseToAnyPublisher()
     }
     
-    func prepare() {
-        
-    }
+    func prepare() { }
 }

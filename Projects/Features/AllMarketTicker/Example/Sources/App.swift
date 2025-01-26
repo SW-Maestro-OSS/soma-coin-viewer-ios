@@ -10,7 +10,6 @@ import Combine
 
 @testable import AllMarketTickerFeature
 
-import WebSocketManagementHelper
 import DomainInterface
 import CoreUtil
 import I18N
@@ -28,7 +27,6 @@ struct CoinViewerApp: App {
           
             AllMarketTickerView(
                 viewModel: .init(
-                    socketHelper: DependencyInjector.shared.resolve(WebSocketManagementHelper.self),
                     i18NManager: DependencyInjector.shared.resolve(I18NManager.self),
                     languageLocalizationRepository: DependencyInjector.shared.resolve(LanguageLocalizationRepository.self),
                     allMarketTickersUseCase: DependencyInjector.shared.resolve(AllMarketTickersUseCase.self),

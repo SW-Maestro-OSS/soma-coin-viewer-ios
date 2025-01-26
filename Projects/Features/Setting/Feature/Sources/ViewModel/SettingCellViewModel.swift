@@ -17,7 +17,7 @@ import CoreUtil
 
 class SettingCellViewModel: UDFObservableObject, Identifiable {
     
-    // DI
+    // Service locator
     @Injected private var i18NManager: I18NManager
     
     

@@ -10,6 +10,8 @@ import Combine
 
 import CoreUtil
 
+import SwiftStructures
+
 public class BinanceWebSocketService: NSObject, WebSocketService {
     
     // Public message interface
@@ -25,13 +27,14 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
     // Network
     private let webSocketManagementQueue: DispatchQueue = .init(label: "com.webSocket.management")
     private var webSocketSession: URLSession!
-    private var webSocketTask: URLSessionWebSocketTask?
+    private var currentWebSocketTask: URLSessionWebSocketTask?
     private var timerForHeartbeat: DispatchSourceTimer?
     private let heartbeatTimerQueue: DispatchQueue = .init(label: "com.heartbeat")
     
     
-    // callbacks
-    private var connectionCallback: WebsocketCompletion?
+    // Connection callback
+    private let connectionCompletion: LockedDictionary<Int, WebsocketCompletion> = .init()
+    
     
     private let jsonEncoder = JSONEncoder()
     
@@ -58,12 +61,10 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
     
     private var isConnected: Bool {
         
-        webSocketTask != nil && webSocketTask?.state == .running
+        currentWebSocketTask != nil && currentWebSocketTask?.state == .running
     }
     
     public func connect(completion: @escaping WebsocketCompletion) {
-        
-        self.connectionCallback = completion
         
         webSocketManagementQueue.async { [weak self] in
             
@@ -72,8 +73,14 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
             // 웹소켓 연결여부 확인
             if isConnected { return }
             
-            self.webSocketTask = webSocketSession.webSocketTask(with: Self.baseURL)
-            self.webSocketTask?.resume()
+            let webSocketTask = webSocketSession.webSocketTask(with: Self.baseURL)
+            webSocketTask.resume()
+            
+            // 최초연결 콜백 작업 등록
+            let taskId = webSocketTask.taskIdentifier
+            connectionCompletion[taskId] = completion
+            
+            self.currentWebSocketTask = webSocketTask
         }
     }
     
@@ -89,7 +96,7 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
             
             
             // 웹소켓 연결 종료
-            webSocketTask?.cancel(with: .normalClosure, reason: nil)
+            currentWebSocketTask?.cancel(with: .normalClosure, reason: nil)
         }
     }
     
@@ -156,18 +163,12 @@ public class BinanceWebSocketService: NSObject, WebSocketService {
         let jsonData = try! jsonEncoder.encode(message)
         let stringedMessage = String(data: jsonData, encoding: .utf8)!
         
-        webSocketTask?.send(.string(stringedMessage)) { error in
-            
+        currentWebSocketTask?.send(.string(stringedMessage)) { error in
             if let error {
-                
                 printIfDebug("웹소켓 메시지 전송실패 \(error.localizedDescription)")
-                
                 completion(.failure(error))
-                
             } else {
-                
                 completion(.success(()))
-                
             }
         }
     }
@@ -178,14 +179,26 @@ extension BinanceWebSocketService: URLSessionWebSocketDelegate {
     
     private func listenToMessage() {
         
-        webSocketTask?.receive(completionHandler: { [weak self] result in
+        currentWebSocketTask?.receive(completionHandler: { [weak self] result in
             
             guard let self else { return }
             
             webSocketMessagePublisher.send(result)
             
             // 재귀호출
-            listenToMessage()
+            switch result {
+            case .success:
+                listenToMessage()
+            case .failure(let error):
+                let nsError = error as NSError
+                // NSPOSIXErrorDomain: 네트워크 소켓 및 저수준 POSIX 관련 에러
+                if nsError.domain == NSPOSIXErrorDomain && nsError.code == 57 {
+                    // CODE=57, 웹소켓 연결이 끊어짐 메세지 수신요청 종료
+                    break
+                }
+                listenToMessage()
+            }
+            
         })
     }
     
@@ -193,17 +206,18 @@ extension BinanceWebSocketService: URLSessionWebSocketDelegate {
     // Task완료시 호출된다.
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
         
-        if task is URLSessionWebSocketTask, let error {
+        guard let webSocketTask = task as? URLSessionWebSocketTask else { return }
         
-            if !isConnected {
-                
-                // 웹소켓 연결시도 에러
-                connectionCallback?(.failure(.connectionRequestFailure))
-                
-            }
+        if let error {
+            printIfDebug("\(Self.self): 웹소켓 작업에러발생 \(error.localizedDescription)")
             
+            let taskId = webSocketTask.taskIdentifier
+            if let completion = connectionCompletion[taskId] {
+                // 웹소켓 최초연결 실패함, 성공했다면 클로저가 존재하지 않음
+                completion(.failure(.connectionRequestFailure))
+                connectionCompletion.remove(key: taskId)
+            }
         }
-        
     }
     
     
@@ -221,7 +235,11 @@ extension BinanceWebSocketService: URLSessionWebSocketDelegate {
         
         
         // 성공결과전송
-        connectionCallback?(.success(()))
+        let taskId = webSocketTask.taskIdentifier
+        if let completion = connectionCompletion[taskId] {
+            completion(.success(()))
+            connectionCompletion.remove(key: taskId)
+        }
         
         
         // 웹소켓 상태 퍼블리싱
@@ -259,7 +277,7 @@ extension BinanceWebSocketService {
     
     private func sendHeartbeatMessage() {
         
-        webSocketTask?.sendPing(pongReceiveHandler: { error in
+        currentWebSocketTask?.sendPing(pongReceiveHandler: { error in
             if let error {
                 printIfDebug("Pong수신 실패 \(error.localizedDescription)")
             } else {

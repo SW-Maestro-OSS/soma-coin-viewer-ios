@@ -22,21 +22,12 @@ public enum RootDestination: Hashable {
 }
 
 public final class RootBuilder {
-    
-    // Dependency inject
-    @Injected private var webSocketHelper: WebSocketManagementHelper
-    @Injected private var i18NManager: I18NManager
-    @Injected private var exchangeRateUseCase: ExchangeRateUseCase
 
     public init() { }
     
     public func build() -> RootRouter {
         
-        let viewModel = RootViewModel(
-            i18NManager: i18NManager,
-            webSocketHelper: webSocketHelper,
-            exchangeRateUseCase: exchangeRateUseCase
-        )
+        let viewModel = RootViewModel()
         let view = RootView(viewModel: viewModel)
         let tabBarBuilder = TabBarBuilder()
         let router = RootRouter(

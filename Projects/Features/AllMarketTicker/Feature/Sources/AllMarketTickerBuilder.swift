@@ -9,15 +9,13 @@ import Foundation
 import Combine
 
 import DomainInterface
-import WebSocketManagementHelper
 
 import CoreUtil
 import I18N
 
 public final class AllMarketTickerBuilder {
     
-    // DI
-    @Injected private var webSocketManagementHelper: WebSocketManagementHelper
+    // Service locator
     @Injected private var allMarketTickersUseCase: AllMarketTickersUseCase
     @Injected private var exchangeRateUseCase: ExchangeRateUseCase
     @Injected private var userConfigurationRepository: UserConfigurationRepository
@@ -29,7 +27,6 @@ public final class AllMarketTickerBuilder {
     public func build() -> AllMarketTickerRouter {
         
         let viewModel = AllMarketTickerViewModel(
-            socketHelper: webSocketManagementHelper,
             i18NManager: i18NManager,
             languageLocalizationRepository: languageLocalizationRepository,
             allMarketTickersUseCase: allMarketTickersUseCase,

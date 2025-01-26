@@ -9,13 +9,8 @@ import Foundation
 
 @testable import AllMarketTickerFeatureTesting
 
-import DataSource
-import Repository
-
 import DomainInterface
-import Domain
 
-import WebSocketManagementHelper
 import I18N
 
 import Swinject
@@ -24,51 +19,27 @@ public class Assemblies: Assembly {
     
     public func assemble(container: Swinject.Container) {
         
-        // MARK: DataSource
-        container.register(UserConfigurationService.self) { _ in
-            DefaultUserConfigurationService()
-        }
-        container.register(ExchangeRateService.self) { _ in
-            DefaultExchangeRateService()
-        }
-        container.register(WebSocketService.self) { _ in
-            BinanceWebSocketService()
-        }
-        .inObjectScope(.container)
-        
-        
         // MARK: Shared
-        container.register(WebSocketManagementHelper.self) { _ in
-            DefaultWebSocketManagementHelper()
-        }
-        .inObjectScope(.container)
-        
         container.register(I18NManager.self) { _ in
-            DefaultI18NManager()
+            FakeI18NManager()
         }
         .inObjectScope(.container)
         
         
         // MARK: Repository
         container.register(UserConfigurationRepository.self) { _ in
-            DefaultUserConfigurationRepository()
+            FakeUserConfigurationRepository()
         }
         .inObjectScope(.container)
         
-        container.register(AllMarketTickersRepository.self) { _ in
-            BinanceAllMarketTickersRepository()
-        }
-        container.register(ExchangeRateRepository.self) { _ in
-            DefaultExchangeRateRepository()
-        }
         container.register(LanguageLocalizationRepository.self) { _ in
-            DefaultLanguageLocalizationRepository()
+            StubLanguageLocalizationRepository()
         }
         
         
         // MARK: UseCase
         container.register(AllMarketTickersUseCase.self) { _ in
-            DefaultAllMarketTickersUseCase()
+            FakeAllMarketTickersUseCase()
         }
         container.register(ExchangeRateUseCase.self) { _ in
             FakeExchangeRateUseCase()
