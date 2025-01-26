@@ -10,7 +10,9 @@ import SwiftUI
 import DomainInterface
 import CoreUtil
 
-public struct LocalizableText: View {
+import I18N
+
+struct LocalizableText: View {
     
     // Service locator
     @Injected private var repository: LanguageLocalizationRepository
@@ -18,13 +20,12 @@ public struct LocalizableText: View {
     private let key: String
     @Binding var languageType: LanguageType
     
-    public init(key: String, languageType: Binding<LanguageType>) {
+    init(key: String, languageType: Binding<LanguageType>) {
         self.key = key
         self._languageType = languageType
     }
     
-    public var body: some View {
-        
+    var body: some View {
         Text(repository.getString(key: key, lanCode: languageType.lanCode))
     }
 }

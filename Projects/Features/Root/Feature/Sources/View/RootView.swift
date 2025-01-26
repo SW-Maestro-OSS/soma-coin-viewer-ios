@@ -15,32 +15,19 @@ struct RootView: View {
     @StateObject private var viewModel: RootViewModel
     
     init(viewModel: RootViewModel) {
-        
         self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
     var body: some View {
-        
         Group {
-            
             if viewModel.state.isLoading {
-                
-                SplashView()
-                
+                SplashView(renderObject: viewModel.state.splashRO)
             } else {
-                
                 NavigationStack(path: viewModel.router?.getPath() ?? .constant(.init())) {
-                                
-                    Text("")
+                    EmptyView()
                         .navigationDestination(for: RootDestination.self) { destination in
-                            
-                            if let router = viewModel.router {
-                                AnyView(router.destinationView(destination: destination))
-                                    .navigationBarBackButtonHidden()
-                            } else {
-                                
-                                Text("Router not found")
-                            }
+                            AnyView(viewModel.router!.destinationView(destination: destination))
+                                .navigationBarBackButtonHidden()
                         }
                 }
             }

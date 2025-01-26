@@ -22,12 +22,18 @@ public enum RootDestination: Hashable {
 }
 
 public final class RootBuilder {
+    
+    // Service locator
+    @Injected private var i18NManager: I18NManager
+    @Injected private var languageLocalizationRepository: LanguageLocalizationRepository
 
     public init() { }
     
     public func build() -> RootRouter {
-        
-        let viewModel = RootViewModel()
+        let viewModel = RootViewModel(
+            i18NManager: i18NManager,
+            languageRepository: languageLocalizationRepository
+        )
         let view = RootView(viewModel: viewModel)
         let tabBarBuilder = TabBarBuilder()
         let router = RootRouter(
@@ -35,7 +41,6 @@ public final class RootBuilder {
             view: view,
             viewModel: viewModel
         )
-        
         return router
     }
 }

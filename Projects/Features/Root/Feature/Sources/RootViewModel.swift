@@ -8,14 +8,24 @@
 import SwiftUI
 import Combine
 
+import DomainInterface
+
 import BaseFeature
 
+import I18N
 import CoreUtil
 
 final class RootViewModel: UDFObservableObject, RootViewModelable {
+    
+    private let i18NManager: I18NManager
+    private let languageRepository: LanguageLocalizationRepository
+    
 
     // Public state interface
-    @Published var state: State
+    @Published var state: State = .init(
+        splashRO: .init(displayTitleText: ""),
+        isLoading: true
+    )
     
     
     // Router
@@ -35,10 +45,18 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     var store: Set<AnyCancellable> = .init()
     
     
-    init() {
+    init(i18NManager: I18NManager, languageRepository: LanguageLocalizationRepository) {
+        self.i18NManager = i18NManager
+        self.languageRepository = languageRepository
         
-        let initailState: State = .init(isLoading: true)
-        self._state = Published(wrappedValue: initailState)
+        let languageType = i18NManager.getLanguageType()
+        let initialSplashRO = createSplashRO(languageType: languageType)
+        
+        let initialState: State = .init(
+            splashRO: initialSplashRO,
+            isLoading: true
+        )
+        self.state = initialState
         
         // Create state stream
         createStateStream()
@@ -97,7 +115,19 @@ extension RootViewModel {
     }
     
     struct State {
+        var splashRO: SplashRO
         var isLoading: Bool
+    }
+}
+
+
+// MARK: Splash
+private extension RootViewModel {
+    
+    func createSplashRO(languageType: LanguageType) -> SplashRO {
+        let titleTextKey = "LaunchScreen_title"
+        let titleText = languageRepository.getString(key: titleTextKey, lanCode: languageType.lanCode)
+        return .init(displayTitleText: titleText)
     }
 }
 
