@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-import I18N
-
 struct TabBarView: View {
     
     @StateObject private var viewModel: TabBarViewModel
@@ -18,36 +16,19 @@ struct TabBarView: View {
     }
     
     var body: some View {
-        
         TabView {
-            
-            ForEach(TabBarPage.orderedPages) { page in
-                
+            ForEach(viewModel.state.tabItemROs) { ro in
                 Tab {
-                    
-                    if let router = viewModel.router {
-                        AnyView(router.destinationView(page))
-                    } else {
-                        Text("Router not found")
-                    }
-                    
+                    AnyView(viewModel.router!.destinationView(ro.page))
                 } label: {
-                    
-                    let tabItem = viewModel.state.tabItem[page]!
-                    
                     VStack {
-                        Image(systemName: tabItem.systemIconName)
-                        LocalizableText(
-                            key: tabItem.titleKey,
-                            languageType: $viewModel.state.languageType
-                        )
+                        Image(systemName: ro.displayIconName)
+                        Text(ro.displayText)
                     }
                 }
             }
         }
-        .onAppear {
-            viewModel.action(.onAppear)
-        }
+        .onAppear { viewModel.action(.onAppear) }
     }
 }
 
