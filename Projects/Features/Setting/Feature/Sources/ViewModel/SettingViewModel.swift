@@ -25,6 +25,7 @@ class SettingViewModel : UDFObservableObject, SettingViewModelable, SettingViewM
     // DI
     @Injected private var i18NManager: I18NManager
     @Injected private var userConfigurationRepository: UserConfigurationRepository
+    @Injected private var repository: LanguageLocalizationRepository
     
     
     // Listener
@@ -65,8 +66,8 @@ class SettingViewModel : UDFObservableObject, SettingViewModelable, SettingViewM
             
             if isFirstAppear {
                 isFirstAppear = false
-                let viewModels = createSettingCellViewModels()
-                return Just(Action.cellViewModelsCreated(viewModels))
+                let cellROs = createSettingCellROS()
+                return Just(Action.cellViewModelsCreated(cellROs))
                     .eraseToAnyPublisher()
             }
             break
@@ -89,8 +90,8 @@ class SettingViewModel : UDFObservableObject, SettingViewModelable, SettingViewM
             case .grid:
                 newState.gridType = userConfigurationRepository.getGridType()
             }
-        case .cellViewModelsCreated(let cellViewModels):
-            newState.settingCellViewModel = cellViewModels
+        case .cellViewModelsCreated(let cellROS):
+            newState.settingCellROs = cellROS
         default:
             return state
         }
@@ -108,7 +109,7 @@ extension SettingViewModel {
         var currencyType: CurrencyType
         var languageType: LanguageType
         var gridType: GridType
-        var settingCellViewModel : [SettingCellViewModel] = []
+        var settingCellROs : [SettingCellRO] = []
         //Operate Property
         
     }
@@ -116,7 +117,7 @@ extension SettingViewModel {
     enum Action {
         case tap(ActionType)
         case onAppear
-        case cellViewModelsCreated([SettingCellViewModel])
+        case cellViewModelsCreated([SettingCellRO])
     }
     
     enum ActionType {
@@ -148,31 +149,28 @@ extension SettingViewModel {
     
     func createSettingCellROS() -> [SettingCellRO] {
         let currentState = state
-        let viewModels = [
-            SettingCellViewModel(
-                cellValue: CellType.currencyType(state.currencyType),
-                titleKey: "Setting_price_title",
-                optionKey: "Setting_price_option",
+        let lanCode = currentState.languageType.lanCode
+        let settingCellROs = [
+            SettingCellRO(
+                cellType: "Setting_price",
+                title: repository.getString(key: "Setting_price_title", lanCode: lanCode),
+                option: repository.getString(key: "Setting_price_option", lanCode: lanCode),
                 isSelected: currentState.currencyType == .won
             ),
-            SettingCellViewModel(
-                cellValue: CellType.languageType(currentState.languageType),
-                titleKey: "Setting_language_title",
-                optionKey: "Setting_language_option",
+            SettingCellRO(
+                cellType: "Setting_language",
+                title: repository.getString(key: "Setting_language_title", lanCode: lanCode),
+                option: repository.getString(key: "Setting_language_option", lanCode: lanCode),
                 isSelected: currentState.languageType == .korean
             ),
-            SettingCellViewModel(
-                cellValue: CellType.gridType(currentState.gridType),
-                titleKey: "Setting_grid_option",
-                optionKey: "Setting_grid_option",
+            SettingCellRO(
+                cellType: "Setting_grid",
+                title: repository.getString(key: "Setting_grid_title", lanCode: lanCode),
+                option: repository.getString(key: "Setting_grid_option", lanCode: lanCode),
                 isSelected: currentState.gridType == .list
             )
         ]
         
-        viewModels.forEach{ viewModel in
-            viewModel.delegate = self
-        }
-        
-        return viewModels
+        return settingCellROs
     }
 }

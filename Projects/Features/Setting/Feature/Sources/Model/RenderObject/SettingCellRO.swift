@@ -12,7 +12,7 @@ struct SettingCellRO : Identifiable {
     
     let cellType : String
     
-    var titleKey : String
-    var optionKey : String
+    var title : String
+    var option : String
     var isSelected : Bool
 }
