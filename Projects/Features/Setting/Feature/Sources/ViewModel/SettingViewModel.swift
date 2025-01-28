@@ -146,7 +146,7 @@ extension SettingViewModel {
 
 extension SettingViewModel {
     
-    func createSettingCellViewModels() -> [SettingCellViewModel] {
+    func createSettingCellROS() -> [SettingCellRO] {
         let currentState = state
         let viewModels = [
             SettingCellViewModel(

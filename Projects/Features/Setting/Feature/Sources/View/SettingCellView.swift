@@ -15,11 +15,11 @@ import CoreUtil
 import I18N
 
 struct SettingCellView : View {
+    @Binding var isSelected : Bool
+    let onToggle: (String type) -> Void
     
-    @ObservedObject private var viewModel: SettingCellViewModel
-    
-    init(viewModel: SettingCellViewModel) {
-        self._viewModel = ObservedObject(wrappedValue: viewModel)
+    init(isSelected : Binding<Bool>) {
+        self._isSelected = isSelected
     }
     
     var body : some View {
@@ -48,12 +48,12 @@ struct SettingCellView : View {
                 .foregroundColor(.gray)
                 
                 HStack {
-                    Toggle("",isOn : Binding(
-                        get : { viewModel.state.isSelected },
-                        set : { _ in viewModel.action.send(.tap) }
-                    ))
+                    Toggle("", isOn: $isSelected)
                         .labelsHidden()
                         .toggleStyle(SwitchToggleStyle(tint: .gray))
+                        .onChange(of: isSelected) { _ in
+                            onToggle() // 콜백 호출
+                        }
                     
                     Spacer()
                         .frame(width : 16)
