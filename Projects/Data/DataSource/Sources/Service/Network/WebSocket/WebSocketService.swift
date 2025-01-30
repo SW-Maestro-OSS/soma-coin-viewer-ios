@@ -11,13 +11,13 @@ import Combine
 // MARK: Interface
 public protocol WebSocketService {
     
-    typealias Message = URLSessionWebSocketTask.Message
-    typealias Response = Result<Message, Error>
     typealias WebsocketCompletion = (Result<Void, WebSocketError>) -> Void
     
-    /// 웹소켓 메세지 상태입니다.
-    var message: AnyPublisher<Response, Never> { get }
     var state: AnyPublisher<WebSocketState, Never> { get }
+    
+    
+    /// 전달한 매세지 형태와 일치하는 메세지만을 리턴합니다. 에러가 전달되지 않습니다.
+    func getMessageStream<DTO: Decodable>() -> AnyPublisher<DTO, Never>
     
     
     /// 소켓을 연결할 것을 요청합니다.
