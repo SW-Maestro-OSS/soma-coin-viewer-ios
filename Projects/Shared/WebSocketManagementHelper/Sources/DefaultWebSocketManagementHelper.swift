@@ -44,28 +44,14 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
                 guard let self else { return }
                 
                 switch state {
-                case .initial:
-                    
-                    return
-                    
                 case .connected:
                     
                     printIfDebug("WebSocketManagementHelper: ✅ 웹소켓 연결됨")
                     
-                case .intentionalDisconnection:
-                    
-                    // 의도된 연결 해제
-                    printIfDebug("WebSocketManagementHelper: ☑️ 웹소켓 연결 해제됨")
-                    
-                    
-                case .unexpectedDisconnection:
-                    
-                    // 의도되지 않은 끊어짐
-                    
-                    printIfDebug("WebSocketManagementHelper: ❌ 웹소켓 연결 끊어짐, 🔁 복구실행")
-                    
+                case .disconnected:
+                    break
                     // 연결재시도 및 스트림 복구 실행
-                    requestConnection(connectionType: .recoverPreviousStreams)
+//                    requestConnection(connectionType: .recoverPreviousStreams)
                 }
                 
             }
