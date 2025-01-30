@@ -18,10 +18,10 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
     private static let baseURL: URL = .init(string: "wss://stream.binance.com:443/ws")!
     
     
-    // Public streams
-    public let state: AnyPublisher<WebSocketState, Never>
+    // Listener
+    public weak var listener: WebSocketServiceListener?
     
-    
+
     // Message coders
     private let messageEncoder = JSONEncoder()
     private let messageDecoder: JSONDecoder = .init()
@@ -46,26 +46,19 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
     
     
     public override init() {
-        self.state = webSocketStatePublisher
-            .share()
-            .eraseToAnyPublisher()
-        
         super.init()
-        
-        let sessionQueue = OperationQueue()
-        self.webSocketSession = URLSession(configuration: .default, delegate: self, delegateQueue: sessionQueue)
+        setupWebSocketSession()
     }
     
     
     private func sendMessage(_ message: BinanceWebSocketStreamMessageDTO, completion: @escaping (Result<Void, Error>) -> Void) {
-        
         let jsonData = try! messageEncoder.encode(message)
         let stringedMessage = String(data: jsonData, encoding: .utf8)!
-        
-        currentWebSocketTask?.send(.string(stringedMessage)) { error in
+        currentWebSocketTask?.send(.string(stringedMessage)) { [weak self] error in
+            guard let self else { return }
             if let error {
-                printIfDebug("웹소켓 메시지 전송실패 \(error.localizedDescription)")
-                completion(.failure(error))
+                let webSocketError = handleNSError(error as NSError)
+                completion(.failure(webSocketError))
             } else {
                 completion(.success(()))
             }
@@ -74,27 +67,35 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
 }
 
 
+// MARK: Setup session
+private extension BinanceWebSocketService {
+    func setupWebSocketSession() {
+        let sessionQueue = OperationQueue()
+        self.webSocketSession = URLSession(configuration: .default, delegate: self, delegateQueue: sessionQueue)
+    }
+}
+
+
 // MARK: Stream subscription or unsubscription
 public extension BinanceWebSocketService {
     
     func subscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
-        
         webSocketManagementQueue.async { [weak self] in
-            
             guard let self, !message.isEmpty else { return }
-            
             let messageDTO = BinanceWebSocketStreamMessageDTO(
                 method: .SUBSCRIBE,
                 params: message,
                 id: 1
             )
-            
-            sendMessage(messageDTO) { result in
+            // 구독 메세지 전송
+            sendMessage(messageDTO) { [weak self] result in
+                guard let self else { return }
                 switch result {
                 case .success:
                     completion(.success(()))
-                case .failure(_):
-                    completion(.failure(.messageTransferFailure(message: message)))
+                case .failure(let error):
+                    let webSocketError = handleNSError(error as NSError)
+                    completion(.failure(.messageTransferFailed(error: webSocketError)))
                 }
             }
         }
@@ -102,29 +103,22 @@ public extension BinanceWebSocketService {
     
     
     func unsubscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
-        
         webSocketManagementQueue.async { [weak self] in
-            
             guard let self, !message.isEmpty else { return }
-            
             let messageDTO = BinanceWebSocketStreamMessageDTO(
                 method: .UNSUBSCRIBE,
                 params: message,
                 id: 1
             )
-            
-            sendMessage(messageDTO) { result in
-                
+            // 구독취소 메세지 전송
+            sendMessage(messageDTO) { [weak self] result in
+                guard let self else { return }
                 switch result {
-                    
                 case .success:
-                    
                     completion(.success(()))
-                    
-                case .failure(_):
-                    
-                    completion(.failure(.messageTransferFailure(message: message)))
-                    
+                case .failure(let error):
+                    let webSocketError = handleNSError(error as NSError)
+                    completion(.failure(.messageTransferFailed(error: webSocketError)))
                 }
             }
         }
@@ -161,11 +155,8 @@ extension BinanceWebSocketService {
 extension BinanceWebSocketService {
     
     public func connect(completion: @escaping WebsocketCompletion) {
-        
         webSocketManagementQueue.async { [weak self] in
-            
             guard let self else { return }
-            
             // 웹소켓 연결여부 확인
             if currentWebSocketTask?.state == .running { return }
             
@@ -181,15 +172,12 @@ extension BinanceWebSocketService {
     }
     
     public func disconnect() {
-        
         webSocketManagementQueue.async { [weak self] in
-            
             guard let self else { return }
             
             // 하트비트 종료
             timerForHeartbeat?.cancel()
             timerForHeartbeat = nil
-            
             
             // 웹소켓 연결 종료
             currentWebSocketTask?.cancel(with: .normalClosure, reason: nil)
@@ -202,32 +190,17 @@ extension BinanceWebSocketService {
 private extension BinanceWebSocketService {
     
     private func listenToMessage() {
-        
         currentWebSocketTask?.receive(completionHandler: { [weak self] result in
             guard let self else { return }
             switch result {
             case .success(let message):
                 // 메세지 정상도착
                 webSocketMessagePublisher.send(message)
+                listenToMessage()
             case .failure(let error):
-                let nsError = error as NSError
-                switch nsError.domain {
-                case NSPOSIXErrorDomain:
-                    // NSPOSIXErrorDomain: 네트워크 소켓 및 저수준 POSIX 관련 에러
-                    if nsError.code == 57 {
-                        // CODE=57, 웹소켓 연결이 끊어짐 메세지 수신요청 종료
-                        return
-                    }
-                    break
-                case NSURLErrorDomain:
-                    break
-                default:
-                    break
-                }
+                let webSocketError = handleNSError(error as NSError)
+                listener?.webSocketListener(unrelatedError: webSocketError)
             }
-            
-            // 리스닝 재요청
-            listenToMessage()
         })
     }
 }
@@ -247,7 +220,8 @@ public extension BinanceWebSocketService {
             let taskId = webSocketTask.taskIdentifier
             if let completion = connectionCompletion[taskId] {
                 // 웹소켓 최초연결 실패함, 성공했다면 클로저가 존재하지 않음
-                completion(.failure(.connectionRequestFailure))
+                let webSocketError = handleNSError(error as NSError)
+                completion(.failure(.unintentionalDisconnection(error: webSocketError)))
                 connectionCompletion.remove(key: taskId)
             }
         }
@@ -255,17 +229,13 @@ public extension BinanceWebSocketService {
     
     
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-        
-        printIfDebug("BinanceWebSocketService: ✅ 웹소캣 연결됨")
-        
+        printIfDebug("\(Self.self): ✅ 웹소캣 연결됨")
         
         // 메서지 수신 시작
         listenToMessage()
-        
-        
+            
         // Ping-pong 시작
         startHeartbeating()
-        
         
         // 성공결과전송
         let taskId = webSocketTask.taskIdentifier
@@ -274,29 +244,18 @@ public extension BinanceWebSocketService {
             connectionCompletion.remove(key: taskId)
         }
         
-        
         // 웹소켓 상태 퍼블리싱
         webSocketStatePublisher.send(.connected)
     }
     
     
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        
-        printIfDebug("BinanceWebSocketService: ☑️ 웹소캣 연결 끊김")
-        
-        
-        // 웹소켓 상태 퍼블리싱
-        switch closeCode {
-        case .normalClosure:
-            
-            // 정상종료
-            break
-            
-        default:
-            
-            // 비정상종료
-            break
-            
+        printIfDebug("\(Self.self): ☑️ 웹소캣 연결 끊김")
+        if closeCode != .normalClosure {
+            // 웹소켓이 정상적으로 종료되지 못한 경우
+            listener?.webSocketListener(unrelatedError: .unintentionalDisconnection(
+                error: nil
+            ))
         }
     }
 }
@@ -318,17 +277,15 @@ extension BinanceWebSocketService {
     
     private func startHeartbeating() {
         
+        // 이전 작업 취소
         timerForHeartbeat?.cancel()
-        
         
         // DispatchSourceTimer 초기화
         let scheduledTimer = DispatchSource.makeTimerSource(queue: heartbeatTimerQueue)
         
         // 3분에 한번씩 하트비트 유지 메세지 전송
         scheduledTimer.schedule(deadline: .now(), repeating: 180)
-        
         scheduledTimer.setEventHandler { [weak self] in
-            
             self?.sendHeartbeatMessage()
         }
                 
@@ -336,6 +293,36 @@ extension BinanceWebSocketService {
         scheduledTimer.resume()
         
         self.timerForHeartbeat = scheduledTimer
+    }
+}
+
+
+// MARK: Error handling
+private extension BinanceWebSocketService {
+    
+    func handleNSError(_ nsError: NSError) -> WebSocketError {
+        switch nsError.domain {
+        case NSPOSIXErrorDomain:
+            // NSPOSIXErrorDomain: 네트워크 소켓 및 저수준 POSIX 관련 에러
+            switch nsError.code {
+            case 57:
+                // 웹소켓 연결이 끊어짐
+                return .unintentionalDisconnection(error: nsError)
+            default:
+                break
+            }
+        case NSURLErrorDomain:
+            switch nsError.code {
+            case NSURLErrorNotConnectedToInternet:
+                // 네트워크가 인터넷에 연결되지 못함
+                return .internetConnectionError(error: nsError)
+            default:
+                break
+            }
+        default:
+            break
+        }
+        return .unknown(error: nsError)
     }
 }
 
