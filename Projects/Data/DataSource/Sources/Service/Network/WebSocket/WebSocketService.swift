@@ -8,12 +8,18 @@
 import Foundation
 import Combine
 
-// MARK: Interface
+public protocol WebSocketServiceListener: AnyObject {
+    
+    func webSocketListener(unrelatedError: WebSocketError)
+}
+
+
 public protocol WebSocketService {
     
     typealias WebsocketCompletion = (Result<Void, WebSocketError>) -> Void
     
-    var state: AnyPublisher<WebSocketState, Never> { get }
+    // Listener
+    var listener: WebSocketServiceListener? { get }
     
     
     /// 전달한 매세지 형태와 일치하는 메세지만을 리턴합니다. 에러가 전달되지 않습니다.
