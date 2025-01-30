@@ -14,11 +14,16 @@ import SwiftStructures
 
 public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebSocketDelegate {
     
+    // WebSocket service url
+    private static let baseURL: URL = .init(string: "wss://stream.binance.com:443/ws")!
+    
+    
     // Public streams
     public let state: AnyPublisher<WebSocketState, Never>
     
     
-    // Message decoder
+    // Message coders
+    private let messageEncoder = JSONEncoder()
     private let messageDecoder: JSONDecoder = .init()
     
     
@@ -40,10 +45,6 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
     private let connectionCompletion: LockedDictionary<Int, WebsocketCompletion> = .init()
     
     
-    private let jsonEncoder = JSONEncoder()
-    
-    static let baseURL: URL = .init(string: "wss://stream.binance.com:443/ws")!
-    
     public override init() {
         self.state = webSocketStatePublisher
             .share()
@@ -56,7 +57,27 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
     }
     
     
-    public func subscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
+    private func sendMessage(_ message: BinanceWebSocketStreamMessageDTO, completion: @escaping (Result<Void, Error>) -> Void) {
+        
+        let jsonData = try! messageEncoder.encode(message)
+        let stringedMessage = String(data: jsonData, encoding: .utf8)!
+        
+        currentWebSocketTask?.send(.string(stringedMessage)) { error in
+            if let error {
+                printIfDebug("웹소켓 메시지 전송실패 \(error.localizedDescription)")
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+}
+
+
+// MARK: Stream subscription or unsubscription
+public extension BinanceWebSocketService {
+    
+    func subscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
         
         webSocketManagementQueue.async { [weak self] in
             
@@ -69,23 +90,18 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
             )
             
             sendMessage(messageDTO) { result in
-                
                 switch result {
-                    
                 case .success:
-                    
                     completion(.success(()))
-                    
                 case .failure(_):
-                    
                     completion(.failure(.messageTransferFailure(message: message)))
-                    
                 }
             }
         }
     }
     
-    public func unsubscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
+    
+    func unsubscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
         
         webSocketManagementQueue.async { [weak self] in
             
@@ -110,21 +126,6 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
                     completion(.failure(.messageTransferFailure(message: message)))
                     
                 }
-            }
-        }
-    }
-    
-    private func sendMessage(_ message: BinanceWebSocketStreamMessageDTO, completion: @escaping (Result<Void, Error>) -> Void) {
-        
-        let jsonData = try! jsonEncoder.encode(message)
-        let stringedMessage = String(data: jsonData, encoding: .utf8)!
-        
-        currentWebSocketTask?.send(.string(stringedMessage)) { error in
-            if let error {
-                printIfDebug("웹소켓 메시지 전송실패 \(error.localizedDescription)")
-                completion(.failure(error))
-            } else {
-                completion(.success(()))
             }
         }
     }
@@ -208,30 +209,25 @@ private extension BinanceWebSocketService {
             case .success(let message):
                 // 메세지 정상도착
                 webSocketMessagePublisher.send(message)
-                listenToMessage()
             case .failure(let error):
                 let nsError = error as NSError
                 switch nsError.domain {
                 case NSPOSIXErrorDomain:
                     // NSPOSIXErrorDomain: 네트워크 소켓 및 저수준 POSIX 관련 에러
+                    if nsError.code == 57 {
+                        // CODE=57, 웹소켓 연결이 끊어짐 메세지 수신요청 종료
+                        return
+                    }
                     break
                 case NSURLErrorDomain:
                     break
                 default:
-                    // Unknown error
                     break
                 }
-                if nsError.domain == NSPOSIXErrorDomain && nsError.code == 57 {
-                    // CODE=57, 웹소켓 연결이 끊어짐 메세지 수신요청 종료
-                    break
-                }
-                
-                
-                
-                
-//                listenToMessage()
             }
             
+            // 리스닝 재요청
+            listenToMessage()
         })
     }
 }
