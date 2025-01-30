@@ -10,8 +10,9 @@ import CoreUtil
 
 import Combine
 
-public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
+public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSocketServiceListener {
     
+    // Stream
     public typealias Stream = String
     
     
@@ -28,22 +29,17 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     private var store: Set<AnyCancellable> = .init()
     
     public init(webSocketService: WebSocketService) {
-        
         self.webSocketService = webSocketService
+        webSocketService.listener = self
     }
     
     
     public func requestSubscribeToStream(streams: [Stream]) {
-        
         subscribedStreamManageQueue.async { [weak self] in
-            
             guard let self else { return }
-        
             // 스트림 구독 메세지 전송
             webSocketService.subscribeTo(message: streams) { [weak self] result in
-                
                 guard let self else { return }
-                
                 switch result {
                 case .success:
                     streams.forEach { stream in
@@ -51,13 +47,17 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
                     }
                     // 구독에 성공한 스트림들을 기록합니다.
                     add(streams: streams)
-                    
                 case .failure(let webSocketError):
                     switch webSocketError {
                     case .messageTransferFailed(_):
                         streams.forEach { stream in
                             printIfDebug("\(Self.self): ❌\(stream)구독 실패")
                         }
+                        
+                        
+                        // MARK: Error Shooter
+                        
+                        
                         return
                     default:
                         return
@@ -66,6 +66,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
             }
         }
     }
+    
     
     public func requestUnsubscribeToStream(streams willRemoveStreams: [Stream]) {
         
@@ -92,41 +93,38 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
                 
                 switch webSocketError {
                 case .messageTransferFailed(_):
-                    
                     printIfDebug("\(Self.self): 스트림 구독 해제 메세지 전송 실패")
                     
-                    return
+                    
+                    // MARK: Error Shooter
+                    
+                    
+                    break
                 default:
-                    return
+                    break
                 }
             }
         }
     }
     
+    
     public func requestDisconnection() {
         webSocketService.disconnect()
     }
     
+    
     public func requestConnection(connectionType: ConnectionType) {
-        
         webSocketService.connect { [weak self] result in
-            
             guard let self else { return }
-            
             switch result {
             case .success:
-                
                 if case .recoverPreviousStreams = connectionType {
-                    
                     // 구독됬던 스트림 복구 실행
                     recoverPreviouslySubscribedStreams()
                 }
-                
             case .failure(let error):
-                
                 // MARK: 웹소켓 연결 실패 대처
                 printIfDebug("\(Self.self) 웹소켓 연결실패 \(error.localizedDescription)")
-                
                 return
             }
         }
@@ -177,6 +175,42 @@ internal extension DefaultWebSocketManagementHelper {
     func getSavedStreams() -> [Stream] {
         subscribedStreamManageQueue.sync {
             return Array(currentSubscribtions)
+        }
+    }
+}
+
+
+// MARK: WebSocketServiceListener
+public extension DefaultWebSocketManagementHelper {
+    func webSocketListener(unrelatedError error: WebSocketError) {
+        switch error {
+        case .unintentionalDisconnection(let error):
+            
+            // MARK: Error Shooter
+            
+            break
+        case .internetConnectionError(let error):
+            
+            // MARK: Error Shooter
+            
+            break
+        case .serverIsBusy:
+            
+            // MARK: Error Shooter
+            
+            break
+        case .tooManyRequests:
+            
+            // MARK: Error Shooter
+            
+            break
+        case .unknown(let error):
+            
+            // MARK: Error Shooter
+            
+            break
+        default:
+            break
         }
     }
 }

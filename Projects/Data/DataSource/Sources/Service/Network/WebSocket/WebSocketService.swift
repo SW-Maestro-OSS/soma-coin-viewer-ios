@@ -14,12 +14,12 @@ public protocol WebSocketServiceListener: AnyObject {
 }
 
 
-public protocol WebSocketService {
+public protocol WebSocketService: AnyObject {
     
     typealias WebsocketCompletion = (Result<Void, WebSocketError>) -> Void
     
     // Listener
-    var listener: WebSocketServiceListener? { get }
+    var listener: WebSocketServiceListener? { get set }
     
     
     /// 전달한 매세지 형태와 일치하는 메세지만을 리턴합니다. 에러가 전달되지 않습니다.
