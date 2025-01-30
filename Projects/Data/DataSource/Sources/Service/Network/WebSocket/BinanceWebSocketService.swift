@@ -55,10 +55,6 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
         self.webSocketSession = URLSession(configuration: .default, delegate: self, delegateQueue: sessionQueue)
     }
     
-    private var isConnected: Bool {
-        
-        currentWebSocketTask != nil && currentWebSocketTask?.state == .running
-    }
     
     public func subscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
         
@@ -170,7 +166,7 @@ extension BinanceWebSocketService {
             guard let self else { return }
             
             // 웹소켓 연결여부 확인
-            if isConnected { return }
+            if currentWebSocketTask?.state == .running { return }
             
             let webSocketTask = webSocketSession.webSocketTask(with: Self.baseURL)
             webSocketTask.resume()
