@@ -12,17 +12,23 @@ import DataSource
 // MARK: 항상 성공결과를 반환하는 Stub
 class StubAllwaysSuccessWebSocketService: WebSocketService {
     
-    private let fakeMessagePublisher = PassthroughSubject<Response, Never>()
+    weak var listener: (any DataSource.WebSocketServiceListener)?
+    
     private let fakeStatePublisher = PassthroughSubject<WebSocketState, Never>()
-    lazy var message: AnyPublisher<Response, Never> = fakeMessagePublisher.eraseToAnyPublisher()
-    lazy var state: AnyPublisher<DataSource.WebSocketState, Never> = fakeStatePublisher.eraseToAnyPublisher()
+    
+    func getMessageStream<DTO>() -> AnyPublisher<DTO, Never> where DTO : Decodable {
+        return Just(1).compactMap {
+            $0 as? DTO
+        }
+        .eraseToAnyPublisher()
+    }
     
     func connect(completion: @escaping WebsocketCompletion) {
         fakeStatePublisher.send(.connected)
     }
     
     func disconnect() {
-        fakeStatePublisher.send(.intentionalDisconnection)
+        fakeStatePublisher.send(.disconnected)
     }
     
     func subscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
@@ -38,24 +44,30 @@ class StubAllwaysSuccessWebSocketService: WebSocketService {
 // MARK: 항상 실패한 결과를 반환하는 Stub
 class StubAllwaysFailureWebSocketService: WebSocketService {
     
-    private let fakeMessagePublisher = PassthroughSubject<Response, Never>()
+    weak var listener: (any DataSource.WebSocketServiceListener)?
+    
     private let fakeStatePublisher = PassthroughSubject<WebSocketState, Never>()
-    lazy var message: AnyPublisher<Response, Never> = fakeMessagePublisher.eraseToAnyPublisher()
-    lazy var state: AnyPublisher<DataSource.WebSocketState, Never> = fakeStatePublisher.eraseToAnyPublisher()
+    
+    func getMessageStream<DTO>() -> AnyPublisher<DTO, Never> where DTO : Decodable {
+        return Just(1).compactMap {
+            $0 as? DTO
+        }
+        .eraseToAnyPublisher()
+    }
     
     func connect(completion: @escaping WebsocketCompletion) {
-        fakeStatePublisher.send(.unexpectedDisconnection)
+        fakeStatePublisher.send(.disconnected)
     }
     
     func disconnect() {
-        fakeStatePublisher.send(.unexpectedDisconnection)
+        fakeStatePublisher.send(.disconnected)
     }
     
     func subscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
-        completion(.failure(WebSocketError.messageTransferFailure(message: "")))
+        completion(.failure(WebSocketError.messageTransferFailed(error: nil)))
     }
     
     func unsubscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
-        completion(.failure(WebSocketError.messageTransferFailure(message: "")))
+        completion(.failure(WebSocketError.messageTransferFailed(error: nil)))
     }
 }
