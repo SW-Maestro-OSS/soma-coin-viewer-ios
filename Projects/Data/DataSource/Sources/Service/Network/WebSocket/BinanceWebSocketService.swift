@@ -30,7 +30,7 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
     // Internal publishers
     private typealias Message = URLSessionWebSocketTask.Message
     private let webSocketMessagePublisher: PassthroughSubject<Message, Never> = .init()
-    private let webSocketStatePublisher: CurrentValueSubject<WebSocketState, Never> = .init(.disconnected)
+    private var store: Set<AnyCancellable> = []
     
     
     // Network
@@ -48,6 +48,7 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
     public override init() {
         super.init()
         setupWebSocketSession()
+        subscribeToWebSocketMessageStreamForMessageError()
     }
     
     
@@ -78,7 +79,6 @@ private extension BinanceWebSocketService {
 
 // MARK: Stream subscription or unsubscription
 public extension BinanceWebSocketService {
-    
     func subscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
         webSocketManagementQueue.async { [weak self] in
             guard let self, !message.isEmpty else { return }
@@ -128,7 +128,6 @@ public extension BinanceWebSocketService {
 
 // MARK: Message stream
 extension BinanceWebSocketService {
-    
     public func getMessageStream<DTO>() -> AnyPublisher<DTO, Never> where DTO : Decodable {
         webSocketMessagePublisher
             .unretained(self)
@@ -243,9 +242,6 @@ public extension BinanceWebSocketService {
             completion(.success(()))
             connectionCompletion.remove(key: taskId)
         }
-        
-        // 웹소켓 상태 퍼블리싱
-        webSocketStatePublisher.send(.connected)
     }
     
     
@@ -299,6 +295,45 @@ extension BinanceWebSocketService {
 
 // MARK: Error handling
 private extension BinanceWebSocketService {
+    
+    // Binance에러처리
+    func subscribeToWebSocketMessageStreamForMessageError() {
+        webSocketMessagePublisher
+            .compactMap({ message in
+                switch message {
+                case .string(let str):
+                    return str.data(using: .utf8)
+                case .data(let data):
+                    return data
+                @unknown default:
+                    return nil
+                }
+            })
+            .sink { [weak self] data in
+                guard let self else { return }
+                guard let binaceError = handleMessageError(data: data) else { return }
+                switch binaceError {
+                case .tooManyRequests:
+                    listener?.webSocketListener(
+                        unrelatedError: .tooManyRequests
+                    )
+                case .serverBusy:
+                    listener?.webSocketListener(
+                        unrelatedError: .serverIsBusy
+                    )
+                default:
+                    return
+                }
+            }
+            .store(in: &store)
+    }
+    
+    private func handleMessageError(data: Data) -> BinanceWebSocketError? {
+        let response = try? messageDecoder.decode(BinanceResponseDTO.self, from: data)
+        guard let response, let errorDTO = response.error else { return nil }
+        let binanceError = BinanceWebSocketError(rawValue: errorDTO.code) ?? .unknown
+        return binanceError
+    }
     
     func handleNSError(_ nsError: NSError) -> WebSocketError {
         switch nsError.domain {

@@ -30,32 +30,6 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
     public init(webSocketService: WebSocketService) {
         
         self.webSocketService = webSocketService
-        
-        // 외부에 상태전파
-        self.isWebSocketConnected = webSocketService.state
-            .map { $0 == .connected }
-            .eraseToAnyPublisher()
-        
-        
-        // 웹소켓 상태 수신 및 회복처리
-        webSocketService.state
-            .sink { [weak self] state in
-                
-                guard let self else { return }
-                
-                switch state {
-                case .connected:
-                    
-                    printIfDebug("WebSocketManagementHelper: ✅ 웹소켓 연결됨")
-                    
-                case .disconnected:
-                    break
-                    // 연결재시도 및 스트림 복구 실행
-//                    requestConnection(connectionType: .recoverPreviousStreams)
-                }
-                
-            }
-            .store(in: &store)
     }
     
     
@@ -80,7 +54,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
                     
                 case .failure(let webSocketError):
                     switch webSocketError {
-                    case .messageTransferFailure(_):
+                    case .messageTransferFailed(_):
                         streams.forEach { stream in
                             printIfDebug("\(Self.self): ❌\(stream)구독 실패")
                         }
@@ -117,7 +91,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper {
             case .failure(let webSocketError):
                 
                 switch webSocketError {
-                case .messageTransferFailure( _ ):
+                case .messageTransferFailed(_):
                     
                     printIfDebug("\(Self.self): 스트림 구독 해제 메세지 전송 실패")
                     
