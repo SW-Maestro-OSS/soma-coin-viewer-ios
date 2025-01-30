@@ -42,5 +42,10 @@ public class Assemblies : Assembly {
         container.register(I18NManager.self) { _ in
             DefaultI18NManager()
         }
+        
+        //MARK: LanguageLocalizationRepository
+        container.register(LanguageLocalizationRepository.self) { _ in
+            DefaultLanguageLocalizationRepository()
+        }
     }
 }

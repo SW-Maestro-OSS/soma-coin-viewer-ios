@@ -23,8 +23,11 @@ struct SettingView : View {
         
         ScrollView {
             VStack {
-                ForEach(viewModel.state.settingCellViewModel) { viewModel in
-                    SettingCellView(viewModel: viewModel)
+                ForEach(viewModel.state.settingCellROs) { ro in
+                    SettingCellView(settingCellRO: ro, onToggle: {type in
+                        print(type)
+                        //viewModel.action.send()
+                    })
                 }
             }
         }
