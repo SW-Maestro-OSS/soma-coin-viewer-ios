@@ -65,6 +65,10 @@
         "en" : "Stream subscription failed",
         "kr" : "스트림 구독에 실패했습니다."
     },
+    "alertmodel_message_streamsubfailure" : {
+        "en" : "Stream subscription failed",
+        "kr" : "스트림 구독해제에 실패했습니다."
+    },
     
     "alertmodel_action_title_cancel" : {
         "en" : "Cancel",
@@ -75,4 +79,9 @@
         "en" : "Retry",
         "kr" : "재시도"
     },
+    
+    "alertmodel_action_title_ignore" : {
+        "en" : "Ignore",
+        "kr" : "무시하기"
+    }
 }

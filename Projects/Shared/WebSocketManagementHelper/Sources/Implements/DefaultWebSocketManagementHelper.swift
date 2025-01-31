@@ -94,34 +94,30 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                        
             guard let self else { return }
             
-            switch result {
-            case .success:
-                
-                // 리커버리 리스트에서 해당 스트림을 제거
-                subscribedStreamManageQueue.async { [weak self] in
-                    
-                    guard let self else { return }
-                    
-                    // 현재 구독중인 스트림에서 구독취소한 스트림 제거
-                    currentSubscribtions = currentSubscribtions.filter { stream in
-                        !willRemoveStreams.contains(stream)
-                    }
+            // 리커버리 리스트에서 해당 스트림을 제거
+            subscribedStreamManageQueue.async { [weak self] in
+                guard let self else { return }
+                // 현재 구독중인 스트림에서 구독취소한 스트림 제거
+                currentSubscribtions = currentSubscribtions.filter { stream in
+                    !willRemoveStreams.contains(stream)
                 }
+            }
+            
+            if case .failure(let error) = result {
+                printIfDebug("\(Self.self): 스트림 구독 해제 메세지 전송 실패 \(error.localizedDescription)")
                 
-            case .failure(let webSocketError):
-                
-                switch webSocketError {
-                case .messageTransferFailed(_):
-                    printIfDebug("\(Self.self): 스트림 구독 해제 메세지 전송 실패")
-                    
-                    
-                    // MARK: Error Shooter
-                    
-                    
-                    break
-                default:
-                    break
-                }
+                var alertModel = AlertModel(
+                    titleKey: "alertmodel_title_websocketerror",
+                    messageKey: "alertmodel_message_streamunsubfailure"
+                )
+                alertModel.add(action: .init(
+                    titleKey: "alertmodel_action_title_ignore",
+                    config: .init(textColor: .red)
+                ))
+                alertModel.add(action: .init(
+                    titleKey: "alertmodel_action_title_retry"
+                ))
+                alertShooter.shoot(alertModel)
             }
         }
     }
