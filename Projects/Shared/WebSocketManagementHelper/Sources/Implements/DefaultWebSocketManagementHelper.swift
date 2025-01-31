@@ -8,6 +8,7 @@ import Combine
 
 import DataSource
 
+import I18N
 import AlertShooter
 import CoreUtil
 
@@ -57,19 +58,18 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                         streams.forEach { stream in
                             printIfDebug("\(Self.self): ❌\(stream)구독 실패")
                         }
-                        
-//                        let alretMessage = streams.joined(separator: ",")
+                    
                         var alertModel = AlertModel(
-                            titleKey: "alertmodel_title_websocketerror",
-                            messageKey: "alertmodel_message_streamsubfailure"
+                            titleKey: TextKey.Alert.Title.webSocketError.rawValue,
+                            messageKey: TextKey.Alert.Message.streamSubFailure.rawValue
                         )
                         alertModel
                             .add(action: .init(
-                                titleKey: "alertmodel_action_title_cancel",
+                                titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
                                 config: .init(textColor: .red)
                             ))
                         alertModel.add(action: .init(
-                            titleKey: "alertmodel_action_title_retry",
+                            titleKey: TextKey.Alert.ActionTitle.retry.rawValue,
                             action: { [weak self] in
                                 guard let self else { return }
                                 requestSubscribeToStream(streams: streams)
@@ -107,16 +107,19 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                 printIfDebug("\(Self.self): 스트림 구독 해제 메세지 전송 실패 \(error.localizedDescription)")
                 
                 var alertModel = AlertModel(
-                    titleKey: "alertmodel_title_websocketerror",
-                    messageKey: "alertmodel_message_streamunsubfailure"
+                    titleKey: TextKey.Alert.Title.webSocketError.rawValue,
+                    messageKey: TextKey.Alert.Message.streamUnsubFailure.rawValue
                 )
                 alertModel.add(action: .init(
-                    titleKey: "alertmodel_action_title_ignore",
+                    titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
                     config: .init(textColor: .red)
                 ))
                 alertModel.add(action: .init(
-                    titleKey: "alertmodel_action_title_retry"
-                ))
+                    titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+                ) { [weak self] in
+                    guard let self else { return }
+                    requestUnsubscribeToStream(streams: willRemoveStreams)
+                })
                 alertShooter.shoot(alertModel)
             }
         }
@@ -200,29 +203,66 @@ public extension DefaultWebSocketManagementHelper {
     func webSocketListener(unrelatedError error: WebSocketError) {
         switch error {
         case .unintentionalDisconnection(let error):
-            
-            // MARK: Error Shooter
-            
+            printIfDebug("\(Self.self) 비정상적 웹소켓연결 해제 \(error?.localizedDescription ?? "")")
+            var alertModel = AlertModel(
+                titleKey: TextKey.Alert.Title.webSocketError.rawValue,
+                messageKey: TextKey.Alert.Message.unintendedDisconnection.rawValue
+            )
+            alertModel.add(action: .init(
+                titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
+                config: .init(textColor: .red)
+            ))
+            alertModel.add(action: .init(
+                titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+            ) { [weak self] in
+                guard let self else { return }
+                requestConnection(connectionType: .recoverPreviousStreams)
+            })
+            alertShooter.shoot(alertModel)
             break
         case .internetConnectionError(let error):
-            
-            // MARK: Error Shooter
-            
+            var alertModel = AlertModel(
+                titleKey: TextKey.Alert.Title.internetConnectionError.rawValue,
+                messageKey: TextKey.Alert.Message.internetConnectionFailed.rawValue
+            )
+            alertModel.add(action: .init(
+                titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
+                config: .init(textColor: .red)
+            ))
+            alertModel.add(action: .init(
+                titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+            ) { [weak self] in
+                guard let self else { return }
+                requestConnection(connectionType: .recoverPreviousStreams)
+            })
+            alertShooter.shoot(alertModel)
             break
-        case .serverIsBusy:
-            
-            // MARK: Error Shooter
-            
-            break
-        case .tooManyRequests:
-            
-            // MARK: Error Shooter
-            
+        case .serverIsBusy, .tooManyRequests:
+            var alertModel = AlertModel(
+                titleKey: TextKey.Alert.Title.webSocketError.rawValue,
+                messageKey: TextKey.Alert.Message.webSocketServerIsUnstable.rawValue
+            )
+            alertModel.add(action: .init(
+                titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
+                config: .init(textColor: .red)
+            ))
+            alertModel.add(action: .init(
+                titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+            ) { [weak self] in
+                guard let self else { return }
+                requestConnection(connectionType: .recoverPreviousStreams)
+            })
+            alertShooter.shoot(alertModel)
             break
         case .unknown(let error):
-            
-            // MARK: Error Shooter
-            
+            var alertModel = AlertModel(
+                titleKey: TextKey.Alert.Title.webSocketError.rawValue,
+                messageKey: TextKey.Alert.Message.unknownError.rawValue
+            )
+            alertModel.add(action: .init(
+                titleKey: TextKey.Alert.ActionTitle.cancel.rawValue
+            ))
+            alertShooter.shoot(alertModel)
             break
         default:
             break

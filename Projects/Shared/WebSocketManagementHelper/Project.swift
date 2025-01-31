@@ -47,6 +47,7 @@ let project = Project(
                 
                 D.Data.dataSource,
                 
+                D.Shared.I18N,
                 D.Shared.AlertShooter,
                 
                 D.Util.CoreUtil,
