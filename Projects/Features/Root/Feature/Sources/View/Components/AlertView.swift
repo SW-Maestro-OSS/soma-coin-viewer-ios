@@ -16,9 +16,14 @@ struct AlertView: View {
     // Content
     private let renderObject: AlertRO
     
-    init(presented: Binding<Bool>, renderObject: AlertRO) {
+    
+    // Action
+    var onDismiss: (() -> Void)?
+    
+    init(presented: Binding<Bool>, renderObject: AlertRO, onDismiss: (() -> Void)?) {
         self._presented = presented
         self.renderObject = renderObject
+        self.onDismiss = onDismiss
     }
     
     var body: some View {
@@ -52,6 +57,7 @@ struct AlertView: View {
                                     )
                                     .onTapGesture {
                                         actionRO.action?()
+                                        onDismiss?()
                                         presented = false
                                     }
                                 }

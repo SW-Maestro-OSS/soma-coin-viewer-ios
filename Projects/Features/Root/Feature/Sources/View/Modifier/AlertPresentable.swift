@@ -11,13 +11,18 @@ struct AlertPresentableView: ViewModifier {
     
     @Binding var presented: Bool
     let renderObject: AlertRO
+    var onDismiss: (() -> Void)?
     
     func body(content: Content) -> some View {
         ZStack {
             content
             Group {
                 if presented {
-                    AlertView(presented: $presented, renderObject: renderObject)
+                    AlertView(
+                        presented: $presented,
+                        renderObject: renderObject,
+                        onDismiss: onDismiss
+                    )
                         .transition(.opacity)
                 }
             }
@@ -28,7 +33,7 @@ struct AlertPresentableView: ViewModifier {
 
 
 extension View {
-    func alertable(presented: Binding<Bool>, renderObject: AlertRO?) -> some View {
+    func alertable(presented: Binding<Bool>, renderObject: AlertRO?, onDismiss: (() -> Void)?) -> some View {
         return self.modifier(
             AlertPresentableView(
                 presented: presented,
@@ -36,7 +41,8 @@ extension View {
                     titleText: "",
                     messageText: nil,
                     actions: []
-                )
+                ),
+                onDismiss: onDismiss
             )
         )
     }
