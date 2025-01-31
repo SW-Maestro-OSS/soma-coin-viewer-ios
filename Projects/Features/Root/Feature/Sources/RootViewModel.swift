@@ -13,12 +13,15 @@ import DomainInterface
 import BaseFeature
 
 import I18N
+import AlertShooter
 import CoreUtil
 
-final class RootViewModel: UDFObservableObject, RootViewModelable {
+final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterListener {
     
+    // Dependency
     private let i18NManager: I18NManager
     private let languageRepository: LanguageLocalizationRepository
+    private let alertShooter: AlertShooter
     
 
     // Public state interface
@@ -45,9 +48,17 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     var store: Set<AnyCancellable> = .init()
     
     
-    init(i18NManager: I18NManager, languageRepository: LanguageLocalizationRepository) {
+    init(
+        i18NManager: I18NManager,
+        languageRepository: LanguageLocalizationRepository,
+        alertShooter: AlertShooter
+    ) {
         self.i18NManager = i18NManager
         self.languageRepository = languageRepository
+        self.alertShooter = alertShooter
+        
+        // Listener
+        alertShooter.request(listener: self)
         
         let languageType = i18NManager.getLanguageType()
         let initialSplashRO = createSplashRO(languageType: languageType)
@@ -81,7 +92,10 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
                     .delay(for: 2, scheduler: RunLoop.main)
                     .eraseToAnyPublisher()
             }
-            
+        case .alert(let alertRO):
+            return Just(action)
+                .delay(for: 0.3, scheduler: RunLoop.main)
+                .eraseToAnyPublisher()
         default:
             break
         }
@@ -96,6 +110,9 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
         case .appIsLoaded:
             newState.isLoading = false
             router?.presentMainTabBar()
+        case .alert(let ro):
+            newState.alertRO = ro
+            newState.presentAlert = true
         default:
             return state
         }
@@ -107,23 +124,26 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
 
 // MARK: Action & State
 extension RootViewModel {
-    
     enum Action {
         // Events
         case onAppear
         case appIsLoaded
+        case alert(ro: AlertRO)
     }
     
     struct State {
         var splashRO: SplashRO
         var isLoading: Bool
+        
+        // Alert
+        var alertRO: AlertRO?
+        var presentAlert: Bool = false
     }
 }
 
 
 // MARK: Splash
 private extension RootViewModel {
-    
     func createSplashRO(languageType: LanguageType) -> SplashRO {
         let titleTextKey = "LaunchScreen_title"
         let titleText = languageRepository.getString(key: titleTextKey, lanCode: languageType.lanCode)
@@ -132,9 +152,48 @@ private extension RootViewModel {
 }
 
 
+// MARK: AlertShooterListener
+extension RootViewModel {
+    func alert(model: AlertModel) {
+        let currentLan = i18NManager.getLanguageType()
+        
+        // AlertAction ROs
+        let actionROs = model.actions.map { actionModel in
+            let titleText = languageRepository.getString(
+                key: actionModel.titleKey,
+                lanCode: currentLan.lanCode
+            )
+            return AlertActionRO(
+                titleText: titleText,
+                titleTextColor: actionModel.config.textColor,
+                action: actionModel.action
+            )
+        }
+        
+        // Alert RO
+        var messageText: String = ""
+        if let messageKey = model.messageKey {
+            messageText = languageRepository.getString(
+                key: messageKey,
+                lanCode: currentLan.lanCode
+            )
+        }
+        let renderObject = AlertRO(
+            titleText: languageRepository.getString(
+                key: model.titleKey,
+                lanCode: currentLan.lanCode
+            ),
+            messageText: messageText,
+            actions: actionROs
+        )
+        
+        self.action.send(.alert(ro: renderObject))
+    }
+}
+
+
 // MARK: WeakRootRouting
 private extension RootViewModel {
-    
     class WeakRootRouting {
         
         weak var value: RootRouting?
