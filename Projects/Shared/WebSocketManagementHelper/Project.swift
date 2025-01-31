@@ -47,6 +47,8 @@ let project = Project(
                 
                 D.Data.dataSource,
                 
+                D.Shared.AlertShooter,
+                
                 D.Util.CoreUtil,
                 
                 D.ThirdParty.SwiftStructures,

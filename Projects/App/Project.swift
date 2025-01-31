@@ -38,6 +38,7 @@ let project = Project(
                 D.Util.PresentationUtil,
                 
                 // Shared
+                D.Shared.AlertShooter,
                 D.Shared.WebSocketManagementHelper,
             ],
             settings: .settings(
