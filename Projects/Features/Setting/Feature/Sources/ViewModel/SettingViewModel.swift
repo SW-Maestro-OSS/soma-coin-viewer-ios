@@ -20,7 +20,7 @@ public protocol SettingViewModelListener: AnyObject {
     func mutation(gridType: GridType)
 }
 
-class SettingViewModel : UDFObservableObject, SettingViewModelable, SettingViewModelDelegate {
+class SettingViewModel : UDFObservableObject, SettingViewModelable {
     
     // DI
     @Injected private var i18NManager: I18NManager
@@ -66,8 +66,8 @@ class SettingViewModel : UDFObservableObject, SettingViewModelable, SettingViewM
             
             if isFirstAppear {
                 isFirstAppear = false
-                let cellROs = createSettingCellROS()
-                return Just(Action.cellViewModelsCreated(cellROs))
+                let cellROs = createSettingCellROS(with : state)
+                return Just(Action.cellROCreated(cellROs))
                     .eraseToAnyPublisher()
             }
             break
@@ -81,16 +81,23 @@ class SettingViewModel : UDFObservableObject, SettingViewModelable, SettingViewM
     func reduce(_ action : Action, state : State) -> State {
         var newState = state
         switch action {
-        case .tap(let type):
+        case .update(let type):
             switch type {
-            case .currency:
-                newState.currencyType = i18NManager.getCurrencyType()
-            case .language:
+            case .currencyType(let value):
+                let updatedValue: CurrencyType = (value == .dollar) ? .won : .dollar
+                i18NManager.setCurrencyType(type: updatedValue)
+                newState.currencyType = updatedValue
+            case .languageType(let value):
+                let updatedValue: LanguageType = (value == .english) ? .korean : .english
+                i18NManager.setLanguageType(type: updatedValue)
                 newState.languageType = i18NManager.getLanguageType()
-            case .grid:
-                newState.gridType = userConfigurationRepository.getGridType()
+            case .gridType(let value):
+                let updatedValue: GridType = (value == .list) ? .twoByTwo : .list
+                userConfigurationRepository.setGrideType(type: updatedValue)
+                newState.gridType = updatedValue
             }
-        case .cellViewModelsCreated(let cellROS):
+            newState.settingCellROs = createSettingCellROS(with: newState)
+        case .cellROCreated(let cellROS):
             newState.settingCellROs = cellROS
         default:
             return state
@@ -115,9 +122,9 @@ extension SettingViewModel {
     }
     
     enum Action {
-        case tap(ActionType)
+        case update(CellType) //i18N update
         case onAppear
-        case cellViewModelsCreated([SettingCellRO])
+        case cellROCreated([SettingCellRO])
     }
     
     enum ActionType {
@@ -127,44 +134,29 @@ extension SettingViewModel {
     }
 }
 
-//MARK: SettingDelegate
-extension SettingViewModel {
-    func updateSetting(cellType : CellType) {
-        switch cellType {
-        case .currencyType(let currencyType):
-            i18NManager.setCurrencyType(type: currencyType)
-            action.send(.tap(.currency))
-        case .languageType(let languageType):
-            i18NManager.setLanguageType(type: languageType)
-            action.send(.tap(.language))
-        case .gridType(let gridType):
-            userConfigurationRepository.setGrideType(type: gridType)
-            listener?.mutation(gridType: gridType)
-            action.send(.tap(.grid))
-        }
-    }
-}
-
 extension SettingViewModel {
     
-    func createSettingCellROS() -> [SettingCellRO] {
-        let currentState = state
+    func createSettingCellROS(with : State) -> [SettingCellRO] {
+        let currentState = with
         let lanCode = currentState.languageType.lanCode
         let settingCellROs = [
             SettingCellRO(
-                cellType: "Setting_price",
+                cellKey: "Setting_price",
+                cellType: CellType.currencyType(currentState.currencyType),
                 title: repository.getString(key: "Setting_price_title", lanCode: lanCode),
                 option: repository.getString(key: "Setting_price_option", lanCode: lanCode),
                 isSelected: currentState.currencyType == .won
             ),
             SettingCellRO(
-                cellType: "Setting_language",
+                cellKey: "Setting_language",
+                cellType: CellType.languageType(currentState.languageType),
                 title: repository.getString(key: "Setting_language_title", lanCode: lanCode),
                 option: repository.getString(key: "Setting_language_option", lanCode: lanCode),
                 isSelected: currentState.languageType == .korean
             ),
             SettingCellRO(
-                cellType: "Setting_grid",
+                cellKey: "Setting_grid",
+                cellType: CellType.gridType(currentState.gridType),
                 title: repository.getString(key: "Setting_grid_title", lanCode: lanCode),
                 option: repository.getString(key: "Setting_grid_option", lanCode: lanCode),
                 isSelected: currentState.gridType == .list

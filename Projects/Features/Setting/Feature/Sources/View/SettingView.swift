@@ -25,8 +25,7 @@ struct SettingView : View {
             VStack {
                 ForEach(viewModel.state.settingCellROs) { ro in
                     SettingCellView(settingCellRO: ro, onToggle: {type in
-                        print(type)
-                        //viewModel.action.send()
+                        viewModel.action.send(.update(type))
                     })
                 }
             }

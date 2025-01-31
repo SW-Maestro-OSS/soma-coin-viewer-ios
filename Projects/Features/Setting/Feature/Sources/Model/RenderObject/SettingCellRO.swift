@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct SettingCellRO : Identifiable {
-    var id : String { self.cellType }
+    var id : String { self.cellKey }
     
-    let cellType : String
+    let cellKey : String
+    let cellType : CellType
     
     var title : String
     var option : String

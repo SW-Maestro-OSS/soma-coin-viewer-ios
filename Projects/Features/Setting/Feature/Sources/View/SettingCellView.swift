@@ -17,9 +17,9 @@ import I18N
 struct SettingCellView : View {
     @State var isSelected : Bool
     let settingCellRO : SettingCellRO
-    let onToggle: (String) -> Void
+    let onToggle: (CellType) -> Void
     
-    init(settingCellRO : SettingCellRO, onToggle : @escaping (String) -> Void) {
+    init(settingCellRO : SettingCellRO, onToggle : @escaping (CellType) -> Void) {
         self._isSelected = State(initialValue: settingCellRO.isSelected)
         self.settingCellRO = settingCellRO
         self.onToggle = onToggle
