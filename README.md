@@ -154,8 +154,17 @@ soma-coin-viewer앱은 현재 `Binance API`를 사용합니다. 하지만 WebSoc
 
 <img src="https://github.com/user-attachments/assets/5a742bf2-0775-4369-b361-e8c62cf4d4c8" width=500 />
 
+
 ### strings파일을 사용하지 않은 이유
 
 `strings파일`을 사용해서 시스템 언어를 기반으로 텍스트를 가져올 수 있습니다. 하지만 해당 기능의 경우 동적으로 언어를 변경할 수 없어 지역 및 시스템 언어와 무관한 언어 설정이 까다롭습니다.
 
 시스템 언어와 무관하게 유저가 언어를 선택하게 함으로써 한층 높아진 국제화 대응을 구현했습니다.
+
+## 에러처리
+
+기본적으로 `AlertShooter`를 통해 Alert관련 정보(`AlertModel`)를 전달할 수 있습니다.
+
+해당 정보는 `AlertShooter`를 구독하고 있는 `RootViewModel`에 의해 관찰되어 화면상에 Alert로 노출되게 됩니다.
+
+<img src="https://github.com/user-attachments/assets/cc2d355c-14a9-4d3f-8152-ff4222ffb512" width=500 />
