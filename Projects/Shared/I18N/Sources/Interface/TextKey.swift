@@ -11,6 +11,7 @@ public enum TextKey {
             case webSocketError = "alertmodel_title_websocketerror"
             case internetConnectionError = "alertmodel_title_internetconnectionerror"
             case systemError = "alertmodel_title_systemerror"
+            case exchangeRateError = "alertmodel_title_exchangerateerror"
         }
         public enum Message: String, CaseIterable {
             case streamSubFailure = "alertmodel_message_streamsubfailure"
@@ -19,6 +20,7 @@ public enum TextKey {
             case webSocketServerIsUnstable = "alertmodel_message_serverisunstable"
             case internetConnectionFailed = "alertmodel_message_internetconnectionfailed"
             case unknownError = "alertmodel_message_unknownerror"
+            case failedToGetExchangerate = "alertmodel_message_failedtogetexchangerate"
         }
         public enum ActionTitle: String, CaseIterable {
             case cancel = "alertmodel_action_title_cancel"

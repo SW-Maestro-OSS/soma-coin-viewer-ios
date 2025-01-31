@@ -68,6 +68,10 @@
         "en" : "System error",
         "kr" : "시스템 오류"
     },
+    "alertmodel_title_exchangerateerror" : {
+        "en" : "Failed to get exchange rate",
+        "kr" : "환율정보 획득 실패"
+    },
     
     "alertmodel_message_streamsubfailure" : {
         "en" : "Stream subscription failed",
@@ -92,6 +96,10 @@
     "alertmodel_message_unknownerror" : {
         "en" : "unknown error occurred",
         "kr" : "알 수 없는 오류가 발생했습니다."
+    },
+    "alertmodel_message_failedtogetexchangerate" : {
+        "en" : "A problem occurred while obtaining exchange rate information.",
+        "kr" : "환율정보를 획득하는 과정에서 문제가 발생했습니다."
     },
     
     "alertmodel_action_title_cancel" : {
