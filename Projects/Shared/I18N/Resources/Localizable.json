@@ -54,4 +54,25 @@
         "en" : "2x2 | List",
         "kr" : "2x2 | 리스트",
     },
+    
+    
+    "alertmodel_title_websocketerror" : {
+        "en" : "WebSocket error",
+        "kr" : "웹소켓 오류"
+    },
+    
+    "alertmodel_message_streamsubfailure" : {
+        "en" : "Stream subscription failed",
+        "kr" : "스트림 구독에 실패했습니다."
+    },
+    
+    "alertmodel_action_title_cancel" : {
+        "en" : "Cancel",
+        "kr" : "닫기"
+    },
+    
+    "alertmodel_action_title_retry" : {
+        "en" : "Retry",
+        "kr" : "재시도"
+    },
 }
