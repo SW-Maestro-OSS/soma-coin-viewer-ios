@@ -4,11 +4,12 @@
 //
 
 import Foundation
+import Combine
 
 import DataSource
-import CoreUtil
 
-import Combine
+import AlertShooter
+import CoreUtil
 
 public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSocketServiceListener {
     
@@ -18,6 +19,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
     
     // Service locator
     private let webSocketService: WebSocketService
+    private let alertShooter: AlertShooter
     
     
     // Pulbic interface
@@ -28,8 +30,10 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
     private let subscribedStreamManageQueue: DispatchQueue = .init(label: "com.WebSocketManagementHelper")
     private var store: Set<AnyCancellable> = .init()
     
-    public init(webSocketService: WebSocketService) {
+    public init(webSocketService: WebSocketService, alertShooter: AlertShooter) {
         self.webSocketService = webSocketService
+        self.alertShooter = alertShooter
+        
         webSocketService.listener = self
     }
     
@@ -54,9 +58,23 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                             printIfDebug("\(Self.self): ❌\(stream)구독 실패")
                         }
                         
-                        
-                        // MARK: Error Shooter
-                        
+                        let alretMessage = streams.joined(separator: ",")
+                        var alertModel = AlertModel(
+                            titleKey: "alertmodel_title_streamsubfailure",
+                            messageKey: "alertmodel_message_streamsubfailure"
+                        )
+                        alertModel
+                            .add(action: .init(
+                                titleKey: "alertmodel_action_title_cancel"
+                            ))
+                        alertModel.add(action: .init(
+                            titleKey: "alertmodel_action_title_retry",
+                            action: { [weak self] in
+                                guard let self else { return }
+                                requestSubscribeToStream(streams: streams)
+                            })
+                        )
+                        alertShooter.shoot(alertModel)
                         
                         return
                     default:
