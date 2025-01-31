@@ -41,7 +41,6 @@ final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterL
     
     // State
     private var isFirstAppear: Bool = true
-    private var alertQueue: [AlertRO] = []
     
     
     // Publishers
@@ -86,31 +85,15 @@ final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterL
         case .onAppear:
             if isFirstAppear {
                 isFirstAppear = false
-                
                 // 화면 최초 등장시 2초간의 지연 발생
                 return Just(.appIsLoaded)
                     .delay(for: 2, scheduler: RunLoop.main)
                     .eraseToAnyPublisher()
             }
-        case .presentAlert(let currentAlertRO):
-            if state.isAlertPresenting {
-                self.alertQueue.append(currentAlertRO)
-                return Empty().eraseToAnyPublisher()
-            }
-            
-            if !self.alertQueue.isEmpty {
-                let nextAlert = self.alertQueue.removeFirst()
-                self.alertQueue.append(currentAlertRO)
-                return Just(Action.presentAlert(ro: nextAlert))
-                    .eraseToAnyPublisher()
-            }
-        case .alertIsDismissed:
-            if !self.alertQueue.isEmpty {
-                let nextAlert = self.alertQueue.removeFirst()
-                return Just(Action.presentAlert(ro: nextAlert))
-                    .delay(for: 0.35, scheduler: RunLoop.main)
-                    .eraseToAnyPublisher()
-            }
+        case .presentAlert, .alertIsDismissed:
+            return Just(action)
+                .delay(for: 0.35, scheduler: RunLoop.main)
+                .eraseToAnyPublisher()
         default:
             break
         }
@@ -119,18 +102,27 @@ final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterL
     
     
     func reduce(_ action: Action, state: State) -> State {
-        
         var newState = state
         switch action {
         case .appIsLoaded:
             newState.isLoading = false
             router?.presentMainTabBar()
         case .alertIsDismissed:
-            newState.isAlertPresenting = false
-            newState.presentingAlertRO = nil
+            if !state.alertQueue.isEmpty {
+                let nextAlertRO = newState.alertQueue.removeFirst()
+                newState.presentingAlertRO = nextAlertRO
+                newState.isAlertPresenting = true
+            } else {
+                newState.isAlertPresenting = false
+                newState.presentingAlertRO = nil
+            }
         case .presentAlert(let alertRO):
-            newState.presentingAlertRO = alertRO
-            newState.isAlertPresenting = true
+            if state.isAlertPresenting {
+                newState.alertQueue.append(alertRO)
+            } else {
+                newState.presentingAlertRO = alertRO
+                newState.isAlertPresenting = true
+            }
         default:
             return state
         }
@@ -155,7 +147,8 @@ extension RootViewModel {
         var splashRO: SplashRO
         var isLoading: Bool
         
-        var presentingAlertRO: AlertRO?
+        fileprivate var alertQueue: [AlertRO] = []
+        var presentingAlertRO: AlertRO? = nil
         var isAlertPresenting: Bool = false
     }
 }

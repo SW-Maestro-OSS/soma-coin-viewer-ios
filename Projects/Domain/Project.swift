@@ -31,6 +31,8 @@ let project = Project(
                 D.Util.CoreUtil,
                 
                 D.Shared.WebSocketManagementHelper,
+                D.Shared.AlertShooter,
+                D.Shared.I18N,
             ]
         ),
         

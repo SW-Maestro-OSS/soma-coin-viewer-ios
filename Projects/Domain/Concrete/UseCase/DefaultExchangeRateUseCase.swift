@@ -10,12 +10,15 @@ import Foundation
 
 import DomainInterface
 
+import AlertShooter
+import I18N
 import CoreUtil
 
 public class DefaultExchangeRateUseCase: ExchangeRateUseCase {
     
+    // Service locator
     @Injected private var exchangeRateRepository: ExchangeRateRepository
-    
+    @Injected private var alertShooter: AlertShooter
     
     // Publisher
     private let fetchSuccessFlag: CurrentValueSubject<Void?, Never> = .init(nil)
@@ -58,13 +61,27 @@ public class DefaultExchangeRateUseCase: ExchangeRateUseCase {
     }
     
     public func prepare() {
-        
         exchangeRateRepository
             .prepare(baseCurrencyCode: "USD", toCurrencyCodes: CurrencyType.allCases.map({ $0.currencyCode }))
-            .sink { error in
-                
-                // Fetch 도중 에러 발생 -> 유저에게 알리기
-                
+            .sink { [weak self] completion in
+                guard let self else { return }
+                if case .failure(let error) = completion {
+                    printIfDebug("\(Self.self) 환율정보 가져오기 실패 \(error.localizedDescription)")
+                    var alertModel = AlertModel(
+                        titleKey: TextKey.Alert.Title.exchangeRateError.rawValue,
+                        messageKey: TextKey.Alert.Message.failedToGetExchangerate.rawValue
+                    )
+                    alertModel.add(action: .init(
+                        titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+                    ) { [weak self] in
+                        guard let self else { return }
+                        prepare()
+                    })
+                    alertModel.add(action: .init(
+                        titleKey: TextKey.Alert.ActionTitle.ignore.rawValue
+                    ))
+                    alertShooter.shoot(alertModel)
+                }
             } receiveValue: { [weak self] _ in
                 
                 guard let self else { return }

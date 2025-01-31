@@ -10,17 +10,17 @@ import SwiftUI
 struct AlertPresentableView: ViewModifier {
     
     @Binding var presented: Bool
-    let renderObject: AlertRO
+    let renderObject: AlertRO?
     var onDismiss: (() -> Void)?
     
     func body(content: Content) -> some View {
         ZStack {
             content
             Group {
-                if presented {
+                if presented, let alertRO = renderObject {
                     AlertView(
                         presented: $presented,
-                        renderObject: renderObject,
+                        renderObject: alertRO,
                         onDismiss: onDismiss
                     )
                         .transition(.opacity)
@@ -37,11 +37,7 @@ extension View {
         return self.modifier(
             AlertPresentableView(
                 presented: presented,
-                renderObject: renderObject ?? .init(
-                    titleText: "",
-                    messageText: nil,
-                    actions: []
-                ),
+                renderObject: renderObject,
                 onDismiss: onDismiss
             )
         )
