@@ -10,7 +10,6 @@ public protocol AlertShooterListener: AnyObject {
     func alert(model: AlertModel)
 }
 
-@MainActor
 public protocol AlertShooter {
     
     /// AlertShooter의 이벤트를 구독할 것을 요청합니다.

@@ -19,8 +19,11 @@ public final class DefaultAlertShooter: AlertShooter {
     }
     
     public func shoot(_ model: AlertModel) {
-        listeners.forEach { listener in
-            listener.wrappedObject?.alert(model: model)
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            listeners.forEach { listener in
+                listener.wrappedObject?.alert(model: model)
+            }
         }
     }
 }
