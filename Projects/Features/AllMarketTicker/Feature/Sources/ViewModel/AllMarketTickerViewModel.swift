@@ -10,32 +10,23 @@ import Combine
 
 import BaseFeature
 
-import WebSocketManagementHelper
 import DomainInterface
 import CoreUtil
 import I18N
 
-final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorViewModelDelegate, AllMarketTickerViewModelable {
+final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewModelable {
     
-    // Stream
-    private let gridTypeChangePublisher: AnyPublisher<GridType, Never>
-    
-    
-    // DI
-    private let webSocketManagementHelper: WebSocketManagementHelper
+    // Service locator
     private let i18NManager: I18NManager
+    private let languageLocalizationRepository: LanguageLocalizationRepository
     private let allMarketTickersUseCase: AllMarketTickersUseCase
     private let exchangeUseCase: ExchangeRateUseCase
     private let userConfigurationRepository: UserConfigurationRepository
     
     
     // State
-    @Published var state: State
+    @Published var state: State = .init()
     private var isFirstAppear: Bool = true
-    
-    
-    // Sub ViewModel
-    private(set) var sortCompartorViewModels: [TickerSortSelectorViewModel] = []
     
     
     var action: PassthroughSubject<Action, Never> = .init()
@@ -43,17 +34,14 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
     
     
     init(
-        gridTypeChangePublisher: AnyPublisher<GridType, Never>,
-        socketHelper: WebSocketManagementHelper,
         i18NManager: I18NManager,
+        languageLocalizationRepository: LanguageLocalizationRepository,
         allMarketTickersUseCase: AllMarketTickersUseCase,
         exchangeUseCase: ExchangeRateUseCase,
         userConfigurationRepository: UserConfigurationRepository
     ) {
-       
-        self.gridTypeChangePublisher = gridTypeChangePublisher
-        self.webSocketManagementHelper = socketHelper
         self.i18NManager = i18NManager
+        self.languageLocalizationRepository = languageLocalizationRepository
         self.allMarketTickersUseCase = allMarketTickersUseCase
         self.exchangeUseCase = exchangeUseCase
         self.userConfigurationRepository = userConfigurationRepository
@@ -63,18 +51,15 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         let initialTickerDisplayType = userConfigurationRepository.getGridType()
         let initialLanguageType = i18NManager.getLanguageType()
         let initialCurrencyType = i18NManager.getCurrencyType()
+        let initialSortSelectionROs = createInitialSortSelectonROs()
         let initialState: State = .init(
+            sortSelectionCellROs: initialSortSelectionROs,
             sortComparator: TickerNoneComparator(),
             tickerDisplayType: initialTickerDisplayType,
             languageType: initialLanguageType,
             currencyType: initialCurrencyType
         )
-        self._state = Published(initialValue: initialState)
-        
-        
-        // Create sort selection view models
-        createTickerSortSelectorViewModels()
-        
+        self._state = Published(initialValue: initialState)        
         
         // Create state stream
         createStateStream()
@@ -82,31 +67,67 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
     
     
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
+        let currentState = self.state
         switch action {
         case .onAppear:
-            let currentState = self.state
             if self.isFirstAppear {
                 self.isFirstAppear = false
+                
                 
                 // AllMarketTicker스트림 구독
                 subscribeToTickerDataStream()
                 
-                // I18N 스트림 구독
-                subscribeToI18NMutation()
-                
-                // GridType변경 구독
-                subscribeToGridTypeChange()
                 
                 // 환율정보 가져오기
-                if let currencyType = currentState.currencyType {
-                    return exchangeUseCase
-                        .getExchangeRate(base: .dollar, to: currencyType)
-                        .map { Action.currencyTypeUpdated(type: currencyType, rate: $0) }
-                        .eraseToAnyPublisher()
-                }
-                break
+                return exchangeUseCase
+                    .getExchangeRate(base: .dollar, to: currentState.currencyType)
+                    .map { Action.i18NUpdated(
+                        currenyType: currentState.currencyType,
+                        exchangeRate: $0)
+                    }
+                    .eraseToAnyPublisher()
             }
-            break
+            
+            // i18N 변경사항 확인
+            // - 언어
+            var actions: [AnyPublisher<Action, Never>] = []
+            let changedLanType = i18NManager.getLanguageType()
+            if currentState.languageType != changedLanType {
+                actions.append(
+                    Just(Action.i18NUpdated(
+                        languageType: changedLanType
+                    )).eraseToAnyPublisher()
+                )
+            }
+            
+            // - 화폐
+            let changedCurrneyType = i18NManager.getCurrencyType()
+            if currentState.currencyType != changedCurrneyType {
+                actions.append(
+                    exchangeUseCase
+                        .getExchangeRate(base: .dollar, to: changedCurrneyType)
+                        .map {
+                            Action.i18NUpdated(
+                                currenyType: changedCurrneyType,
+                                exchangeRate: $0
+                            )
+                        }
+                        .eraseToAnyPublisher()
+                )
+            }
+            
+            // UserConfiguration변경사항 확인
+            // - GridType
+            let changedGridType = userConfigurationRepository.getGridType()
+            if currentState.tickerGridType != changedGridType {
+                actions.append(
+                    Just(Action.gridTypeUpdated(type: changedGridType)).eraseToAnyPublisher()
+                )
+            }
+            
+            if actions.isEmpty { break }
+            
+            return Publishers.MergeMany(actions).eraseToAnyPublisher()
             
         default:
             break
@@ -120,36 +141,99 @@ final class AllMarketTickerViewModel: UDFObservableObject, TickerSortSelectorVie
         var newState = state
         
         switch action {
-        case .changeSortingCriteria(let comparator):
-            
-            let sortedTickerViewModels = state.tickerCellViewModels.sorted(by: comparator)
-            newState.tickerCellViewModels = sortedTickerViewModels
-            newState.sortComparator = comparator
-            
-        case .fetchList(let list):
+        case .tickerListFetched(let tickerVOs):
             
             let currentComparator = state.sortComparator
-            let tickerViewModels = list.map { tickerVO in
-                TickerCellViewModel(config: .init(
-                    tickerVO: tickerVO,
-                    currencyConfig: .init(
-                        type: state.currencyType ?? .dollar,
-                        rate: state.exchangeRate ?? 0.0
-                    )
+            let sortedTickerVOs = tickerVOs.sorted(by: currentComparator.compare)
+            guard let exchangeRate = state.exchangeRate else { break }
+            newState.tickerCellVO = sortedTickerVOs
+            newState.tickerCellRO = sortedTickerVOs.map {
+                createRO($0, currencyConfig: .init(
+                    type: state.currencyType,
+                    rate: exchangeRate
                 ))
             }
-            let sortedTickerViewModels = tickerViewModels.sorted(by: currentComparator)
-            newState.tickerCellViewModels = sortedTickerViewModels
+        case .i18NUpdated(let languageType, let currencyType, let exchangeRate):
+            if let languageType {
+                newState.languageType = languageType
+            }
+            if let currencyType {
+                newState.currencyType = currencyType
+            }
+            if let exchangeRate {
+                newState.exchangeRate = exchangeRate
+            }
             
-        case .currencyTypeUpdated(let currenyType, let rate):
-            newState.currencyType = currenyType
-            newState.exchangeRate = rate
-            
-        case .languageTypeUpdated(let languageType):
-            newState.languageType = languageType
+            // selection cell 변경
+            state.sortSelectionCellROs.forEach { type, ro in
+                var newRO = ro
+                newRO.displayText = createSelectionCellLocalizedText(
+                    type: type,
+                    languageType: newState.languageType,
+                    currenyType: newState.currencyType
+                )
+                newState.sortSelectionCellROs[type] = newRO
+            }
+
+            // ticker cell 변경
+            guard let exchangeRate else { break }
+            newState.tickerCellRO = state.tickerCellVO.map {
+                createRO($0, currencyConfig: .init(
+                    type: newState.currencyType,
+                    rate: exchangeRate
+                ))
+            }
             
         case .gridTypeUpdated(let gridType):
-            newState.tickerDisplayType = gridType
+            newState.tickerGridType = gridType
+            
+        case .sortSelectionButtonTapped(let selectedType):
+            // #1. UI update
+            var newSelectionRO: SortSelectionCellRO!
+            state.sortSelectionCellROs.forEach { type, ro in
+                if type == selectedType {
+                    // 선택된 타입인 경우
+                    newSelectionRO = ro
+                    switch ro.sortState {
+                    case .neutral:
+                        // neutral --> descending
+                        newSelectionRO.sortState = .descending
+                    case .ascending:
+                        // ascending --> descending
+                        newSelectionRO.sortState = .descending
+                    case .descending:
+                        // descending --> ascending
+                        newSelectionRO.sortState = .ascending
+                    }
+                    newState.sortSelectionCellROs[type] = newSelectionRO
+                } else {
+                    // 선택되지 않은 타입인 경우
+                    var newSelectionRO = ro
+                    newSelectionRO.sortState = .neutral
+                    newState.sortSelectionCellROs[type] = newSelectionRO
+                }
+            }
+            
+            // #2. Sort current
+            var newSortComparator: TickerSortComparator!
+            switch newSelectionRO.sortState {
+            case .neutral:
+                fatalError()
+            case .ascending:
+                newSortComparator = selectedType.getSortComparator(type: .ascending)
+            case .descending:
+                newSortComparator = selectedType.getSortComparator(type: .descending)
+            }
+            newState.sortComparator = newSortComparator
+            let sortedTickerVOs = state.tickerCellVO.sorted(by: newSortComparator.compare)
+            guard let exchangeRate = state.exchangeRate else { break }
+            newState.tickerCellVO = sortedTickerVOs
+            newState.tickerCellRO = sortedTickerVOs.map {
+                createRO($0, currencyConfig: .init(
+                    type: state.currencyType,
+                    rate: exchangeRate
+                ))
+            }
             
         default:
             return state
@@ -174,144 +258,192 @@ extension AllMarketTickerViewModel {
     struct State {
         
         // Sort
-        var sortComparator: any TickerSortComparator
+        fileprivate var sortSelectionCellROs: [SortSelectionCellType: SortSelectionCellRO] = [:]
+        var sortComparator: TickerSortComparator = TickerNoneComparator()
+        var displayingSortSelectionCellROs: [SortSelectionCellRO] {
+            let order: [SortSelectionCellType] = [.symbol, .price, .changeIn24h]
+            return order.compactMap({ sortSelectionCellROs[$0] })
+        }
         
-        // Cell
-        var tickerDisplayType: GridType
-        var tickerCellViewModels: [TickerCellViewModel] = []
+        // Ticker cell
+        fileprivate var tickerCellVO: [Twenty4HourTickerForSymbolVO] = []
+        var tickerGridType: GridType
+        var tickerCellRO: [TickerCellRO] = []
         
         // Currency
-        var languageType: LanguageType?
-        var currencyType: CurrencyType?
+        var languageType: LanguageType
+        var currencyType: CurrencyType
         var exchangeRate: Double?
         
-        
+
         var isLoaded: Bool {
-            !tickerCellViewModels.isEmpty &&
-            languageType != nil &&
-            currencyType != nil &&
+            !tickerCellRO.isEmpty &&
             exchangeRate != nil
+        }
+        
+        init(
+            sortSelectionCellROs: [SortSelectionCellType: SortSelectionCellRO] = [:],
+            sortComparator: TickerSortComparator=TickerNoneComparator(),
+            tickerCellVO: [Twenty4HourTickerForSymbolVO] = [],
+            tickerDisplayType: GridType = .list,
+            tickerCellRO: [TickerCellRO] = [],
+            languageType: LanguageType = .english,
+            currencyType: CurrencyType = .dollar,
+            exchangeRate: Double? = nil
+        ) {
+            self.sortSelectionCellROs = sortSelectionCellROs
+            self.sortComparator = sortComparator
+            self.tickerCellVO = tickerCellVO
+            self.tickerGridType = tickerDisplayType
+            self.tickerCellRO = tickerCellRO
+            self.languageType = languageType
+            self.currencyType = currencyType
+            self.exchangeRate = exchangeRate
         }
     }
     
     enum Action {
         
-        // Event
+        // View event
         case onAppear
+        case sortSelectionButtonTapped(type: SortSelectionCellType)
+        
+        
+        // Side effect
+        case tickerListFetched(list: [Twenty4HourTickerForSymbolVO])
+        
+        
+        // Configuration changed
+        case i18NUpdated(
+            languageType: LanguageType?=nil,
+            currenyType: CurrencyType?=nil,
+            exchangeRate: Double?=nil
+        )
         case gridTypeUpdated(type: GridType)
-        case currencyTypeUpdated(type: CurrencyType, rate: Double)
-        case languageTypeUpdated(type: LanguageType)
-        case changeSortingCriteria(comparator: any TickerSortComparator)
-        case fetchList(list: [Twenty4HourTickerForSymbolVO])
     }
 }
 
 
-// MARK: Private
+// MARK: Websocket stream subscription
 private extension AllMarketTickerViewModel {
     
     func subscribeToTickerDataStream() {
         
+        // 스트림 준비
+        allMarketTickersUseCase.prepareStream()
+        
+        // 스트림 메시지 구독
         allMarketTickersUseCase
             .requestTickers()
-            .map { tickers in
-                
-                return Action.fetchList(list: tickers)
-            }
+            .map { Action.tickerListFetched(list: $0) }
             .subscribe(action)
             .store(in: &store)
-        
-        
-        // Subscribe to webSocketStream
-        webSocketManagementHelper.requestSubscribeToStream(streams: ["!ticker@arr"])
-    }
-    
-    func createTickerSortSelectorViewModels() {
-        
-        let tickerSortSelectorViewModels = [
-            SymbolSortingViewModel(),
-            PriceSortingViewModel(),
-            ChangeIn24hViewModel()
-        ]
-        tickerSortSelectorViewModels.forEach { $0.delegate = self }
-        self.sortCompartorViewModels = tickerSortSelectorViewModels
-    }
-    
-    func subscribeToI18NMutation() {
-        
-        // MARK: 화폐정보변경
-        i18NManager
-            .getChangePublisher()
-            .receive(on: RunLoop.main)
-            .compactMap({ $0.currencyType })
-            .unretained(self)
-            .flatMap { vm, mutatedCurrencyType in
-                
-                // NOTE: currencyType의 경우 즉시 환율 정보를 가져오도록 한다.
-                
-                vm.exchangeUseCase
-                    .getExchangeRate(base: .dollar, to: mutatedCurrencyType)
-                    .map({ (mutatedCurrencyType, $0) })
-            }
-            .sink { [weak self] currencyType, rate in
-                guard let self else { return }
-                action.send(.currencyTypeUpdated(type: currencyType, rate: rate))
-            }
-            .store(in: &store)
-        
-        
-        // MARK: 언어정보 변경
-        i18NManager
-            .getChangePublisher()
-            .receive(on: RunLoop.main)
-            .compactMap({ $0.languageType })
-            .sink { [weak self] mutatedLanguage in
-                guard let self else { return }
-                action.send(.languageTypeUpdated(type: mutatedLanguage))
-            }
-            .store(in: &store)
-    }
-    
-    
-    func subscribeToGridTypeChange() {
-        
-        gridTypeChangePublisher
-            .receive(on: RunLoop.main)
-            .sink { [weak self] gridType in
-                guard let self else { return }
-                action.send(.gridTypeUpdated(type: gridType))
-            }
-            .store(in: &store)
     }
 }
 
 
-// MARK: TickerSortSelectorViewModelDelegate
-extension AllMarketTickerViewModel {
+// MARK: Create ticker cell render object
+private extension AllMarketTickerViewModel {
     
-    func sortSelector(selection comparator: any TickerSortComparator) {
+    func createRO(_ vo: Twenty4HourTickerForSymbolVO, currencyConfig: CurrencyConfig) -> TickerCellRO {
         
-        // 정렬 버튼 UI에게 현재 선택된 정렬기준을 전파
-        sortCompartorViewModels.forEach { sortViewModel in
-
-            sortViewModel.notifySelectedComparator(comparator)
+        let symbolImageURL = createSymbolImageURL(symbol: vo.firstSymbol)
+        let (changePercentText, changePercentColor) = createChangePercentTextConfig(percent: vo.changedPercent)
+        let displayPriceText = createPriceText(
+            price: vo.price,
+            config: currencyConfig
+        )
+        
+        return TickerCellRO(
+            symbolText: vo.pairSymbol,
+            symbolImageURL: symbolImageURL,
+            displayPriceText: displayPriceText,
+            displayChangePercentText: changePercentText,
+            displayChangePercentTextColor: changePercentColor
+        )
+    }
+    
+    func createSymbolImageURL(symbol: String) -> String {
+        let baseURL = URL(string: "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/32/icon")!
+        let symbolImageURL = baseURL.appendingPathComponent(symbol.lowercased(), conformingTo: .png)
+        return symbolImageURL.absoluteString
+    }
+    
+    func createChangePercentTextConfig(percent: CVNumber) -> (String, Color) {
+        let percentText = percent.roundToTwoDecimalPlaces()+"%"
+        var displayText: String = percentText
+        var displayColor: Color = .red
+        if percent >= 0.0 {
+            displayText = "+"+displayText
+            displayColor = .green
+        }
+        return (displayText, displayColor)
+    }
+    
+    struct CurrencyConfig {
+        let type: CurrencyType
+        let rate: Double
+    }
+    
+    func createPriceText(price: CVNumber, config: CurrencyConfig) -> String {
+        
+        let currencyType = config.type
+        let currencySymbol = currencyType.symbol
+        let exchangeRate = config.rate
+        
+        let dollarPrice: Decimal = price.wrappedNumber
+        let formattedPrice = CVNumber(dollarPrice * Decimal(exchangeRate))
+        var priceText = formattedPrice.roundToTwoDecimalPlaces()
+        
+        if currencyType.isPrefix {
+            priceText = "\(currencySymbol) \(priceText)"
+        } else {
+            priceText = "\(priceText) \(currencySymbol)"
         }
         
-        // 현재 선택된 정렬기준을 리스트에 적용하기 위해 액션으로 전달
-        action.send(.changeSortingCriteria(comparator: comparator))
+        return priceText
     }
 }
 
 
-// MARK: Array + Extension
-extension Array where Element == TickerCellViewModel {
+// MARK: Create sort selection cell render objects
+private extension AllMarketTickerViewModel {
     
-    func sorted(by comparator: any TickerSortComparator) -> Self {
+    func createInitialSortSelectonROs() -> [SortSelectionCellType: SortSelectionCellRO] {
+        var sortSelectionROs: [SortSelectionCellType: SortSelectionCellRO] = [:]
+        sortSelectionROs[.symbol] = .init(type: .symbol, sortState: .neutral)
+        sortSelectionROs[.price] = .init(type: .price, sortState: .neutral)
+        sortSelectionROs[.changeIn24h] = .init(type: .changeIn24h, sortState: .neutral)
+        return sortSelectionROs
+    }
+}
+
+
+// MARK: I18N
+private extension AllMarketTickerViewModel {
+    
+    func createSelectionCellLocalizedText(type: SortSelectionCellType, languageType: LanguageType, currenyType: CurrencyType) -> String {
         
-        self.sorted { lhs, rhs in
-            
-            comparator.compare(lhs: lhs.tickerVO, rhs: rhs.tickerVO)
+        switch type {
+        case .symbol:
+            let localizedString = languageLocalizationRepository.getString(
+                key: type.displayTextKey,
+                lanCode: languageType.lanCode
+            )
+            return localizedString
+        case .price:
+            var localizedString = languageLocalizationRepository.getString(
+                key: type.displayTextKey,
+                lanCode: languageType.lanCode
+            )
+            localizedString = "\(localizedString)(\(currenyType.symbol))"
+            return localizedString
+        case .changeIn24h:
+            let localizedString = languageLocalizationRepository.getString(
+                key: type.displayTextKey,
+                lanCode: languageType.lanCode
+            )
+            return localizedString
         }
     }
 }
-

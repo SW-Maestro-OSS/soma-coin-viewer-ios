@@ -29,6 +29,8 @@ let project = Project(
                 .target(name: "DomainInterface"),
                 
                 D.Util.CoreUtil,
+                
+                D.Shared.WebSocketManagementHelper,
             ]
         ),
         
@@ -52,6 +54,7 @@ let project = Project(
             bundleId: "com.CoinViewer.Domain.testing",
             sources: ["Testing/**"],
             dependencies: [
+                .target(name: "Domain"),
                 .target(name: "DomainInterface"),
             ]
         ),

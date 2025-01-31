@@ -15,14 +15,11 @@ import DomainInterface
 import I18N
 import CoreUtil
 
-public protocol SettingViewModelListener: AnyObject {
-    
-    func mutation(gridType: GridType)
-}
+public protocol SettingViewModelListener: AnyObject { }
 
 class SettingViewModel : UDFObservableObject, SettingViewModelable {
     
-    // DI
+    // Service locator
     @Injected private var i18NManager: I18NManager
     @Injected private var userConfigurationRepository: UserConfigurationRepository
     @Injected private var repository: LanguageLocalizationRepository

@@ -68,7 +68,6 @@ let project = Project(
                 D.Util.PresentationUtil,
                 
                 D.Shared.CommonUI,
-                D.Shared.WebSocketManagementHelper,
                 
                 D.Domain.interface,
             ]

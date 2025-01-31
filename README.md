@@ -5,7 +5,7 @@
 <table>
   <tr>
     <td>
-      <b>웹소켓 데이터 수신 및 표출</b>
+      <b>웹소켓 데이터 표출 & 정렬</b>
     </td>
     <td>
       <b>코인가격 표시화폐 동적변경</b>
@@ -19,7 +19,7 @@
   </tr>
   <tr>
     <td>
-      <img src="https://github.com/user-attachments/assets/227bc448-0e8b-40df-bca6-9c0f742b011c" width=200 />
+      <img src="https://github.com/user-attachments/assets/1e842b6a-692c-4e77-935c-8114688aa716" width=200 />
     </td>
     <td>
        <img src="https://github.com/user-attachments/assets/5cd0509a-e2b2-4692-a1c2-f9bdd1475d7b" width=200 />
@@ -59,7 +59,7 @@
             <b>디자인 패턴</b>
         </td>
         <td>
-            <b>MVVM, MVI(단방향 플로우)</b>
+            <b>MVVM, 커스텀 MVI</b>
         </td>
     </tr>
     <tr>
@@ -136,13 +136,11 @@ soma-coin-viewer앱은 현재 `Binance API`를 사용합니다. 하지만 WebSoc
 
 해당 객체는 최근까지 구독했던 스트림에 대한 정보를 관리함으로써 재연결 후에 연결이 해제되기 직전까지 진행중인던 작업을 완벽하게 복원합니다.
 
-<img src="https://github.com/user-attachments/assets/1c1000d7-c1b3-4494-85f9-98ef53169823" width=500 />
-
+<img src="https://github.com/user-attachments/assets/0436f88b-0ef2-4353-a135-1f67eb297c2d" width=500 />
 
 `WebSocketManagementHelper`객체와 협력하는 객체들은 아래 그림처럼 협력하게 됩니다.
 
-<img src="https://github.com/user-attachments/assets/08fb804b-aa11-493d-ba0e-68db0b73d164" width=500 />
-
+<img src="https://github.com/user-attachments/assets/d45a0ad7-db02-422c-a69c-146ff4a562a8" width=500 />
 
 ※ Presentation --> WebSocketManagementHelper 메세지중 **데이터 스트림**이란 웹소켓 API에게 구독을 요청하는 스트림을 의미합니다. (Ex, all market tickers, orderbook)
 
@@ -152,9 +150,9 @@ soma-coin-viewer앱은 현재 `Binance API`를 사용합니다. 하지만 WebSoc
 
 해당 **Configuration**들은 세팅 화면을 통해서 설정이 가능하며 `I18NManager`타입을 통해 관리됩니다.
 
-실시간으로 변경사항을 UI에 반영하기 위해 아래 사진과 같은 시스템을 구축했습니다.
+변경사항을 UI에 반영하기 위해 아래 사진과 같은 시스템을 구축했습니다.
 
-<img src="https://github.com/user-attachments/assets/d68d7fbb-2ac5-4074-8a4b-19c11c0c0a40" width=500 />
+<img src="https://github.com/user-attachments/assets/5a742bf2-0775-4369-b361-e8c62cf4d4c8" width=500 />
 
 ### strings파일을 사용하지 않은 이유
 

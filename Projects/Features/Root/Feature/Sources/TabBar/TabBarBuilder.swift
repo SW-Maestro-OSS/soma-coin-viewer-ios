@@ -14,17 +14,22 @@ import AllMarketTickerFeature
 import SettingFeature
 import BaseFeature
 
+import I18N
+import CoreUtil
+
 class TabBarBuilder {
     
+    @Injected private var i18NManager: I18NManager
+    @Injected private var languageLocalizationRepository: LanguageLocalizationRepository
+    
     func build() -> TabBarRouter {
-        
-        let gridTypeChangePublisher = PassthroughSubject<GridType, Never>()
-        
-        let viewModel = TabBarViewModel(gridTypeChangePublisher: gridTypeChangePublisher)
-        let view = TabBarView(viewModel: viewModel)
-        let allMarketTickerBuilder = AllMarketTickerBuilder(
-            gridTypeChangePublisher: gridTypeChangePublisher.eraseToAnyPublisher()
+    
+        let viewModel = TabBarViewModel(
+            i18NManager: i18NManager,
+            languageRepository: languageLocalizationRepository
         )
+        let view = TabBarView(viewModel: viewModel)
+        let allMarketTickerBuilder = AllMarketTickerBuilder()
         let settingBuilder = SettingBuilder()
         let router = TabBarRouter(
             settingBuilder: settingBuilder,

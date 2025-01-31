@@ -9,26 +9,20 @@ import SwiftUI
 import Combine
 
 import BaseFeature
-import SettingFeature
 
 import DomainInterface
 
 import I18N
-
 import CoreUtil
 
 class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
-    
-    // Stream
-    private let gridTypeChangePublisher: PassthroughSubject<GridType, Never>
-    
-    
-    // DI
-    @Injected private var i18NManager: I18NManager
+
+    private let i18NManager: I18NManager
+    private let languageRepository: LanguageLocalizationRepository
     
     
     // State
-    @Published var state: State
+    @Published var state: State = .init(tabItemROs: [], languageType: .english)
     
     var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = .init()
@@ -43,24 +37,19 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     }
     
     
-    init(gridTypeChangePublisher: PassthroughSubject<GridType, Never>) {
+    init(i18NManager: I18NManager, languageRepository: LanguageLocalizationRepository) {
         
-        self.gridTypeChangePublisher = gridTypeChangePublisher
+        self.i18NManager = i18NManager
+        self.languageRepository = languageRepository
         
         // Initial state
-        self.state = .init(
-            tabItem: [
-                .allMarketTicker : .init(
-                    titleKey: "AllMarketTickerPage_tabBar_market",
-                    systemIconName: "24.square"
-                ),
-                .setting : .init(
-                    titleKey: "AllMarketTickerPage_tabBar_setting",
-                    systemIconName: "gear"
-                ),
-            ],
-            languageType: .english
+        let languageType = i18NManager.getLanguageType()
+        let tabItemROs = createTabBarItemROs(languageType: languageType)
+        let initialState: State = .init(
+            tabItemROs: tabItemROs,
+            languageType: languageType
         )
+        self.state = initialState
         
         createStateStream()
     }
@@ -72,7 +61,7 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
                 isFirstAppear = false
                 let languageType = i18NManager.getLanguageType()
                 subscribeToI18NMutation()
-                return Just(.applyLanguageType(languageType)).eraseToAnyPublisher()
+                return Just(.languageTypeUpdated(languageType)).eraseToAnyPublisher()
             }
             break
         default:
@@ -84,8 +73,10 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     func reduce(_ action: Action, state: State) -> State {
         var newState = state
         switch action {
-        case .applyLanguageType(let languageType):
+        case .languageTypeUpdated(let languageType):
             newState.languageType = languageType
+            let newTabBarROs = createTabBarItemROs(languageType: languageType)
+            newState.tabItemROs = newTabBarROs
         default:
             return state
         }
@@ -94,7 +85,29 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
 }
 
 
-// MARK: Private
+// MARK: Tab bar item creation & modification
+private extension TabBarViewModel {
+    
+    func createTabBarItemROs(languageType: LanguageType) -> [TabBarItemRO] {
+        let orderedPage: [TabBarPage] = [.allMarketTicker, .setting]
+        return orderedPage.map { page in
+            
+            let displayText = languageRepository.getString(
+                key: page.titleTextLocalizationKey,
+                lanCode: languageType.lanCode
+            )
+            
+            return TabBarItemRO(
+                page: page,
+                displayText: displayText,
+                displayIconName: page.systemIconName
+            )
+        }
+    }
+}
+
+
+// MARK: Stream subscription
 private extension TabBarViewModel {
     
     func subscribeToI18NMutation() {
@@ -104,7 +117,7 @@ private extension TabBarViewModel {
             .receive(on: RunLoop.main)
             .sink { [weak self] mutatedLanType in
                 guard let self else { return }
-                action.send(.applyLanguageType(mutatedLanType))
+                action.send(.languageTypeUpdated(mutatedLanType))
             }
             .store(in: &store)
     }
@@ -124,23 +137,14 @@ extension TabBarViewModel {
 extension TabBarViewModel {
     
     struct State {
-        var tabItem: [TabBarPage: TabItem]
+        var tabItemROs: [TabBarItemRO]
         var languageType: LanguageType
     }
     
     enum Action {
         
         case onAppear
-        case applyLanguageType(LanguageType)
-    }
-}
-
-
-// MARK: SettingViewModelListenr
-extension TabBarViewModel {
-    
-    func mutation(gridType: GridType) {
-        gridTypeChangePublisher.send(gridType)
+        case languageTypeUpdated(LanguageType)
     }
 }
 

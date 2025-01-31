@@ -8,6 +8,7 @@ import DomainInterface
 import WebSocketManagementHelper
 import CoreUtil
 
+@MainActor
 class AppDelegate: NSObject, UIApplicationDelegate {
     
     private(set) var rootRouter: RootRouter!
@@ -20,17 +21,23 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // 의존성 주입
         dependencyInjection()
         
-        // RootCoordinator할당
+        // RootRouter참조
         self.rootRouter = RootBuilder().build()
+        
+        // 최초 작업 실행
+        executeInitialTask()
+        
         return true
     }
-    
-    // MARK: UISceneSession Lifecycle
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        
+        let sceneConfig = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        
+        // SceneDelegate클래스 지정
+        sceneConfig.delegateClass = SceneDelegate.self
+        
+        return sceneConfig
     }
     
     private func dependencyInjection() {
@@ -40,5 +47,23 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             SharedAssembly(),
             DomainAssembly()
         ])
+    }
+}
+
+
+// MARK: Initial tasks
+extension AppDelegate {
+    
+    func executeInitialTask() {
+        
+        // Service locator
+        let webSocketManagementHelper: WebSocketManagementHelper = DependencyInjector.shared.resolve()
+        let exchangeRateUseCase: ExchangeRateUseCase = DependencyInjector.shared.resolve()
+        
+        // 웹소켓 최초연결 시도
+        webSocketManagementHelper.requestConnection(connectionType: .freshStart)
+        
+        // 환율정보 Fetch 시도
+        exchangeRateUseCase.prepare()
     }
 }

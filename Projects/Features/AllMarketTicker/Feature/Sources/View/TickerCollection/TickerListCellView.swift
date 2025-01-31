@@ -13,10 +13,10 @@ import SimpleImageProvider
 
 struct TickerListCellView: View {
     
-    @ObservedObject private var viewModel: TickerCellViewModel
+    private let renderObject: TickerCellRO
     
-    init(viewModel: TickerCellViewModel) {
-        self._viewModel = ObservedObject(wrappedValue: viewModel)
+    init(renderObject: TickerCellRO) {
+        self.renderObject = renderObject
     }
     
     var body: some View {
@@ -34,11 +34,11 @@ struct TickerListCellView: View {
                         HStack(alignment: .center, spacing: 5) {
                             
                             // Symbol image view
-                            SymbolImageView(imageURL: $viewModel.state.firstSymbolImageURL)
+                            SymbolImageView(imageURL: .constant(renderObject.symbolImageURL))
                                 .frame(width: geo1.size.width*0.2, height: geo1.size.width*0.2)
                             
                             // Pair symbol text
-                            CVText(text: $viewModel.state.pairSymbolNameText)
+                            Text(renderObject.symbolText)
                                 .font(.subheadline)
                                 .lineLimit(1)
                                 
@@ -53,7 +53,7 @@ struct TickerListCellView: View {
                     // MARK: Price
                     HStack(spacing: 0) {
                         Spacer(minLength: 0)
-                        CVText(text: $viewModel.state.priceText)
+                        Text(renderObject.displayPriceText)
                             .font(.footnote)
                             .lineLimit(1)
                     }
@@ -63,8 +63,9 @@ struct TickerListCellView: View {
                     // MARK: 24h change percent
                     HStack(spacing: 0) {
                         Spacer(minLength: 0)
-                        CVText(text: $viewModel.state.percentText)
+                        Text(renderObject.displayChangePercentText)
                             .font(.body)
+                            .foregroundStyle(renderObject.displayChangePercentTextColor)
                             .lineLimit(1)
                     }
                     .padding(.trailing, 10)

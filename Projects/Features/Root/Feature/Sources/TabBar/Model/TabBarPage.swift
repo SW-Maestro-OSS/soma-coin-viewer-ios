@@ -5,26 +5,28 @@
 //  Created by choijunios on 12/16/24.
 //
 
-enum TabBarPage: Identifiable, CaseIterable {
+enum TabBarPage: String, Identifiable, CaseIterable {
     
-    var id: Int { self.pageOrder }
+    var id: String { self.rawValue }
     
     case allMarketTicker
     case setting
     
-    var pageOrder: Int {
-        
+    var systemIconName: String {
         switch self {
         case .allMarketTicker:
-            return 0
+            "24.square"
         case .setting:
-            return 1
+            "gear"
         }
     }
     
-    static var orderedPages: [Self] {
-        Self.allCases.sorted {
-            $0.pageOrder < $1.pageOrder
+    var titleTextLocalizationKey: String {
+        switch self {
+        case .allMarketTicker:
+            "AllMarketTickerPage_tabBar_market"
+        case .setting:
+            "AllMarketTickerPage_tabBar_setting"
         }
     }
 }

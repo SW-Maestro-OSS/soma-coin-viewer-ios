@@ -9,11 +9,15 @@ import Foundation
 import Combine
 
 import DomainInterface
+
+import WebSocketManagementHelper
 import CoreUtil
 
 public class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     
+    // Service locator
     @Injected private var allMarketTickersRepository: AllMarketTickersRepository
+    @Injected private var webSocketManagementHelper: WebSocketManagementHelper
     
     private let throttleTimerQueue: DispatchQueue = .init(
         label: "com.AllMarketTickersUseCase",
@@ -23,6 +27,13 @@ public class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     private let standardSymbol = "USDT"
     
     public init() { }
+    
+    
+    public func prepareStream() {
+        webSocketManagementHelper
+            .requestSubscribeToStream(streams: ["!ticker@arr"])
+    }
+    
     
     public func requestTickers() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> {
         

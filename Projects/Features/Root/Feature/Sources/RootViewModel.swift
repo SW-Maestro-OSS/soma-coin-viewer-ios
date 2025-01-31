@@ -8,24 +8,24 @@
 import SwiftUI
 import Combine
 
-import BaseFeature
-
 import DomainInterface
 
-import CoreUtil
+import BaseFeature
+
 import I18N
-import WebSocketManagementHelper
+import CoreUtil
 
 final class RootViewModel: UDFObservableObject, RootViewModelable {
+    
+    private let i18NManager: I18NManager
+    private let languageRepository: LanguageLocalizationRepository
+    
 
-    // DI
-    private let i18NManager : I18NManager
-    private let webSocketHelper: WebSocketManagementHelper
-    private let exchangeRateUseCase: ExchangeRateUseCase
-    
-    
     // Public state interface
-    @Published var state: State
+    @Published var state: State = .init(
+        splashRO: .init(displayTitleText: ""),
+        isLoading: true
+    )
     
     
     // Router
@@ -45,20 +45,21 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     var store: Set<AnyCancellable> = .init()
     
     
-    init(i18NManager : I18NManager, webSocketHelper: WebSocketManagementHelper, exchangeRateUseCase: ExchangeRateUseCase) {
-        
+    init(i18NManager: I18NManager, languageRepository: LanguageLocalizationRepository) {
         self.i18NManager = i18NManager
-        self.webSocketHelper = webSocketHelper
-        self.exchangeRateUseCase = exchangeRateUseCase
+        self.languageRepository = languageRepository
         
-        let initailState: State = .init(isLoading: true)
-        self._state = Published(wrappedValue: initailState)
+        let languageType = i18NManager.getLanguageType()
+        let initialSplashRO = createSplashRO(languageType: languageType)
+        
+        let initialState: State = .init(
+            splashRO: initialSplashRO,
+            isLoading: true
+        )
+        self.state = initialState
         
         // Create state stream
         createStateStream()
-        
-        // Subscribe to notifications
-        setAppLifeCycleNotification()
     }
     
     
@@ -70,99 +71,36 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
         
         switch action {
-        case .app_cycle_will_foreground:
-            
-            let publisher = PassthroughSubject<Bool, Never>()
-                
-            webSocketHelper
-                .isWebSocketConnected
-                .filter({ $0 })
-                .subscribe(publisher)
-                .store(in: &store)
-            
-            webSocketHelper
-                .requestConnection(connectionType: .recoverPreviousStreams)
-            
-            return publisher
-                .first()
-                .map { _ in Action.isWebSocketConnected(true) }
-                .eraseToAnyPublisher()
-            
-        case .app_cycle_background:
-            
-            let publisher = PassthroughSubject<Bool, Never>()
-                
-            webSocketHelper
-                .isWebSocketConnected
-                .filter({ !$0 })
-                .subscribe(publisher)
-                .store(in: &store)
-            
-            webSocketHelper
-                .requestDisconnection()
-            
-            return publisher
-                .first()
-                .map { _ in Action.isWebSocketConnected(false) }
-                .eraseToAnyPublisher()
-            
         case .onAppear:
             
             if isFirstAppear {
                 isFirstAppear = false
                 
-                // 웹소켓 연결
-                webSocketHelper.requestConnection(connectionType: .freshStart)
-                
-                // 환율정보 Fetch
-                exchangeRateUseCase.prepare()
+                // 화면 최초 등장시 2초간의 지연 발생
+                return Just(.appIsLoaded)
+                    .delay(for: 2, scheduler: RunLoop.main)
+                    .eraseToAnyPublisher()
             }
             
-            return Just(.appIsLoaded)
-                .delay(for: 2, scheduler: RunLoop.main)
-                .eraseToAnyPublisher()
-            
         default:
-            return Just(action).eraseToAnyPublisher()
+            break
         }
+        return Just(action).eraseToAnyPublisher()
     }
     
     
     func reduce(_ action: Action, state: State) -> State {
         
         var newState = state
-        
         switch action {
-        case .isWebSocketConnected(let isConnected):
-            newState.isWebSocketConnected = isConnected
         case .appIsLoaded:
             newState.isLoading = false
             router?.presentMainTabBar()
-            
         default:
             return state
         }
         
         return newState
-    }
-    
-    private func setAppLifeCycleNotification() {
-        
-        // Background 상태 진입
-        NotificationCenter
-            .Publisher(center: .default, name: UIApplication.didEnterBackgroundNotification)
-            .map { _ in Action.app_cycle_background }
-            .subscribe(action)
-            .store(in: &store)
-        
-        
-        // Foreground 상태 집입 직전
-        NotificationCenter
-            .Publisher(center: .default, name: UIApplication.willEnterForegroundNotification)
-            .map { _ in Action.app_cycle_will_foreground }
-            .subscribe(action)
-            .store(in: &store)
-        
     }
 }
 
@@ -171,20 +109,25 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
 extension RootViewModel {
     
     enum Action {
-        
         // Events
         case onAppear
-        case app_cycle_background
-        case app_cycle_will_foreground
         case appIsLoaded
-        
-        // Side effects
-        case isWebSocketConnected(Bool)
     }
     
     struct State {
+        var splashRO: SplashRO
         var isLoading: Bool
-        var isWebSocketConnected: Bool?
+    }
+}
+
+
+// MARK: Splash
+private extension RootViewModel {
+    
+    func createSplashRO(languageType: LanguageType) -> SplashRO {
+        let titleTextKey = "LaunchScreen_title"
+        let titleText = languageRepository.getString(key: titleTextKey, lanCode: languageType.lanCode)
+        return .init(displayTitleText: titleText)
     }
 }
 

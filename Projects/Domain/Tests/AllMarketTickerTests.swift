@@ -9,16 +9,17 @@ import Testing
 import Foundation
 import Combine
 
-import DomainInterface
-import Domain
-import CoreUtil
-
+@testable import DomainInterface
+@testable import Domain
 @testable import DomainTesting
 
+import WebSocketManagementHelper
+import CoreUtil
 
 // MARK: AllMarketTickerUseCaseTests
 struct AllMarketTickerUseCaseTests {
     
+    @Test
     func checkSortedArrayIsReturning() async {
         
         // Given
@@ -39,10 +40,13 @@ struct AllMarketTickerUseCaseTests {
             )
         }
         let givenTickers = usdtTickers + anonymousTickers
-        
         DependencyInjector.shared.register(
             AllMarketTickersRepository.self,
             StubAllMarketTickersRepository(stubTickerEntities: givenTickers)
+        )
+        DependencyInjector.shared.register(
+            WebSocketManagementHelper.self,
+            StubAllwaysConnectedWebSocketHelper()
         )
         let defaultAllMarketTickersUseCase = DefaultAllMarketTickersUseCase()
 

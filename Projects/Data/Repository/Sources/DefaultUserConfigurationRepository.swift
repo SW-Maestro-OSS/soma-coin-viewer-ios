@@ -16,11 +16,13 @@ import SwiftStructures
 
 public class DefaultUserConfigurationRepository: UserConfigurationRepository {
     
-    // DI
+    // Service locator
     @Injected var userConfigurationService: UserConfigurationService
+    
     
     // Cache configuration
     private let cachedConfiguration: LockedDictionary<String, Any> = .init()
+    
     
     public init() { }
     
