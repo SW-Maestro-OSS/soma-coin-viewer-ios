@@ -21,12 +21,11 @@ public class DefaultExchangeRateUseCase: ExchangeRateUseCase {
     @Injected private var alertShooter: AlertShooter
     
     // Publisher
-    private let fetchSuccessFlag: CurrentValueSubject<Void?, Never> = .init(nil)
     private var store: Set<AnyCancellable> = .init()
     
     public init() { }
     
-    public func getExchangeRate(base: CurrencyType, to: CurrencyType) -> AnyPublisher<Double, Never> {
+    public func getExchangeRate(base: CurrencyType, to: CurrencyType) -> AnyPublisher<Double?, Never> {
         
         if base == to { return Just(1.0).eraseToAnyPublisher() }
         
@@ -34,27 +33,19 @@ public class DefaultExchangeRateUseCase: ExchangeRateUseCase {
             
             guard let self else { return }
             
-            fetchSuccessFlag
-                .compactMap({ $0 })
-                .first()
-                .unretained(self)
-                .sink { useCase, _ in
-                    
-                    let result = useCase.exchangeRateRepository
-                        .getExchangeRate(
-                            baseCurrencyCode: base.currencyCode,
-                            toCurrencyCode: to.currencyCode
-                        )
-                    
-                    guard let result else {
-                        printIfDebug("DefaultExchangeUseCase, 환율정보가져오기 실패 from: \(base.currencyCode) to: \(to.currencyCode)")
-                        promise(.success(0.0))
-                        return
-                    }
-                    
-                    promise(.success(result))
-                }
-                .store(in: &store)
+            let result = exchangeRateRepository
+                .getExchangeRate(
+                    baseCurrencyCode: base.currencyCode,
+                    toCurrencyCode: to.currencyCode
+                )
+            
+            guard let result else {
+                printIfDebug("DefaultExchangeUseCase, 환율정보가져오기 실패 from: \(base.currencyCode) to: \(to.currencyCode)")
+                promise(.success(nil))
+                return
+            }
+            
+            promise(.success(result))
             
         }
         .eraseToAnyPublisher()
@@ -82,12 +73,8 @@ public class DefaultExchangeRateUseCase: ExchangeRateUseCase {
                     ))
                     alertShooter.shoot(alertModel)
                 }
-            } receiveValue: { [weak self] _ in
-                
-                guard let self else { return }
-                
+            } receiveValue: { _ in
                 printIfDebug("DefaultExchangeUseCase, 성공적으로 환율정보 가져옴")
-                fetchSuccessFlag.send(())
             }
             .store(in: &store)
     }

@@ -11,7 +11,7 @@ import DomainInterface
 
 class StubExchangeUseCase: ExchangeRateUseCase {
     
-    func getExchangeRate(base: DomainInterface.CurrencyType, to: DomainInterface.CurrencyType) -> AnyPublisher<Double, Never> {
+    func getExchangeRate(base: DomainInterface.CurrencyType, to: DomainInterface.CurrencyType) -> AnyPublisher<Double?, Never> {
         
         return Just(1.0).eraseToAnyPublisher()
     }
