@@ -9,11 +9,13 @@ import AlertShooter
 
 class FakeAlertShooter: AlertShooter {
     
+    var shotAlertModels: [AlertModel] = []
+    
     func request(listener: AlertShooterListener) {
         fatalError()
     }
     
     func shoot(_ model: AlertModel) {
-        fatalError()
+        shotAlertModels.append(model)
     }
 }

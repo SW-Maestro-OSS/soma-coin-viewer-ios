@@ -62,4 +62,24 @@ struct WebSocketManagementHelperTests {
         let savedStreams = webSocketHelper.getSavedStreams()
         #expect(savedStreams.isEmpty)
     }
+    
+    
+    @Test
+    func checkShootAlertWhenUnSubscribtionFailed() async {
+        
+        // Given
+        let alertShooter = FakeAlertShooter()
+        let webSocketHelper = DefaultWebSocketManagementHelper(
+            webSocketService: StubAllwaysFailureWebSocketService(),
+            alertShooter: alertShooter
+        )
+        
+        // When
+        webSocketHelper.requestUnsubscribeToStream(streams: ["Test"])
+        try? await Task.sleep(for: .seconds(3))
+        
+        
+        // Then
+        #expect(alertShooter.shotAlertModels.isEmpty == false)
+    }
 }
