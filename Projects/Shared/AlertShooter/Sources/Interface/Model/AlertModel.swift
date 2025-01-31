@@ -5,8 +5,6 @@
 //  Created by choijunios on 1/31/25.
 //
 
-import Foundation
-
 public struct AlertModel {
     
     // Imformation
