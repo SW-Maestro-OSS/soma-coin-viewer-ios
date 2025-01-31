@@ -22,7 +22,7 @@ struct WebSocketManagementHelperTests {
         // - 모든 응답에 대해 항상성공을 반환하는 Stub WebSocketService
         let webSocketHelper = DefaultWebSocketManagementHelper(
             webSocketService: StubAllwaysSuccessWebSocketService(),
-            alertShooter: FakeAlertShooter()
+            alertShooter: MockAlertShooter()
         )
         
         
@@ -48,7 +48,7 @@ struct WebSocketManagementHelperTests {
         // - 모든 응답에 대해 항상실패를 반환하는 Stub WebSocketService
         let webSocketHelper = DefaultWebSocketManagementHelper(
             webSocketService: StubAllwaysFailureWebSocketService(),
-            alertShooter: FakeAlertShooter()
+            alertShooter: MockAlertShooter()
         )
         
         
@@ -68,7 +68,7 @@ struct WebSocketManagementHelperTests {
     func checkShootAlertWhenUnSubscribtionFailed() async {
         
         // Given
-        let alertShooter = FakeAlertShooter()
+        let alertShooter = MockAlertShooter()
         let webSocketHelper = DefaultWebSocketManagementHelper(
             webSocketService: StubAllwaysFailureWebSocketService(),
             alertShooter: alertShooter
