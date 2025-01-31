@@ -141,8 +141,22 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                     recoverPreviouslySubscribedStreams()
                 }
             case .failure(let error):
-                // MARK: 웹소켓 연결 실패 대처
                 printIfDebug("\(Self.self) 웹소켓 연결실패 \(error.localizedDescription)")
+                var alertModel = AlertModel(
+                    titleKey: TextKey.Alert.Title.webSocketError.rawValue,
+                    messageKey: TextKey.Alert.Message.unintendedDisconnection.rawValue
+                )
+                alertModel.add(action: .init(
+                    titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
+                    config: .init(textColor: .red)
+                ))
+                alertModel.add(action: .init(
+                    titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+                ) { [weak self] in
+                    guard let self else { return }
+                    requestConnection(connectionType: .recoverPreviousStreams)
+                })
+                alertShooter.shoot(alertModel)
                 return
             }
         }
@@ -221,6 +235,7 @@ public extension DefaultWebSocketManagementHelper {
             alertShooter.shoot(alertModel)
             break
         case .internetConnectionError(let error):
+            printIfDebug("\(Self.self) 인터넷 연결오류 \(error?.localizedDescription ?? "")")
             var alertModel = AlertModel(
                 titleKey: TextKey.Alert.Title.internetConnectionError.rawValue,
                 messageKey: TextKey.Alert.Message.internetConnectionFailed.rawValue
@@ -255,6 +270,7 @@ public extension DefaultWebSocketManagementHelper {
             alertShooter.shoot(alertModel)
             break
         case .unknown(let error):
+            printIfDebug("\(Self.self) 알 수 없는 오류 \(error?.localizedDescription ?? "")")
             var alertModel = AlertModel(
                 titleKey: TextKey.Alert.Title.webSocketError.rawValue,
                 messageKey: TextKey.Alert.Message.unknownError.rawValue
