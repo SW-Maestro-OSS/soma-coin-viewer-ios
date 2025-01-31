@@ -13,13 +13,13 @@ import CoreUtil
 
 public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSocketServiceListener {
     
-    // Stream
-    public typealias Stream = String
-    
-    
-    // Service locator
+    // Dependency
     private let webSocketService: WebSocketService
     private let alertShooter: AlertShooter
+    
+    
+    // Stream
+    public typealias Stream = String
     
     
     // Pulbic interface
@@ -58,14 +58,15 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                             printIfDebug("\(Self.self): ❌\(stream)구독 실패")
                         }
                         
-                        let alretMessage = streams.joined(separator: ",")
+//                        let alretMessage = streams.joined(separator: ",")
                         var alertModel = AlertModel(
-                            titleKey: "alertmodel_title_streamsubfailure",
+                            titleKey: "alertmodel_title_websocketerror",
                             messageKey: "alertmodel_message_streamsubfailure"
                         )
                         alertModel
                             .add(action: .init(
-                                titleKey: "alertmodel_action_title_cancel"
+                                titleKey: "alertmodel_action_title_cancel",
+                                config: .init(textColor: .red)
                             ))
                         alertModel.add(action: .init(
                             titleKey: "alertmodel_action_title_retry",
