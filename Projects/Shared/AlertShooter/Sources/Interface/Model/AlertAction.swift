@@ -13,9 +13,9 @@ public struct AlertAction {
     
     public let titleKey: String
     public let actionRole: ActionRole
-    public let action: (() -> Void)
+    public let action: (() -> Void)?
     
-    public init(titleKey: String, actionRole: ActionRole? = .cancel, action: @escaping () -> Void) {
+    public init(titleKey: String, actionRole: ActionRole = .cancel, action: (() -> Void)? = nil) {
         self.titleKey = titleKey
         self.actionRole = actionRole
         self.action = action

@@ -10,13 +10,13 @@ import Foundation
 public struct AlertModel {
     
     // Imformation
-    public let title: String
-    public let message: String?
+    public let titleKey: String
+    public let messageKey: String?
     public private(set) var actions: [AlertAction] = []
     
-    public init(title: String, message: String?) {
-        self.title = title
-        self.message = message
+    public init(titleKey: String, messageKey: String?) {
+        self.titleKey = titleKey
+        self.messageKey = messageKey
     }
     
     @discardableResult
