@@ -70,7 +70,7 @@ public class DefaultExchangeRateUseCase: ExchangeRateUseCase {
                     })
                     alertModel.add(action: .init(
                         titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
-                        config: .init(textColor: .red)
+                        role: .cancel
                     ))
                     alertShooter.shoot(alertModel)
                 }

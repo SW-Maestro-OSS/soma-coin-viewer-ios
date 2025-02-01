@@ -66,7 +66,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                         alertModel
                             .add(action: .init(
                                 titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
-                                config: .init(textColor: .red)
+                                role: .cancel
                             ))
                         alertModel.add(action: .init(
                             titleKey: TextKey.Alert.ActionTitle.retry.rawValue,
@@ -112,7 +112,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                 )
                 alertModel.add(action: .init(
                     titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
-                    config: .init(textColor: .red)
+                    role: .cancel
                 ))
                 alertModel.add(action: .init(
                     titleKey: TextKey.Alert.ActionTitle.retry.rawValue
@@ -148,7 +148,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                 )
                 alertModel.add(action: .init(
                     titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
-                    config: .init(textColor: .red)
+                    role: .cancel
                 ))
                 alertModel.add(action: .init(
                     titleKey: TextKey.Alert.ActionTitle.retry.rawValue
@@ -224,7 +224,7 @@ public extension DefaultWebSocketManagementHelper {
             )
             alertModel.add(action: .init(
                 titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
-                config: .init(textColor: .red)
+                role: .cancel
             ))
             alertModel.add(action: .init(
                 titleKey: TextKey.Alert.ActionTitle.retry.rawValue
@@ -242,7 +242,7 @@ public extension DefaultWebSocketManagementHelper {
             )
             alertModel.add(action: .init(
                 titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
-                config: .init(textColor: .red)
+                role: .cancel
             ))
             alertModel.add(action: .init(
                 titleKey: TextKey.Alert.ActionTitle.retry.rawValue
@@ -259,7 +259,7 @@ public extension DefaultWebSocketManagementHelper {
             )
             alertModel.add(action: .init(
                 titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
-                config: .init(textColor: .red)
+                role: .cancel
             ))
             alertModel.add(action: .init(
                 titleKey: TextKey.Alert.ActionTitle.retry.rawValue

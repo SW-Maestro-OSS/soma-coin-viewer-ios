@@ -168,16 +168,21 @@ private extension RootViewModel {
 extension RootViewModel {
     func alert(model: AlertModel) {
         let currentLan = i18NManager.getLanguageType()
-        
-        // AlertAction ROs
-        let actionROs = model.actions.map { actionModel in
+        let alertActionROs = model.actions.map { actionModel in
             let titleText = languageRepository.getString(
                 key: actionModel.titleKey,
                 lanCode: currentLan.lanCode
             )
+            var titleTextColor: Color!
+            switch actionModel.role {
+            case .normal:
+                titleTextColor = .black
+            case .cancel:
+                titleTextColor = .red
+            }
             return AlertActionRO(
                 titleText: titleText,
-                titleTextColor: actionModel.config.textColor,
+                titleTextColor: titleTextColor,
                 action: actionModel.action
             )
         }
@@ -190,15 +195,15 @@ extension RootViewModel {
                 lanCode: currentLan.lanCode
             )
         }
-        let renderObject = AlertRO(
+        let alertRO = AlertRO(
             titleText: languageRepository.getString(
                 key: model.titleKey,
                 lanCode: currentLan.lanCode
             ),
             messageText: messageText,
-            actions: actionROs
+            actions: alertActionROs
         )
-        self.action.send(.presentAlert(ro: renderObject))
+        self.action.send(.presentAlert(ro: alertRO))
     }
 }
 
