@@ -8,12 +8,17 @@
 public struct AlertAction {
 
     public let titleKey: String
-    public let config: AlertActionConfig
+    public let role: Role
     public let action: (() -> Void)?
     
-    public init(titleKey: String, config: AlertActionConfig = .default, action: (() -> Void)? = nil) {
+    public init(titleKey: String, role: Role = .normal, action: (() -> Void)? = nil) {
         self.titleKey = titleKey
+        self.role = role
         self.action = action
-        self.config = config
+    }
+    
+    public enum Role {
+        case normal
+        case cancel
     }
 }
