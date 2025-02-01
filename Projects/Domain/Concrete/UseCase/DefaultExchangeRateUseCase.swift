@@ -69,7 +69,8 @@ public class DefaultExchangeRateUseCase: ExchangeRateUseCase {
                         prepare()
                     })
                     alertModel.add(action: .init(
-                        titleKey: TextKey.Alert.ActionTitle.ignore.rawValue
+                        titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
+                        config: .init(textColor: .red)
                     ))
                     alertShooter.shoot(alertModel)
                 }
