@@ -13,12 +13,15 @@ import DomainInterface
 import BaseFeature
 
 import I18N
+import AlertShooter
 import CoreUtil
 
-final class RootViewModel: UDFObservableObject, RootViewModelable {
+final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterListener {
     
+    // Dependency
     private let i18NManager: I18NManager
     private let languageRepository: LanguageLocalizationRepository
+    private let alertShooter: AlertShooter
     
 
     // Public state interface
@@ -45,9 +48,17 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     var store: Set<AnyCancellable> = .init()
     
     
-    init(i18NManager: I18NManager, languageRepository: LanguageLocalizationRepository) {
+    init(
+        i18NManager: I18NManager,
+        languageRepository: LanguageLocalizationRepository,
+        alertShooter: AlertShooter
+    ) {
         self.i18NManager = i18NManager
         self.languageRepository = languageRepository
+        self.alertShooter = alertShooter
+        
+        // Listener
+        alertShooter.request(listener: self)
         
         let languageType = i18NManager.getLanguageType()
         let initialSplashRO = createSplashRO(languageType: languageType)
@@ -72,16 +83,17 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
         
         switch action {
         case .onAppear:
-            
             if isFirstAppear {
                 isFirstAppear = false
-                
                 // 화면 최초 등장시 2초간의 지연 발생
                 return Just(.appIsLoaded)
                     .delay(for: 2, scheduler: RunLoop.main)
                     .eraseToAnyPublisher()
             }
-            
+        case .presentAlert, .alertIsDismissed:
+            return Just(action)
+                .delay(for: 0.35, scheduler: RunLoop.main)
+                .eraseToAnyPublisher()
         default:
             break
         }
@@ -90,12 +102,27 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     
     
     func reduce(_ action: Action, state: State) -> State {
-        
         var newState = state
         switch action {
         case .appIsLoaded:
             newState.isLoading = false
             router?.presentMainTabBar()
+        case .alertIsDismissed:
+            if !state.alertQueue.isEmpty {
+                let nextAlertRO = newState.alertQueue.removeFirst()
+                newState.presentingAlertRO = nextAlertRO
+                newState.isAlertPresenting = true
+            } else {
+                newState.isAlertPresenting = false
+                newState.presentingAlertRO = nil
+            }
+        case .presentAlert(let alertRO):
+            if state.isAlertPresenting {
+                newState.alertQueue.append(alertRO)
+            } else {
+                newState.presentingAlertRO = alertRO
+                newState.isAlertPresenting = true
+            }
         default:
             return state
         }
@@ -107,23 +134,28 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
 
 // MARK: Action & State
 extension RootViewModel {
-    
     enum Action {
         // Events
         case onAppear
         case appIsLoaded
+        case presentAlert(ro: AlertRO)
+        
+        case alertIsDismissed
     }
     
     struct State {
         var splashRO: SplashRO
         var isLoading: Bool
+        
+        fileprivate var alertQueue: [AlertRO] = []
+        var presentingAlertRO: AlertRO? = nil
+        var isAlertPresenting: Bool = false
     }
 }
 
 
 // MARK: Splash
 private extension RootViewModel {
-    
     func createSplashRO(languageType: LanguageType) -> SplashRO {
         let titleTextKey = "LaunchScreen_title"
         let titleText = languageRepository.getString(key: titleTextKey, lanCode: languageType.lanCode)
@@ -132,9 +164,52 @@ private extension RootViewModel {
 }
 
 
+// MARK: AlertShooterListener
+extension RootViewModel {
+    func alert(model: AlertModel) {
+        let currentLan = i18NManager.getLanguageType()
+        let alertActionROs = model.actions.map { actionModel in
+            let titleText = languageRepository.getString(
+                key: actionModel.titleKey,
+                lanCode: currentLan.lanCode
+            )
+            var titleTextColor: Color!
+            switch actionModel.role {
+            case .normal:
+                titleTextColor = .black
+            case .cancel:
+                titleTextColor = .red
+            }
+            return AlertActionRO(
+                titleText: titleText,
+                titleTextColor: titleTextColor,
+                action: actionModel.action
+            )
+        }
+        
+        // Alert RO
+        var messageText: String = ""
+        if let messageKey = model.messageKey {
+            messageText = languageRepository.getString(
+                key: messageKey,
+                lanCode: currentLan.lanCode
+            )
+        }
+        let alertRO = AlertRO(
+            titleText: languageRepository.getString(
+                key: model.titleKey,
+                lanCode: currentLan.lanCode
+            ),
+            messageText: messageText,
+            actions: alertActionROs
+        )
+        self.action.send(.presentAlert(ro: alertRO))
+    }
+}
+
+
 // MARK: WeakRootRouting
 private extension RootViewModel {
-    
     class WeakRootRouting {
         
         weak var value: RootRouting?

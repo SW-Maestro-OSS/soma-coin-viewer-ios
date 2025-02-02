@@ -34,5 +34,11 @@ struct RootView: View {
         }
         .animation(.easeIn(duration: 0.2), value: viewModel.state.isLoading)
         .onAppear { viewModel.action(.onAppear) }
+        .alertable(
+            presented: $viewModel.state.isAlertPresenting,
+            renderObject: viewModel.state.presentingAlertRO
+        ) { [weak viewModel] in
+            viewModel?.action(.alertIsDismissed)
+        }
     }
 }

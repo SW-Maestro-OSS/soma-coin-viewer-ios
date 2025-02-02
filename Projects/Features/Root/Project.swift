@@ -68,6 +68,8 @@ let project = Project(
                 
                 D.Feature.AllMarketTickerFeature,
                 D.Feature.SettingFeature,
+                
+                D.Shared.AlertShooter,
             ]
         ),
     ]

@@ -12,6 +12,7 @@ import Foundation
 import DomainInterface
 
 import I18N
+import AlertShooter
 
 import Swinject
 
@@ -22,6 +23,10 @@ public class Assemblies: Assembly {
         // MARK: Shared
         container.register(I18NManager.self) { _ in
             FakeI18NManager()
+        }
+        .inObjectScope(.container)
+        container.register(AlertShooter.self) { _ in
+            MockAlertShooter()
         }
         .inObjectScope(.container)
         

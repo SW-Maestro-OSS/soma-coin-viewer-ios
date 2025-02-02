@@ -21,7 +21,8 @@ struct WebSocketManagementHelperTests {
         // Given
         // - 모든 응답에 대해 항상성공을 반환하는 Stub WebSocketService
         let webSocketHelper = DefaultWebSocketManagementHelper(
-            webSocketService: StubAllwaysSuccessWebSocketService()
+            webSocketService: StubAllwaysSuccessWebSocketService(),
+            alertShooter: MockAlertShooter()
         )
         
         
@@ -46,7 +47,8 @@ struct WebSocketManagementHelperTests {
         // Given
         // - 모든 응답에 대해 항상실패를 반환하는 Stub WebSocketService
         let webSocketHelper = DefaultWebSocketManagementHelper(
-            webSocketService: StubAllwaysFailureWebSocketService()
+            webSocketService: StubAllwaysFailureWebSocketService(),
+            alertShooter: MockAlertShooter()
         )
         
         
@@ -59,5 +61,25 @@ struct WebSocketManagementHelperTests {
         // Then
         let savedStreams = webSocketHelper.getSavedStreams()
         #expect(savedStreams.isEmpty)
+    }
+    
+    
+    @Test
+    func checkShootAlertWhenUnSubscribtionFailed() async {
+        
+        // Given
+        let alertShooter = MockAlertShooter()
+        let webSocketHelper = DefaultWebSocketManagementHelper(
+            webSocketService: StubAllwaysFailureWebSocketService(),
+            alertShooter: alertShooter
+        )
+        
+        // When
+        webSocketHelper.requestUnsubscribeToStream(streams: ["Test"])
+        try? await Task.sleep(for: .seconds(3))
+        
+        
+        // Then
+        #expect(alertShooter.shotAlertModels.isEmpty == false)
     }
 }

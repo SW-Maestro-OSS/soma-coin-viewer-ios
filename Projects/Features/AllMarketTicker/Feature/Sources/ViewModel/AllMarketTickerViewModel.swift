@@ -11,8 +11,10 @@ import Combine
 import BaseFeature
 
 import DomainInterface
+
 import CoreUtil
 import I18N
+import AlertShooter
 
 final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewModelable {
     
@@ -22,6 +24,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     private let allMarketTickersUseCase: AllMarketTickersUseCase
     private let exchangeUseCase: ExchangeRateUseCase
     private let userConfigurationRepository: UserConfigurationRepository
+    private let alertShooter: AlertShooter
     
     
     // State
@@ -38,13 +41,15 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
         languageLocalizationRepository: LanguageLocalizationRepository,
         allMarketTickersUseCase: AllMarketTickersUseCase,
         exchangeUseCase: ExchangeRateUseCase,
-        userConfigurationRepository: UserConfigurationRepository
+        userConfigurationRepository: UserConfigurationRepository,
+        alertShooter: AlertShooter
     ) {
         self.i18NManager = i18NManager
         self.languageLocalizationRepository = languageLocalizationRepository
         self.allMarketTickersUseCase = allMarketTickersUseCase
         self.exchangeUseCase = exchangeUseCase
         self.userConfigurationRepository = userConfigurationRepository
+        self.alertShooter = alertShooter
         
         
         // Initial configuration
@@ -73,19 +78,11 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
             if self.isFirstAppear {
                 self.isFirstAppear = false
                 
-                
                 // AllMarketTicker스트림 구독
                 subscribeToTickerDataStream()
                 
-                
                 // 환율정보 가져오기
-                return exchangeUseCase
-                    .getExchangeRate(base: .dollar, to: currentState.currencyType)
-                    .map { Action.i18NUpdated(
-                        currenyType: currentState.currencyType,
-                        exchangeRate: $0)
-                    }
-                    .eraseToAnyPublisher()
+                getExchangeRate(base: .dollar, to: state.currencyType)
             }
             
             // i18N 변경사항 확인
@@ -445,5 +442,40 @@ private extension AllMarketTickerViewModel {
             )
             return localizedString
         }
+    }
+}
+
+
+// MARK: Exchange rate
+private extension AllMarketTickerViewModel {
+    
+    func getExchangeRate(base: CurrencyType, to: CurrencyType) {
+        exchangeUseCase
+            .getExchangeRate(base: base, to: to)
+            .sink(receiveValue: { [weak self] rate in
+                guard let self else { return }
+                if let rate {
+                    let action = Action.i18NUpdated(
+                        currenyType: to,
+                        exchangeRate: rate
+                    )
+                    self.action.send(action)
+                } else { alertExchangeRateError(base: base, to: to) }
+            })
+            .store(in: &store)
+    }
+    
+    func alertExchangeRateError(base: CurrencyType, to: CurrencyType) {
+        var alertModel = AlertModel(
+            titleKey: TextKey.Alert.Title.exchangeRateError.rawValue,
+            messageKey: TextKey.Alert.Message.failedToGetExchangerate.rawValue
+        )
+        alertModel.add(action: .init(
+            titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+        ) { [weak self] in
+            guard let self else { return }
+            getExchangeRate(base: base, to: to)
+        })
+        alertShooter.shoot(alertModel)
     }
 }

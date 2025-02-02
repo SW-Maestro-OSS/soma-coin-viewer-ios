@@ -37,7 +37,8 @@ struct AllMarketTickerViewModelTests {
             languageLocalizationRepository: StubLanguageLocalizationRepository(),
             allMarketTickersUseCase: StubEmptyAllMarketTickerUseCase(),
             exchangeUseCase: StubExchangeUseCase(),
-            userConfigurationRepository: FakeUserConfigurationRepository()
+            userConfigurationRepository: FakeUserConfigurationRepository(),
+            alertShooter: MockAlertShooter()
         )
         let givenTickerVOs: [Twenty4HourTickerForSymbolVO] = [
             Twenty4HourTickerForSymbolVO(pairSymbol: "test4USDT", price: 200.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),

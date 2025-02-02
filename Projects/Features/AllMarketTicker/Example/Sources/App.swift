@@ -12,6 +12,8 @@ import Combine
 
 import DomainInterface
 import CoreUtil
+
+import AlertShooter
 import I18N
 
 @main
@@ -31,7 +33,8 @@ struct CoinViewerApp: App {
                     languageLocalizationRepository: DependencyInjector.shared.resolve(LanguageLocalizationRepository.self),
                     allMarketTickersUseCase: DependencyInjector.shared.resolve(AllMarketTickersUseCase.self),
                     exchangeUseCase: DependencyInjector.shared.resolve(ExchangeRateUseCase.self),
-                    userConfigurationRepository: DependencyInjector.shared.resolve(UserConfigurationRepository.self)
+                    userConfigurationRepository: DependencyInjector.shared.resolve(UserConfigurationRepository.self),
+                    alertShooter: DependencyInjector.shared.resolve(AlertShooter.self)
                 )
             )
 

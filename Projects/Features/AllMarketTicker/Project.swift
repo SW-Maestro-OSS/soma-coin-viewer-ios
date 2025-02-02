@@ -69,6 +69,7 @@ let project = Project(
                 D.Feature.BaseFeature,
                 
                 D.Shared.I18N,
+                D.Shared.AlertShooter,
                 
                 D.ThirdParty.SimpleImageProvider,
             ]

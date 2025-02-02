@@ -11,6 +11,7 @@ import Combine
 import DomainInterface
 
 import CoreUtil
+import AlertShooter
 import I18N
 
 public final class AllMarketTickerBuilder {
@@ -21,6 +22,7 @@ public final class AllMarketTickerBuilder {
     @Injected private var userConfigurationRepository: UserConfigurationRepository
     @Injected private var i18NManager: I18NManager
     @Injected private var languageLocalizationRepository: LanguageLocalizationRepository
+    @Injected private var alertShooter: AlertShooter
     
     public init() { }
     
@@ -31,7 +33,8 @@ public final class AllMarketTickerBuilder {
             languageLocalizationRepository: languageLocalizationRepository,
             allMarketTickersUseCase: allMarketTickersUseCase,
             exchangeUseCase: exchangeRateUseCase,
-            userConfigurationRepository: userConfigurationRepository
+            userConfigurationRepository: userConfigurationRepository,
+            alertShooter: alertShooter
         )
         let view = AllMarketTickerView(viewModel: viewModel)
         let router = AllMarketTickerRouter(
