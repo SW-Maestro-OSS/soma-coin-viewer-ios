@@ -15,11 +15,14 @@ import CoreUtil
 import I18N
 
 struct SettingCellView : View {
+    @State var isSelected : Bool
+    let settingCellRO : SettingCellRO
+    let onToggle: (CellType) -> Void
     
-    @ObservedObject private var viewModel: SettingCellViewModel
-    
-    init(viewModel: SettingCellViewModel) {
-        self._viewModel = ObservedObject(wrappedValue: viewModel)
+    init(settingCellRO : SettingCellRO, onToggle : @escaping (CellType) -> Void) {
+        self._isSelected = State(initialValue: settingCellRO.isSelected)
+        self.settingCellRO = settingCellRO
+        self.onToggle = onToggle
     }
     
     var body : some View {
@@ -27,33 +30,25 @@ struct SettingCellView : View {
             Spacer().frame(width : 16)
             
             VStack {
-                
-                LocalizableText(
-                    key: viewModel.state.titleKey,
-                    languageType: $viewModel.state.languageType
-                )
-                .font(.body)
-                .foregroundColor(.black)
+                Text(settingCellRO.title)
+                    .font(.body)
+                    .foregroundColor(.black)
             }
             
             Spacer()
             
             VStack (alignment : .trailing) {
-                
-                LocalizableText(
-                    key: viewModel.state.optionKey,
-                    languageType: $viewModel.state.languageType
-                )
-                .font(.body)
-                .foregroundColor(.gray)
+                Text(settingCellRO.option)
+                    .font(.body)
+                    .foregroundColor(.gray)
                 
                 HStack {
-                    Toggle("",isOn : Binding(
-                        get : { viewModel.state.isSelected },
-                        set : { _ in viewModel.action.send(.tap) }
-                    ))
+                    Toggle("", isOn: $isSelected)
                         .labelsHidden()
                         .toggleStyle(SwitchToggleStyle(tint: .gray))
+                        .onChange(of: isSelected) { _ in
+                            onToggle(settingCellRO.cellType) // 콜백 호출
+                        }
                     
                     Spacer()
                         .frame(width : 16)
