@@ -455,7 +455,6 @@ private extension AllMarketTickerViewModel {
             .sink(receiveValue: { [weak self] rate in
                 guard let self else { return }
                 if let rate {
-                    print(rate)
                     let action = Action.i18NUpdated(
                         currenyType: to,
                         exchangeRate: rate
