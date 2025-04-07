@@ -197,6 +197,7 @@ private extension BinanceWebSocketService {
                 webSocketMessagePublisher.send(message)
                 listenToMessage()
             case .failure(let error):
+                guard currentWebSocketTask?.state == .running else { return }
                 let webSocketError = handleNSError(error as NSError)
                 listener?.webSocketListener(unrelatedError: webSocketError)
             }
