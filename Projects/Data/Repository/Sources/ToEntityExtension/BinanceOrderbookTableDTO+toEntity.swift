@@ -9,7 +9,7 @@ import DataSource
 import DomainInterface
 import CoreUtil
 
-extension OrderbookTableDTO {
+extension BinanceOrderbookTableDTO {
     func toEntity() -> OrderbookUpdateVO {
         let converter = { (info: [String]) -> Orderbook in
             Orderbook(price: CVNumber(Double(info[0])!), quantity: CVNumber(Double(info[1])!))

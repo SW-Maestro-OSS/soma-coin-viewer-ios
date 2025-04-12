@@ -9,9 +9,11 @@ import Foundation
 
 import DomainInterface
 import DataSource
+import CoreUtil
 
 final class BinanceOrderbookRepository: OrderbookRepository {
-    
+    // Dependency
+    @Injected var webSocketService: WebSocketService
     private let httpService: HTTPService = .init()
     
     public init() { }
@@ -26,11 +28,25 @@ final class BinanceOrderbookRepository: OrderbookRepository {
             "symbol": symbolPair,
             "limit": "5000"
         ])
-        let dto = try await httpService.request(requestBuiler, dtoType: OrderbookTableDTO.self, retry: 1)
+        let dto = try await httpService.request(requestBuiler, dtoType: BinanceOrderbookTableDTO.self, retry: 1)
         return dto.body!.toEntity()
     }
     
     func getUpdate(symbolPair: String) -> AsyncStream<DomainInterface.OrderbookUpdateVO> {
-        AsyncStream { continuation in }
+        let publisher = webSocketService
+            .getMessageStream()
+            .map { (dto: BinacneOrderbookUpdateDTO) in
+                let entity = dto.toEntity()
+                return entity
+            }
+            return AsyncStream { continuation in
+                let cancellable = publisher
+                    .sink(receiveValue: { entity in
+                        continuation.yield(entity)
+                    })
+                continuation.onTermination = { @Sendable _ in
+                    cancellable.cancel()
+                }
+            }
     }
 }
