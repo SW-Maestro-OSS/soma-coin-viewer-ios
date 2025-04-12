@@ -21,11 +21,11 @@ final public class DefaultDetailScreenUseCase: DetailScreenUseCase {
 
 // MARK: Orderbook
 public extension DefaultDetailScreenUseCase {
-    func getWholeOrderbookTable() async -> OrderbookUpdateVO {
-        await orderbookRepository.getWhileTable()
+    func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO {
+        try await orderbookRepository.getWhileTable(symbolPair: symbolPair)
     }
     
-    func getChangeInOrderbook() -> AsyncStream<OrderbookUpdateVO> {
-        orderbookRepository.getUpdate()
+    func getChangeInOrderbook(symbolPair: String) -> AsyncStream<OrderbookUpdateVO> {
+        orderbookRepository.getUpdate(symbolPair: symbolPair)
     }
 }

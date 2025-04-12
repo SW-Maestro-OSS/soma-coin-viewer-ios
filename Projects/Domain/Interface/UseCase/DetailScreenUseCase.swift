@@ -8,7 +8,6 @@
 import Combine
 
 public protocol DetailScreenUseCase {
-    
-    func getWholeOrderbookTable() async -> OrderbookUpdateVO
-    func getChangeInOrderbook() -> AsyncStream<OrderbookUpdateVO>
+    func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO
+    func getChangeInOrderbook(symbolPair: String) -> AsyncStream<OrderbookUpdateVO>
 }

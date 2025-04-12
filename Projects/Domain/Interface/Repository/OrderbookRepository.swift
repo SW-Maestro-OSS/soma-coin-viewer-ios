@@ -8,6 +8,6 @@
 import Combine
 
 public protocol OrderbookRepository {
-    func getWhileTable() async -> OrderbookUpdateVO
-    func getUpdate() -> AsyncStream<OrderbookUpdateVO>
+    func getWhileTable(symbolPair: String) async throws -> OrderbookUpdateVO
+    func getUpdate(symbolPair: String) -> AsyncStream<OrderbookUpdateVO>
 }
