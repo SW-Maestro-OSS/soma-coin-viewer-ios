@@ -5,20 +5,23 @@
 //  Created by choijunios on 4/12/25.
 //
 
-public struct OrderbookUpdateVO {
-    public struct Order {
-        public let price: Double
-        public let quantity: Double
-        public init(price: Double, quantity: Double) {
-            self.price = price
-            self.quantity = quantity
-        }
+import CoreUtil
+
+public struct Orderbook: Sendable {
+    public let price: CVNumber
+    public let quantity: CVNumber
+    public init(price: CVNumber, quantity: CVNumber) {
+        self.price = price
+        self.quantity = quantity
     }
-    public let bids: [Order]
-    public let asks: [Order]
+}
+
+public struct OrderbookUpdateVO: Sendable {
+    public let bids: [Orderbook]
+    public let asks: [Orderbook]
     public let lastUpdateId: Int
     
-    public init(bids: [Order], asks: [Order], lastUpdateId: Int) {
+    public init(bids: [Orderbook], asks: [Orderbook], lastUpdateId: Int) {
         self.bids = bids
         self.asks = asks
         self.lastUpdateId = lastUpdateId

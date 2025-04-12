@@ -7,11 +7,12 @@
 
 import DataSource
 import DomainInterface
+import CoreUtil
 
 extension OrderbookTableDTO {
     func toEntity() -> OrderbookUpdateVO {
-        let converter = { (info: [String]) -> OrderbookUpdateVO.Order in
-            OrderbookUpdateVO.Order(price: Double(info[0])!, quantity: Double(info[1])!)
+        let converter = { (info: [String]) -> Orderbook in
+            Orderbook(price: CVNumber(Double(info[0])!), quantity: CVNumber(Double(info[1])!))
         }
         return OrderbookUpdateVO(
             bids: bids.map(converter),

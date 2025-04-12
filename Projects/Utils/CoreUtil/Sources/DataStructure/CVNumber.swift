@@ -7,10 +7,9 @@
 
 import Foundation
 
-public struct CVNumber: Comparable, CustomStringConvertible, ExpressibleByFloatLiteral {
+public struct CVNumber: Sendable, Hashable, Comparable, CustomStringConvertible, ExpressibleByFloatLiteral {
     
     public typealias FloatLiteralType = Double
-    
     
     public private(set) var wrappedNumber: Decimal
     
@@ -42,20 +41,17 @@ public struct CVNumber: Comparable, CustomStringConvertible, ExpressibleByFloatL
         
         return formattedString ?? "-1.0"
     }
+    
+    public var description: String { wrappedNumber.description }
 }
 
-extension CVNumber {
+public extension CVNumber {
+    static func + (lhs: Self, rhs: Self) -> Self {
+        CVNumber(lhs.wrappedNumber + rhs.wrappedNumber)
+    }
     
-    public static func < (lhs: CVNumber, rhs: CVNumber) -> Bool {
+    static func < (lhs: CVNumber, rhs: CVNumber) -> Bool {
         
         lhs.wrappedNumber < rhs.wrappedNumber
-    }
-}
-
-extension CVNumber {
-    
-    public var description: String {
-        
-        wrappedNumber.description
     }
 }

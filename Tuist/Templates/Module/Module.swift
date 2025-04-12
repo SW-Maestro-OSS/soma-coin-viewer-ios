@@ -45,11 +45,6 @@ let featureTemplate = Template(
         .item(path: "\(projectPath)/Testing/Testing.swift", contents: .file(.relativeToRoot("Scaffold/TMA/Testing/Testing.swift"))),
         
         
-        // Interface
-        
-        .item(path: "\(projectPath)/Interface/Interface.swift", contents: .file(.relativeToRoot("Scaffold/TMA/Interface/Interface.swift"))),
-        
-        
         // Project.swift
         
         .file(
