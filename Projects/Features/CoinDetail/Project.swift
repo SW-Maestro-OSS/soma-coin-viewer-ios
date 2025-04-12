@@ -25,6 +25,12 @@ let project = Project(
             dependencies: [
                 .target(name: "CoinDetailFeature"),
                 .target(name: "CoinDetailFeatureTesting"),
+                
+                D.Data.repository,
+                D.Domain.concrete,
+                D.Shared.WebSocketManagementHelper,
+                D.Shared.AlertShooter,
+                D.Data.dataSource,
             ]
         ),
 

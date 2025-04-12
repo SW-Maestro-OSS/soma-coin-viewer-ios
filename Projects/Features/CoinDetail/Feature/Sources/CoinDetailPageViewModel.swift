@@ -11,19 +11,19 @@ import Foundation
 import DomainInterface
 import BaseFeature
 
-enum CoinDetailPageAction {
+public enum CoinDetailPageAction {
     case onAppear
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
 }
 
-final class CoinDetailPageViewModel: UDFObservableObject {
+final public class CoinDetailPageViewModel: UDFObservableObject {
     // Dependency
     private let useCase: CoinDetailPageUseCase
     
     
     // State
-    @Published var state: State = .init()
+    @Published public var state: State = .init()
     private let symbolPair: String
     private var hasAppeared = false
     private let bidStore: OrderbookStore = .init()
@@ -31,20 +31,22 @@ final class CoinDetailPageViewModel: UDFObservableObject {
 
     
     // Action
-    let action: PassthroughSubject<CoinDetailPageAction, Never> = .init()
+    public let action: PassthroughSubject<CoinDetailPageAction, Never> = .init()
     
-    typealias Action = CoinDetailPageAction
-    var store: Set<AnyCancellable> = .init()
+    public typealias Action = CoinDetailPageAction
+    public var store: Set<AnyCancellable> = .init()
     private var orderbookStream: AnyCancellable?
     
     
-    init(symbolPair: String, useCase: CoinDetailPageUseCase) {
+    public init(symbolPair: String, useCase: CoinDetailPageUseCase) {
         self.symbolPair = symbolPair
         self.useCase = useCase
+        
+        createStateStream()
     }
     
     
-    func mutate(_ action: CoinDetailPageAction) -> AnyPublisher<CoinDetailPageAction, Never> {
+    public func mutate(_ action: CoinDetailPageAction) -> AnyPublisher<CoinDetailPageAction, Never> {
         switch action {
         case .onAppear:
             if !hasAppeared {
@@ -58,7 +60,7 @@ final class CoinDetailPageViewModel: UDFObservableObject {
         return Just(action).eraseToAnyPublisher()
     }
     
-    func reduce(_ action: CoinDetailPageAction, state: State) -> State {
+    public func reduce(_ action: CoinDetailPageAction, state: State) -> State {
         var newState = state
         switch action {
         case .updateOrderbook(let bids, let asks):
@@ -72,6 +74,7 @@ final class CoinDetailPageViewModel: UDFObservableObject {
     
     func transform(_ orderbook: Orderbook) -> OrderbookRO {
         OrderbookRO(
+            id: orderbook.price.description,
             priceText: orderbook.price.roundToTwoDecimalPlaces(),
             quantityText: orderbook.quantity.roundToTwoDecimalPlaces()
         )
@@ -144,7 +147,7 @@ private extension CoinDetailPageViewModel {
 
 
 // MARK: State
-extension CoinDetailPageViewModel {
+public extension CoinDetailPageViewModel {
     struct State {
         var bidOrderbooks: [OrderbookRO] = []
         var askOrderbooks: [OrderbookRO] = []

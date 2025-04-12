@@ -16,14 +16,14 @@ final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
     @Injected private var orderbookRepository: OrderbookRepository
     @Injected private var webSocketHelper: WebSocketManagementHelper
     
-    init() { }
+    public init() { }
 }
 
 
 // MARK: Orderbook
 public extension DefaultCoinDetailPageUseCase {
     func connectToStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair)@depth"])
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth@100ms"])
     }
     
     func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO {
