@@ -80,7 +80,7 @@ final class CoinDetailPageViewModel: UDFObservableObject {
 
 
 // MARK: Orderbook
-extension CoinDetailPageViewModel {
+private extension CoinDetailPageViewModel {
     func startOrderbookStream() {
         let updateTracker = PassthroughSubject<Void, Never>()
         orderbookStream?.cancel()
@@ -102,22 +102,42 @@ extension CoinDetailPageViewModel {
         Task {
             useCase.connectToStream(symbolPair: symbolPair)
             do {
+                // #1. 전체 테이블 요청
                 let wholeTable = try await useCase.getWholeOrderbookTable(symbolPair: symbolPair)
+                await clearOrderbookStore()
+                await apply(bids: wholeTable.bids)
+                await apply(asks: wholeTable.asks)
+                updateTracker.send(())
+                
+                // #2. 실시간 업데이트
                 let sequence = useCase.getChangeInOrderbook(symbolPair: symbolPair).filter { entity in
                     entity.lastUpdateId > wholeTable.lastUpdateId
                 }
                 for await update in sequence {
-                    for bidOrder in update.bids {
-                        await bidStore.update(key: bidOrder.price, value: bidOrder.quantity)
-                    }
-                    for askOrder in update.asks {
-                        await askStroe.update(key: askOrder.price, value: askOrder.quantity)
-                    }
+                    await apply(bids: update.bids)
+                    await apply(asks: update.asks)
                     updateTracker.send(())
                 }
             } catch {
                 print(error)
             }
+        }
+    }
+    
+    func clearOrderbookStore() async {
+        await bidStore.clearStore()
+        await askStroe.clearStore()
+    }
+    
+    func apply(bids: [Orderbook]) async {
+        for bidOrder in bids {
+            await bidStore.update(key: bidOrder.price, value: bidOrder.quantity)
+        }
+    }
+    
+    func apply(asks: [Orderbook]) async {
+        for askOrder in asks {
+            await askStroe.update(key: askOrder.price, value: askOrder.quantity)
         }
     }
 }

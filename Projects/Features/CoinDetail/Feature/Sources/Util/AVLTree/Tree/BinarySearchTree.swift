@@ -138,6 +138,16 @@ public extension BinarySearchTree {
         
         return MemoryLeakChecker(object: targetNode)
     }
+    
+    final func clear() {
+        guard let rootNode else { return }
+        postOrderTraversal(node: rootNode, action: { node in
+            node.setLeftChild(nil)
+            node.setRightChild(nil)
+            node.setParent(nil)
+        })
+        entryNode.removeChild(rootNode)
+    }
 }
 
 
@@ -146,14 +156,14 @@ public extension BinarySearchTree {
     final func getAscendingList(maxCount: Int) -> [Value] {
         guard let rootNode else { return [] }
         var list: [Value] = []
-        inOrderTraversal(node: rootNode, list: &list, maxCount: maxCount)
+        inOrderLeftTraversal(node: rootNode, list: &list, maxCount: maxCount)
         return list
     }
     
     final func getDiscendingList(maxCount: Int) -> [Value] {
         guard let rootNode else { return [] }
         var list: [Value] = []
-        postOrderTraversal(node: rootNode, list: &list, maxCount: maxCount)
+        inOrderRightTraversal(node: rootNode, list: &list, maxCount: maxCount)
         return list
     }
 }
@@ -161,29 +171,53 @@ public extension BinarySearchTree {
 
 // MARK: 순회 함수
 private extension BinarySearchTree {
-    func inOrderTraversal(node: Node<Value>, list: inout [Value], maxCount: Int) {
+    func inOrderLeftTraversal(node: Node<Value>, list: inout [Value], maxCount: Int) {
         if let leftChild = node.leftChild {
-            inOrderTraversal(node: leftChild, list: &list, maxCount: maxCount)
+            inOrderLeftTraversal(node: leftChild, list: &list, maxCount: maxCount)
         }
         
         if list.count >= maxCount { return }
         list.append(node.value)
         
         if let rightChild = node.rightChild {
-            inOrderTraversal(node: rightChild, list: &list, maxCount: maxCount)
+            inOrderLeftTraversal(node: rightChild, list: &list, maxCount: maxCount)
         }
     }
     
-    func postOrderTraversal(node: Node<Value>, list: inout [Value], maxCount: Int) {
+    func inOrderRightTraversal(node: Node<Value>, list: inout [Value], maxCount: Int) {
         if let rightChild = node.rightChild {
-            postOrderTraversal(node: rightChild, list: &list, maxCount: maxCount)
+            inOrderRightTraversal(node: rightChild, list: &list, maxCount: maxCount)
         }
         
         if list.count >= maxCount { return }
         list.append(node.value)
         
         if let leftChild = node.leftChild {
-            postOrderTraversal(node: leftChild, list: &list, maxCount: maxCount)
+            inOrderRightTraversal(node: leftChild, list: &list, maxCount: maxCount)
         }
+    }
+    
+    func postOrderTraversal(node: Node<Value>, action: (Node<Value>) -> ()) {
+        if let leftChild = node.leftChild {
+            postOrderTraversal(node: leftChild, action: action)
+        }
+        if let rightChild = node.rightChild {
+            postOrderTraversal(node: rightChild, action: action)
+        }
+        action(node)
+    }
+}
+
+
+// MARK: For test
+extension BinarySearchTree {
+    func clearWithCheckers() -> [MemoryLeakChecker] {
+        guard let rootNode else { return [] }
+        var checkers: [MemoryLeakChecker] = []
+        postOrderTraversal(node: rootNode, action: { node in
+            checkers.append(.init(object: node))
+        })
+        self.clear()
+        return checkers
     }
 }

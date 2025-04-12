@@ -20,6 +20,11 @@ actor OrderbookStore {
 extension OrderbookStore {
     subscript (_ key: CVNumber) -> CVNumber? { get { orderQuantityTable[key] } }
     
+    func clearStore() {
+        keyTree.clear()
+        orderQuantityTable.removeAll()
+    }
+    
     func update(key: CVNumber, value: CVNumber) {
         if let prev = orderQuantityTable[key] {
             // 키값이 이미 존재하는 경우, 업데이트
