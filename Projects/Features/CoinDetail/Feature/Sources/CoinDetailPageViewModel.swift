@@ -10,6 +10,7 @@ import Foundation
 
 import DomainInterface
 import BaseFeature
+import CoreUtil
 
 public enum CoinDetailPageAction {
     case onAppear
@@ -64,18 +65,26 @@ final public class CoinDetailPageViewModel: UDFObservableObject {
         var newState = state
         switch action {
         case .updateOrderbook(let bids, let asks):
-            newState.bidOrderbooks = bids.map(self.transform)
-            newState.askOrderbooks = asks.map(self.transform)
+            guard let bigestQuantity = (bids + asks).map(\.quantity).max() else { break }
+            newState.bidOrderbooks = bids.map {
+                transform(bigestQuantity: bigestQuantity, orderbook: $0, type: .bid)
+            }
+            newState.askOrderbooks = asks.map {
+                transform(bigestQuantity: bigestQuantity, orderbook: $0, type: .ask)
+            }
         default:
             break
         }
         return newState
     }
     
-    func transform(_ orderbook: Orderbook) -> OrderbookRO {
-        OrderbookRO(
+    private func transform(bigestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
+        let percent = sqrt(pow(bigestQuantity.double, 2) - pow(bigestQuantity.double-orderbook.quantity.double, 2)) / bigestQuantity.double
+        return OrderbookCellRO(
+            type: type,
             priceText: orderbook.price.roundToTwoDecimalPlaces(),
-            quantityText: orderbook.quantity.roundToTwoDecimalPlaces()
+            quantityText: orderbook.quantity.roundToTwoDecimalPlaces(),
+            relativePercentOfQuantity: percent
         )
     }
 }
@@ -148,8 +157,8 @@ private extension CoinDetailPageViewModel {
 // MARK: State
 public extension CoinDetailPageViewModel {
     struct State {
-        var bidOrderbooks: [OrderbookRO] = []
-        var askOrderbooks: [OrderbookRO] = []
+        var bidOrderbooks: [OrderbookCellRO] = []
+        var askOrderbooks: [OrderbookCellRO] = []
     }
 }
 

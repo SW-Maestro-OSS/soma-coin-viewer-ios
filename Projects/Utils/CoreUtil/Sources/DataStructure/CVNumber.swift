@@ -43,6 +43,7 @@ public struct CVNumber: Sendable, Hashable, Comparable, CustomStringConvertible,
     }
     
     public var description: String { wrappedNumber.description }
+    public var double: Double { (wrappedNumber as NSDecimalNumber).doubleValue }
 }
 
 public extension CVNumber {
@@ -51,7 +52,10 @@ public extension CVNumber {
     }
     
     static func < (lhs: CVNumber, rhs: CVNumber) -> Bool {
-        
         lhs.wrappedNumber < rhs.wrappedNumber
+    }
+    
+    static func / (lhs: CVNumber, rhs: CVNumber) -> CVNumber {
+        CVNumber(lhs.wrappedNumber / rhs.wrappedNumber)
     }
 }

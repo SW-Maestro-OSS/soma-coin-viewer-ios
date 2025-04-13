@@ -23,7 +23,7 @@ final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
 // MARK: Orderbook
 public extension DefaultCoinDetailPageUseCase {
     func connectToStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth@100ms"])
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth"])
     }
     
     func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO {

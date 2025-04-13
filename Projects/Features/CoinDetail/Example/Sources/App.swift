@@ -13,12 +13,7 @@ import CoreUtil
 
 @main
 struct ExampleApp: App {
-    
-    init() {
-        DependencyInjector.shared.assemble([Assemblies()])
-        let webSocketHelper = DependencyInjector.shared.resolve(WebSocketManagementHelper.self)
-        webSocketHelper.requestConnection(connectionType: .freshStart)
-    }
+    @UIApplicationDelegateAdaptor var appDelegate: AppDelegate
     
     var body: some Scene {
         WindowGroup {
@@ -27,5 +22,24 @@ struct ExampleApp: App {
                 useCase: DependencyInjector.shared.resolve()
             ))
         }
+    }
+}
+
+@MainActor
+class AppDelegate: NSObject, UIApplicationDelegate {
+    
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
+    ) -> Bool {
+        
+        // 의존성 주입
+        DependencyInjector.shared.assemble([Assemblies()])
+        let webSocketHelper = DependencyInjector.shared.resolve(WebSocketManagementHelper.self)
+        webSocketHelper.requestConnection(connectionType: .freshStart)
+        
+        sleep(2)
+        
+        return true
     }
 }

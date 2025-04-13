@@ -16,40 +16,21 @@ public struct CoinDetailPageView: View {
     }
     
     public var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 0) {
             VStack(spacing: 0) {
-                
-                ForEach(Array(viewModel.state.bidOrderbooks.enumerated()), id: \.offset) { _, bidItem in
-                    HStack {
-                        Text(bidItem.quantityText)
-                            .foregroundStyle(.green)
-                            .font(.system(size: 10))
-                        Spacer()
-                        Text(bidItem.priceText)
-                            .font(.system(size: 10))
-                    }
-                    .frame(height: 20)
+                ForEach(Array(viewModel.state.bidOrderbooks.enumerated()), id: \.offset) { index, _ in
+                    OrderbookCellView(renderObject: $viewModel.state.bidOrderbooks[index])
+                        .frame(height: 30)
                 }
             }
             
             VStack(spacing: 0) {
-                ForEach(Array(viewModel.state.askOrderbooks.enumerated()), id: \.offset) { _, askItem in
-                    HStack {
-                        Text(askItem.priceText)
-                            .font(.system(size: 10))
-                        Spacer()
-                        Text(askItem.quantityText)
-                            .foregroundStyle(.red)
-                            .font(.system(size: 10))
-                    }
-                    .frame(height: 20)
+                ForEach(Array(viewModel.state.askOrderbooks.enumerated()), id: \.offset) { index, _ in
+                    OrderbookCellView(renderObject: $viewModel.state.askOrderbooks[index])
+                        .frame(height: 30)
                 }
             }
         }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now()+2) {
-                viewModel.action.send(.onAppear)
-            }
-        }
+        .onAppear { viewModel.action.send(.onAppear) }
     }
 }
