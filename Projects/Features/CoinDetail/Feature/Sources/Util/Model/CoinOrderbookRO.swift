@@ -5,8 +5,7 @@
 //  Created by choijunios on 4/12/25.
 //
 
-struct OrderbookRO: Identifiable {
-    let id: String
+struct OrderbookRO {
     let priceText: String
     let quantityText: String
 }

@@ -74,7 +74,6 @@ final public class CoinDetailPageViewModel: UDFObservableObject {
     
     func transform(_ orderbook: Orderbook) -> OrderbookRO {
         OrderbookRO(
-            id: orderbook.price.description,
             priceText: orderbook.price.roundToTwoDecimalPlaces(),
             quantityText: orderbook.quantity.roundToTwoDecimalPlaces()
         )
@@ -88,7 +87,7 @@ private extension CoinDetailPageViewModel {
         let updateTracker = PassthroughSubject<Void, Never>()
         orderbookStream?.cancel()
         orderbookStream = updateTracker
-            .throttle(for: 0.35, scheduler: DispatchQueue.global(), latest: true)
+            .throttle(for: 0.3, scheduler: DispatchQueue.global(), latest: true)
             .flatMap { [weak self] _ in
                 return Future<Action, Never> { promise in
                     Task { [weak self] in

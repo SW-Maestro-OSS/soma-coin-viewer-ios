@@ -19,7 +19,7 @@ public struct CoinDetailPageView: View {
         HStack(alignment: .top, spacing: 10) {
             VStack(spacing: 0) {
                 
-                ForEach(viewModel.state.bidOrderbooks) { bidItem in
+                ForEach(Array(viewModel.state.bidOrderbooks.enumerated()), id: \.offset) { _, bidItem in
                     HStack {
                         Text(bidItem.quantityText)
                             .foregroundStyle(.green)
@@ -33,7 +33,7 @@ public struct CoinDetailPageView: View {
             }
             
             VStack(spacing: 0) {
-                ForEach(viewModel.state.askOrderbooks) { askItem in
+                ForEach(Array(viewModel.state.askOrderbooks.enumerated()), id: \.offset) { _, askItem in
                     HStack {
                         Text(askItem.priceText)
                             .font(.system(size: 10))
