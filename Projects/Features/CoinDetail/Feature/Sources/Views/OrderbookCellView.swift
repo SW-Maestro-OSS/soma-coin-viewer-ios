@@ -30,14 +30,14 @@ struct OrderbookCellView: View {
                             height: geo.size.height
                         )
                         .foregroundStyle(renderObject.quantityGageColor)
-                        .animation(.easeInOut(duration: 0.3), value: renderObject.relativePercentOfQuantity)
+                        .animation(.easeOut(duration: 0.3), value: renderObject.relativePercentOfQuantity)
                     Spacer(minLength: geo.size.width/2)
                 case .quantityFirst:
                     Spacer(minLength: geo.size.width/2)
                     Rectangle()
                         .frame(width: geo.size.width/2 * renderObject.relativePercentOfQuantity, height: geo.size.height)
                         .foregroundStyle(renderObject.quantityGageColor)
-                        .animation(.easeInOut(duration: 0.3), value: renderObject.relativePercentOfQuantity)
+                        .animation(.easeOut(duration: 0.3), value: renderObject.relativePercentOfQuantity)
                 }
             }
         }
