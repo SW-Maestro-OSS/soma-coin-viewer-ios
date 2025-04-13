@@ -18,7 +18,7 @@ struct ExampleApp: App {
     var body: some Scene {
         WindowGroup {
             CoinDetailPageView(viewModel: CoinDetailPageViewModel(
-                symbolPair: "btcusdt",
+                symbolPair: "xrpusdt",
                 useCase: DependencyInjector.shared.resolve()
             ))
         }
