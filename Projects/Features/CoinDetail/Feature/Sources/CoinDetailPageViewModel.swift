@@ -82,8 +82,8 @@ final public class CoinDetailPageViewModel: UDFObservableObject {
         let percent = sqrt(pow(bigestQuantity.double, 2) - pow(bigestQuantity.double-orderbook.quantity.double, 2)) / bigestQuantity.double
         return OrderbookCellRO(
             type: type,
-            priceText: orderbook.price.roundToTwoDecimalPlaces(),
-            quantityText: orderbook.quantity.roundToTwoDecimalPlaces(),
+            priceText: orderbook.price.roundDecimalPlaces(exact: 4),
+            quantityText: orderbook.quantity.roundDecimalPlaces(exact: 1),
             relativePercentOfQuantity: percent
         )
     }

@@ -42,6 +42,18 @@ public struct CVNumber: Sendable, Hashable, Comparable, CustomStringConvertible,
         return formattedString ?? "-1.0"
     }
     
+    public func roundDecimalPlaces(exact: Int) -> String {
+        
+        let formatter = NumberFormatter()
+        formatter.maximumFractionDigits = exact
+        formatter.minimumFractionDigits = exact
+        formatter.roundingMode = .down
+
+        let formattedString = formatter.string(from: wrappedNumber as NSDecimalNumber)
+        
+        return formattedString ?? "-1." + Array(repeating: "0", count: (exact-1))
+    }
+    
     public var description: String { wrappedNumber.description }
     public var double: Double { (wrappedNumber as NSDecimalNumber).doubleValue }
 }
