@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-import CoinDetailFeature
+@testable import CoinDetailFeature
 import WebSocketManagementHelper
 import CoreUtil
 

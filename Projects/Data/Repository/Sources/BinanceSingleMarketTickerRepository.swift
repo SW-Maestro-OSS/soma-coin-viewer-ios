@@ -1,5 +1,5 @@
 //
-//  DefaultSingleMarketTickerRepository.swift
+//  BinanceSingleMarketTickerRepository.swift
 //  Data
 //
 //  Created by choijunios on 4/14/25.
@@ -9,13 +9,13 @@ import DomainInterface
 import DataSource
 import CoreUtil
 
-final class DefaultSingleMarketTickerRepository: SingleMarketTickerRepository {
+final public class BinanceSingleMarketTickerRepository: SingleMarketTickerRepository {
     
     @Injected private var webSocketService: WebSocketService
     
     public init() { }
     
-    func request24hTicker(pairSymbol: String) -> AsyncStream<DomainInterface.Twenty4HourTickerForSymbolVO> {
+    public func request24hTickerChange(pairSymbol: String) -> AsyncStream<DomainInterface.Twenty4HourTickerForSymbolVO> {
         let publisher = webSocketService
             .getMessageStream()
             .filter { (dto: BinanceTickerForSymbolDTO) in

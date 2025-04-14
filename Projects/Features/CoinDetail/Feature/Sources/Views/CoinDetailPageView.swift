@@ -7,15 +7,15 @@
 
 import SwiftUI
 
-public struct CoinDetailPageView: View {
+struct CoinDetailPageView: View {
     
     @StateObject var viewModel: CoinDetailPageViewModel
     
-    public init(viewModel: CoinDetailPageViewModel) {
+    init(viewModel: CoinDetailPageViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
-    public var body: some View {
+    var body: some View {
         HStack(alignment: .top, spacing: 0) {
             VStack(spacing: 0) {
                 ForEach(Array(viewModel.state.bidOrderbooks.enumerated()), id: \.offset) { index, _ in

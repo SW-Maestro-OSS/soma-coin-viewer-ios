@@ -43,6 +43,9 @@ public class Assemblies: Assembly {
         container.register(OrderbookRepository.self) { _ in
             BinanceOrderbookRepository()
         }
+        container.register(SingleMarketTickerRepository.self) { _ in
+            BinanceSingleMarketTickerRepository()
+        }
         
         // MARK: UseCase
         container.register(CoinDetailPageUseCase.self) { _ in

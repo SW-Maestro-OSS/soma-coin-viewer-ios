@@ -6,5 +6,5 @@
 //
 
 public protocol SingleMarketTickerRepository {
-    func request24hTicker(pairSymbol: String) -> AsyncStream<Twenty4HourTickerForSymbolVO>
+    func request24hTickerChange(pairSymbol: String) -> AsyncStream<Twenty4HourTickerForSymbolVO>
 }
