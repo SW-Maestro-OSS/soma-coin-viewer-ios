@@ -13,7 +13,7 @@ import DomainInterface
 import WebSocketManagementHelper
 import CoreUtil
 
-public class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
+public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     
     // Service locator
     @Injected private var allMarketTickersRepository: AllMarketTickersRepository

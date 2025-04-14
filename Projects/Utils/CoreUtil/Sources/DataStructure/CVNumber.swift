@@ -7,10 +7,9 @@
 
 import Foundation
 
-public struct CVNumber: Comparable, CustomStringConvertible, ExpressibleByFloatLiteral {
+public struct CVNumber: Sendable, Hashable, Comparable, CustomStringConvertible, ExpressibleByFloatLiteral {
     
     public typealias FloatLiteralType = Double
-    
     
     public private(set) var wrappedNumber: Decimal
     
@@ -42,20 +41,33 @@ public struct CVNumber: Comparable, CustomStringConvertible, ExpressibleByFloatL
         
         return formattedString ?? "-1.0"
     }
+    
+    public func roundDecimalPlaces(exact: Int) -> String {
+        
+        let formatter = NumberFormatter()
+        formatter.maximumFractionDigits = exact
+        formatter.minimumFractionDigits = exact
+        formatter.roundingMode = .down
+
+        let formattedString = formatter.string(from: wrappedNumber as NSDecimalNumber)
+        
+        return formattedString ?? "-1." + Array(repeating: "0", count: (exact-1))
+    }
+    
+    public var description: String { wrappedNumber.description }
+    public var double: Double { (wrappedNumber as NSDecimalNumber).doubleValue }
 }
 
-extension CVNumber {
+public extension CVNumber {
+    static func + (lhs: Self, rhs: Self) -> Self {
+        CVNumber(lhs.wrappedNumber + rhs.wrappedNumber)
+    }
     
-    public static func < (lhs: CVNumber, rhs: CVNumber) -> Bool {
-        
+    static func < (lhs: CVNumber, rhs: CVNumber) -> Bool {
         lhs.wrappedNumber < rhs.wrappedNumber
     }
-}
-
-extension CVNumber {
     
-    public var description: String {
-        
-        wrappedNumber.description
+    static func / (lhs: CVNumber, rhs: CVNumber) -> CVNumber {
+        CVNumber(lhs.wrappedNumber / rhs.wrappedNumber)
     }
 }
