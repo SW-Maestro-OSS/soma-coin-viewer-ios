@@ -11,6 +11,7 @@ import SwiftUI
 import DomainInterface
 import BaseFeature
 import CoreUtil
+import PresentationUtil
 
 enum CoinDetailPageAction {
     case onAppear

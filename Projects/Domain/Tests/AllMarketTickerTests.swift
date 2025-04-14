@@ -28,7 +28,9 @@ struct AllMarketTickerUseCaseTests {
                 pairSymbol: "symbol\(index)USDT",
                 price: .init(100.0),
                 totalTradedQuoteAssetVolume: .init(100 + index)!,
-                changedPercent: .init(50.0)
+                changedPercent: .init(50.0),
+                bestBidPrice: .init(0.0),
+                bestAskPrice: .init(0.0)
             )
         }
         let anonymousTickers = (0..<30).map { index in
@@ -36,7 +38,9 @@ struct AllMarketTickerUseCaseTests {
                 pairSymbol: "symbol\(index)CJY",
                 price: .init(100.0),
                 totalTradedQuoteAssetVolume: .init(100 + index)!,
-                changedPercent: .init(50.0)
+                changedPercent: .init(50.0),
+                bestBidPrice: .init(0.0),
+                bestAskPrice: .init(0.0)
             )
         }
         let givenTickers = usdtTickers + anonymousTickers
