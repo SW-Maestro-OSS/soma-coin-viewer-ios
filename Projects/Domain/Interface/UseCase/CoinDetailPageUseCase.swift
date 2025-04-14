@@ -8,7 +8,7 @@
 import Combine
 
 public protocol CoinDetailPageUseCase {
-    func connectToOrederbookStream(symbolPair: String)
+    func connectToOrderbookStream(symbolPair: String)
     func connectToTickerChangesStream(symbolPair: String)
     func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO
     func getChangeInOrderbook(symbolPair: String) -> AsyncStream<OrderbookUpdateVO>

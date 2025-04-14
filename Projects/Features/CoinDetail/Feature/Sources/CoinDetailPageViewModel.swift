@@ -30,7 +30,7 @@ final class CoinDetailPageViewModel: UDFObservableObject {
     private let symbolPair: String
     private var hasAppeared = false
     private let bidStore: OrderbookStore = .init()
-    private let askStroe: OrderbookStore = .init()
+    private let askStore: OrderbookStore = .init()
 
     
     // Action
@@ -102,7 +102,7 @@ final class CoinDetailPageViewModel: UDFObservableObject {
 private extension CoinDetailPageViewModel {
     func start24hTickerStream() {
         Task {
-            useCase.connectToOrederbookStream(symbolPair: symbolPair)
+            useCase.connectToOrderbookStream(symbolPair: symbolPair)
             for await tickerVO in useCase.get24hTickerChange(symbolPair: symbolPair) {
                 let (changePercentText, changePercentTextColor) = createChangePercentTextConfig(percent: tickerVO.changedPercent)
                 action.send(.updateTickerInfo(info: .init(
@@ -139,7 +139,7 @@ private extension CoinDetailPageViewModel {
             .unretainedOnly(self)
             .asyncTransform { vm in
                 let bidList = await vm.bidStore.getDescendingList(count: 20).map(Orderbook.init)
-                let askList = await vm.askStroe.getAscendingList(count: 20).map(Orderbook.init)
+                let askList = await vm.askStore.getAscendingList(count: 20).map(Orderbook.init)
                 return Action.updateOrderbook(bids: bidList, asks: askList)
             }
             .subscribe(self.action)
@@ -171,7 +171,7 @@ private extension CoinDetailPageViewModel {
     
     func clearOrderbookStore() async {
         await bidStore.clearStore()
-        await askStroe.clearStore()
+        await askStore.clearStore()
     }
     
     func apply(bids: [Orderbook]) async {
@@ -182,7 +182,7 @@ private extension CoinDetailPageViewModel {
     
     func apply(asks: [Orderbook]) async {
         for askOrder in asks {
-            await askStroe.update(key: askOrder.price, value: askOrder.quantity)
+            await askStore.update(key: askOrder.price, value: askOrder.quantity)
         }
     }
 }
