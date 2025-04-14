@@ -14,14 +14,14 @@ import CoreUtil
 // MARK: Binance API
 
 extension BinanceTickerForSymbolDTO {
-    
     func toEntity() -> Twenty4HourTickerForSymbolVO {
-        
-        return .init(
+        .init(
             pairSymbol: symbol,
-            price: CVNumber(Double(lastPrice) ?? 0.0),
-            totalTradedQuoteAssetVolume: CVNumber(Double(quoteAssetVolume) ?? 0.0),
-            changedPercent: CVNumber(Double(priceChangePercent) ?? 0.0)
+            price: CVNumber(Decimal(string: lastPrice) ?? 0.0),
+            totalTradedQuoteAssetVolume: CVNumber(Decimal(string: quoteAssetVolume) ?? 0.0),
+            changedPercent: CVNumber(Double(priceChangePercent) ?? 0.0),
+            bestBidPrice: CVNumber(Decimal(string: bestBidPrice) ?? 0.0),
+            bestAskPrice: CVNumber(Decimal(string: bestAskPrice) ?? 0.0)
         )
     }
 }
