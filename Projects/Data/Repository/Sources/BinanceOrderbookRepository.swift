@@ -35,10 +35,10 @@ final public class BinanceOrderbookRepository: OrderbookRepository {
     public func getUpdate(symbolPair: String) -> AsyncStream<DomainInterface.OrderbookUpdateVO> {
         let publisher = webSocketService
             .getMessageStream()
-            .map { (dto: BinacneOrderbookUpdateDTO) in
-                let entity = dto.toEntity()
-                return entity
-            }
+            .filter({ (dto: BinacneOrderbookUpdateDTO) in
+                dto.symbol.lowercased() == symbolPair.lowercased()
+            })
+            .map({ $0.toEntity() })
             return AsyncStream { continuation in
                 let cancellable = publisher
                     .sink(receiveValue: { entity in
