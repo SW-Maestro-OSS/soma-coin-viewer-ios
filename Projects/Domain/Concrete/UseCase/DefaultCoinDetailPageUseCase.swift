@@ -14,6 +14,7 @@ import CoreUtil
 final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
 
     @Injected private var orderbookRepository: OrderbookRepository
+    @Injected private var singleTickerRepository: SingleMarketTickerRepository
     @Injected private var webSocketHelper: WebSocketManagementHelper
     
     public init() { }
@@ -32,5 +33,9 @@ public extension DefaultCoinDetailPageUseCase {
     
     func getChangeInOrderbook(symbolPair: String) -> AsyncStream<OrderbookUpdateVO> {
         orderbookRepository.getUpdate(symbolPair: symbolPair)
+    }
+    
+    func get24hChanges(symbolPair: String) -> AsyncStream<Twenty4HourTickerForSymbolVO> {
+        singleTickerRepository.request24hTicker(pairSymbol: symbolPair)
     }
 }
