@@ -135,16 +135,11 @@ private extension CoinDetailPageViewModel {
         orderbookStream?.cancel()
         orderbookStream = updateTracker
             .throttle(for: 0.3, scheduler: DispatchQueue.global(), latest: true)
-            .flatMap { [weak self] _ in
-                return Future<Action, Never> { promise in
-                    Task { [weak self] in
-                        guard let self else { return }
-                        let bidList = await bidStore.getDescendingList(count: 20).map(Orderbook.init)
-                        let askList = await askStroe.getAscendingList(count: 20).map(Orderbook.init)
-                        promise(.success(Action.updateOrderbook(bids: bidList, asks: askList)))
-                    }
-                }
-                .eraseToAnyPublisher()
+            .unretainedOnly(self)
+            .asyncTransform { vm in
+                let bidList = await vm.bidStore.getDescendingList(count: 20).map(Orderbook.init)
+                let askList = await vm.askStroe.getAscendingList(count: 20).map(Orderbook.init)
+                return Action.updateOrderbook(bids: bidList, asks: askList)
             }
             .subscribe(self.action)
         

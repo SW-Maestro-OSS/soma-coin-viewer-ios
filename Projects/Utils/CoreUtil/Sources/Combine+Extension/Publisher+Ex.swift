@@ -32,4 +32,18 @@ public extension Publisher {
             }
             .eraseToAnyPublisher()
     }
+    
+    func asyncTransform<T>(transform: @escaping (Output) async -> T) -> AnyPublisher<T, Failure> {
+        
+        self
+            .flatMap { output in
+                Future<T, Failure> { promise in
+                    Task {
+                        let element = await transform(output)
+                        promise(.success(element))
+                    }
+                }
+            }
+            .eraseToAnyPublisher()
+    }
 }
