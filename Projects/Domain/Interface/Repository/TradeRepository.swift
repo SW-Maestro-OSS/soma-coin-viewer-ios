@@ -6,5 +6,5 @@
 //
 
 public protocol TradeRepository {
-    func getSingleTrade(pairSymbol: String) -> AsyncStream<CoinTradeVO>
+    func getSingleTrade(symbolPair: String) -> AsyncStream<CoinTradeVO>
 }

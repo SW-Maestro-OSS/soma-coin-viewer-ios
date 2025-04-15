@@ -1,11 +1,11 @@
 //
-//  TradeDTO.swift
+//  BinanceCoinTradeDTO.swift
 //  Data
 //
 //  Created by choijunios on 4/15/25.
 //
 
-public struct TradeDTO: Decodable {
+public struct BinanceCoinTradeDTO: Decodable {
     public let eventType: String          // "e": "trade"
     public let eventTime: Int64           // "E": 1672515782136
     public let symbol: String             // "s": "BNBBTC"
