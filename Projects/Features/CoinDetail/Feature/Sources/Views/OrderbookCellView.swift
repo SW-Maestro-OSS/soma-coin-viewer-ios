@@ -14,7 +14,8 @@ struct OrderbookCellView: View {
     var body: some View {
         ZStack {
             quantityGageContent()
-            HStack { textContent() }
+            textContent()
+                .padding(.horizontal, 3)
         }
     }
     
@@ -45,19 +46,23 @@ struct OrderbookCellView: View {
     
     @ViewBuilder
     private func textContent() -> some View {
-        switch renderObject.textAlignment {
-        case .priceFirst:
-            Text(renderObject.priceText)
-                .foregroundStyle(renderObject.priceTextColor)
-            Spacer()
-            Text(renderObject.quantityText)
-                .foregroundStyle(.black)
-        case .quantityFirst:
-            Text(renderObject.quantityText)
-                .foregroundStyle(.black)
-            Spacer()
-            Text(renderObject.priceText)
-                .foregroundStyle(renderObject.priceTextColor)
+        HStack {
+            switch renderObject.textAlignment {
+            case .priceFirst:
+                Text(renderObject.priceText)
+                    .foregroundStyle(renderObject.priceTextColor)
+                Spacer()
+                Text(renderObject.quantityText)
+                    .foregroundStyle(.black)
+            case .quantityFirst:
+                Text(renderObject.quantityText)
+                    .foregroundStyle(.black)
+                Spacer()
+                Text(renderObject.priceText)
+                    .foregroundStyle(renderObject.priceTextColor)
+            }
         }
+        .monospaced()
+        .font(.subheadline.bold())
     }
 }

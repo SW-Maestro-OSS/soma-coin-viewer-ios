@@ -23,9 +23,9 @@ struct RecentTradeTableView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
             .font(.subheadline.bold())
-            .padding(.horizontal)
-            .padding(.vertical, 8)
             .foregroundColor(.gray)
+            .padding(.horizontal, 3)
+            .padding(.vertical, 8)
             
             Divider()
             
@@ -36,7 +36,6 @@ struct RecentTradeTableView: View {
                         RecentTradeRowView(trade: $trades[index])
                     }
                 }
-                .padding(.vertical, 8)
             }
         }
     }
