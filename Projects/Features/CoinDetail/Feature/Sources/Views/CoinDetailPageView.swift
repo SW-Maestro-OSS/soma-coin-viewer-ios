@@ -7,15 +7,51 @@
 
 import SwiftUI
 
-public struct CoinDetailPageView: View {
+struct CoinDetailPageView: View {
     
     @StateObject var viewModel: CoinDetailPageViewModel
     
-    public init(viewModel: CoinDetailPageViewModel) {
+    init(viewModel: CoinDetailPageViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
-    public var body: some View {
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                coinTitleContent()
+                tickerChangeInfoContent()
+                orderbookTableContent()
+            }
+        }
+        .onAppear { viewModel.action.send(.onAppear) }
+    }
+    
+    @ViewBuilder
+    private func coinTitleContent() -> some View {
+        HStack {
+            Text(viewModel.state.symbolText)
+                .font(.title)
+                .foregroundStyle(.black)
+            Spacer()
+        }
+        .padding(.horizontal, 10)
+        .padding(.bottom, 5)
+        
+        Rectangle()
+            .frame(height: 1)
+            .foregroundStyle(.black)
+    }
+    
+    @ViewBuilder
+    private func tickerChangeInfoContent() -> some View {
+        TickerChangeInfoView(info: $viewModel.state.tickerInfo)
+        Rectangle()
+            .frame(height: 1)
+            .foregroundStyle(.black)
+    }
+    
+    @ViewBuilder
+    private func orderbookTableContent() -> some View {
         HStack(alignment: .top, spacing: 0) {
             VStack(spacing: 0) {
                 ForEach(Array(viewModel.state.bidOrderbooks.enumerated()), id: \.offset) { index, _ in
@@ -23,7 +59,6 @@ public struct CoinDetailPageView: View {
                         .frame(height: 30)
                 }
             }
-            
             VStack(spacing: 0) {
                 ForEach(Array(viewModel.state.askOrderbooks.enumerated()), id: \.offset) { index, _ in
                     OrderbookCellView(renderObject: $viewModel.state.askOrderbooks[index])
@@ -31,6 +66,5 @@ public struct CoinDetailPageView: View {
                 }
             }
         }
-        .onAppear { viewModel.action.send(.onAppear) }
     }
 }

@@ -17,12 +17,23 @@ public struct Twenty4HourTickerForSymbolVO {
     public let price: CVNumber
     public let totalTradedQuoteAssetVolume: CVNumber
     public let changedPercent: CVNumber
+    public let bestBidPrice: CVNumber
+    public let bestAskPrice: CVNumber
     
-    public init(pairSymbol: String, price: CVNumber, totalTradedQuoteAssetVolume: CVNumber, changedPercent: CVNumber) {
+    public init(
+        pairSymbol: String,
+        price: CVNumber,
+        totalTradedQuoteAssetVolume: CVNumber,
+        changedPercent: CVNumber,
+        bestBidPrice: CVNumber,
+        bestAskPrice: CVNumber
+    ) {
         self.pairSymbol = pairSymbol
         self.price = price
         self.totalTradedQuoteAssetVolume = totalTradedQuoteAssetVolume
         self.changedPercent = changedPercent
+        self.bestBidPrice = bestBidPrice
+        self.bestAskPrice = bestAskPrice
     }
     
     public mutating func setSymbols(closure: (String) -> (String, String)) {

@@ -6,53 +6,59 @@
 //
 
 import Combine
-import Foundation
+import SwiftUI
 
 import DomainInterface
 import BaseFeature
 import CoreUtil
+import PresentationUtil
 
-public enum CoinDetailPageAction {
+enum CoinDetailPageAction {
     case onAppear
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
+    case updateTickerInfo(info: TickerInfo)
 }
 
-final public class CoinDetailPageViewModel: UDFObservableObject {
+final class CoinDetailPageViewModel: UDFObservableObject {
     // Dependency
     private let useCase: CoinDetailPageUseCase
     
     
     // State
-    @Published public var state: State = .init()
+    @Published var state: State
     private let symbolPair: String
     private var hasAppeared = false
     private let bidStore: OrderbookStore = .init()
-    private let askStroe: OrderbookStore = .init()
+    private let askStore: OrderbookStore = .init()
 
     
     // Action
-    public let action: PassthroughSubject<CoinDetailPageAction, Never> = .init()
+    typealias Action = CoinDetailPageAction
+    let action: PassthroughSubject<CoinDetailPageAction, Never> = .init()
     
-    public typealias Action = CoinDetailPageAction
-    public var store: Set<AnyCancellable> = .init()
+    
+    // Streams
     private var orderbookStream: AnyCancellable?
+    private var singleTickerStream: AnyCancellable?
+    var store: Set<AnyCancellable> = .init()
     
-    
-    public init(symbolPair: String, useCase: CoinDetailPageUseCase) {
+    init(symbolPair: String, useCase: CoinDetailPageUseCase) {
         self.symbolPair = symbolPair
         self.useCase = useCase
+        self.state = .init(symbolText: symbolPair.uppercased())
         
         createStateStream()
     }
     
     
-    public func mutate(_ action: CoinDetailPageAction) -> AnyPublisher<CoinDetailPageAction, Never> {
+    func mutate(_ action: CoinDetailPageAction) -> AnyPublisher<CoinDetailPageAction, Never> {
         switch action {
         case .onAppear:
             if !hasAppeared {
                 hasAppeared = true
                 startOrderbookStream()
+                start24hTickerStream()
             }
             return Just(action).eraseToAnyPublisher()
         default:
@@ -61,7 +67,7 @@ final public class CoinDetailPageViewModel: UDFObservableObject {
         return Just(action).eraseToAnyPublisher()
     }
     
-    public func reduce(_ action: CoinDetailPageAction, state: State) -> State {
+    func reduce(_ action: CoinDetailPageAction, state: State) -> State {
         var newState = state
         switch action {
         case .updateOrderbook(let bids, let asks):
@@ -72,6 +78,8 @@ final public class CoinDetailPageViewModel: UDFObservableObject {
             newState.askOrderbooks = asks.map {
                 transform(bigestQuantity: bigestQuantity, orderbook: $0, type: .ask)
             }
+        case .updateTickerInfo(let info):
+            newState.tickerInfo = info
         default:
             break
         }
@@ -90,28 +98,54 @@ final public class CoinDetailPageViewModel: UDFObservableObject {
 }
 
 
-// MARK: Orderbook
+// MARK: 24h ticker
+private extension CoinDetailPageViewModel {
+    func start24hTickerStream() {
+        Task {
+            useCase.connectToOrderbookStream(symbolPair: symbolPair)
+            for await tickerVO in useCase.get24hTickerChange(symbolPair: symbolPair) {
+                let (changePercentText, changePercentTextColor) = createChangePercentTextConfig(percent: tickerVO.changedPercent)
+                action.send(.updateTickerInfo(info: .init(
+                    changePercentText: changePercentText,
+                    changePercentTextColor: changePercentTextColor,
+                    currentPriceText: tickerVO.price.roundDecimalPlaces(exact: 4),
+                    bestBidPriceText: tickerVO.bestBidPrice.roundDecimalPlaces(exact: 4),
+                    bestAskPriceText: tickerVO.bestAskPrice.roundDecimalPlaces(exact: 4)
+                )))
+            }
+        }
+    }
+    
+    func createChangePercentTextConfig(percent: CVNumber) -> (String, Color) {
+        let percentText = percent.roundToTwoDecimalPlaces()+"%"
+        var displayText: String = percentText
+        var displayColor: Color = .red
+        if percent >= 0.0 {
+            displayText = "+"+displayText
+            displayColor = .green
+        }
+        return (displayText, displayColor)
+    }
+}
+
+
+// MARK: Orderbook table
 private extension CoinDetailPageViewModel {
     func startOrderbookStream() {
         let updateTracker = PassthroughSubject<Void, Never>()
         orderbookStream?.cancel()
         orderbookStream = updateTracker
             .throttle(for: 0.3, scheduler: DispatchQueue.global(), latest: true)
-            .flatMap { [weak self] _ in
-                return Future<Action, Never> { promise in
-                    Task { [weak self] in
-                        guard let self else { return }
-                        let bidList = await bidStore.getDescendingList(count: 20).map(Orderbook.init)
-                        let askList = await askStroe.getAscendingList(count: 20).map(Orderbook.init)
-                        promise(.success(Action.updateOrderbook(bids: bidList, asks: askList)))
-                    }
-                }
-                .eraseToAnyPublisher()
+            .unretainedOnly(self)
+            .asyncTransform { vm in
+                let bidList = await vm.bidStore.getDescendingList(count: 20).map(Orderbook.init)
+                let askList = await vm.askStore.getAscendingList(count: 20).map(Orderbook.init)
+                return Action.updateOrderbook(bids: bidList, asks: askList)
             }
             .subscribe(self.action)
         
         Task {
-            useCase.connectToStream(symbolPair: symbolPair)
+            useCase.connectToTickerChangesStream(symbolPair: symbolPair)
             do {
                 // #1. 전체 테이블 요청
                 let wholeTable = try await useCase.getWholeOrderbookTable(symbolPair: symbolPair)
@@ -137,7 +171,7 @@ private extension CoinDetailPageViewModel {
     
     func clearOrderbookStore() async {
         await bidStore.clearStore()
-        await askStroe.clearStore()
+        await askStore.clearStore()
     }
     
     func apply(bids: [Orderbook]) async {
@@ -148,15 +182,20 @@ private extension CoinDetailPageViewModel {
     
     func apply(asks: [Orderbook]) async {
         for askOrder in asks {
-            await askStroe.update(key: askOrder.price, value: askOrder.quantity)
+            await askStore.update(key: askOrder.price, value: askOrder.quantity)
         }
     }
 }
 
 
 // MARK: State
-public extension CoinDetailPageViewModel {
+extension CoinDetailPageViewModel {
     struct State {
+        // 24h ticker
+        var symbolText: String
+        var tickerInfo: TickerInfo?
+        
+        // Orderbook table
         var bidOrderbooks: [OrderbookCellRO] = []
         var askOrderbooks: [OrderbookCellRO] = []
     }

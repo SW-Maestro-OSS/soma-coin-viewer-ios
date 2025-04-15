@@ -41,10 +41,10 @@ struct AllMarketTickerViewModelTests {
             alertShooter: MockAlertShooter()
         )
         let givenTickerVOs: [Twenty4HourTickerForSymbolVO] = [
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test4USDT", price: 200.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0),
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test3USDT", price: 100.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 2.0),
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test2USDT", price: 300.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 3.0),
-            Twenty4HourTickerForSymbolVO(pairSymbol: "test1USDT", price: 400.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 4.0),
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test4USDT", price: 200.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 1.0, bestBidPrice: .init(0.0), bestAskPrice: .init(0.0)),
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test3USDT", price: 100.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 2.0, bestBidPrice: .init(0.0), bestAskPrice: .init(0.0)),
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test2USDT", price: 300.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 3.0, bestBidPrice: .init(0.0), bestAskPrice: .init(0.0)),
+            Twenty4HourTickerForSymbolVO(pairSymbol: "test1USDT", price: 400.0, totalTradedQuoteAssetVolume: 1.0, changedPercent: 4.0, bestBidPrice: .init(0.0), bestAskPrice: .init(0.0)),
         ].map { vo in
             var newVO = vo
             newVO.setSymbols(closure: { pairSymbol in

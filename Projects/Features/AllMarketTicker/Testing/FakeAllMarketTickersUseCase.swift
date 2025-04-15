@@ -37,7 +37,9 @@ class FakeAllMarketTickersUseCase: AllMarketTickersUseCase {
                 pairSymbol: "test\(index)USDT",
                 price: .init(100.0 * Double.random(in: 1..<10)),
                 totalTradedQuoteAssetVolume: .init(.random(in: 100..<2000)),
-                changedPercent: .init(.random(in: -100...100))
+                changedPercent: .init(.random(in: -100...100)),
+                bestBidPrice: .init(0.0),
+                bestAskPrice: .init(0.0)
             )
         }.map { vo in
             var newVO = vo
