@@ -21,6 +21,7 @@ struct CoinDetailPageView: View {
                 coinTitleContent()
                 tickerChangeInfoContent()
                 orderbookTableContent()
+                recentTradeContent()
             }
         }
         .onAppear { viewModel.action.send(.onAppear) }
@@ -66,5 +67,10 @@ struct CoinDetailPageView: View {
                 }
             }
         }
+    }
+    
+    @ViewBuilder
+    private func recentTradeContent() -> some View {
+        RecentTradeTableView(trades: $viewModel.state.trades)
     }
 }

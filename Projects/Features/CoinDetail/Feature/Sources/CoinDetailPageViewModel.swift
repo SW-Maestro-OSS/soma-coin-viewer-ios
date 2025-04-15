@@ -18,7 +18,7 @@ enum CoinDetailPageAction {
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
     case updateTickerInfo(info: TickerInfo)
-    case insertTrade(trade: CoinTradeRO)
+    case updateTrades(trades: [CoinTradeVO])
 }
 
 final class CoinDetailPageViewModel: UDFObservableObject {
@@ -32,7 +32,8 @@ final class CoinDetailPageViewModel: UDFObservableObject {
     private var hasAppeared = false
     private let bidStore: OrderbookStore = .init()
     private let askStore: OrderbookStore = .init()
-
+    private var tradeContainer: TradeContainer = .init(maxCount: 15)
+    
     
     // Action
     typealias Action = CoinDetailPageAction
@@ -42,6 +43,7 @@ final class CoinDetailPageViewModel: UDFObservableObject {
     // Streams
     private var orderbookStream: AnyCancellable?
     private var singleTickerStream: AnyCancellable?
+    private var recentTradeStream: AnyCancellable?
     var store: Set<AnyCancellable> = .init()
     
     init(symbolPair: String, useCase: CoinDetailPageUseCase) {
@@ -82,6 +84,8 @@ final class CoinDetailPageViewModel: UDFObservableObject {
             }
         case .updateTickerInfo(let info):
             newState.tickerInfo = info
+        case .updateTrades(let trades):
+            newState.trades = trades.map(convertToRO)
         default:
             break
         }
@@ -140,8 +144,8 @@ private extension CoinDetailPageViewModel {
             .throttle(for: 0.3, scheduler: DispatchQueue.global(), latest: true)
             .unretainedOnly(self)
             .asyncTransform { vm in
-                let bidList = await vm.bidStore.getDescendingList(count: 20).map(Orderbook.init)
-                let askList = await vm.askStore.getAscendingList(count: 20).map(Orderbook.init)
+                let bidList = await vm.bidStore.getDescendingList(count: 15).map(Orderbook.init)
+                let askList = await vm.askStore.getAscendingList(count: 15).map(Orderbook.init)
                 return Action.updateOrderbook(bids: bidList, asks: askList)
             }
             .subscribe(self.action)
@@ -193,23 +197,39 @@ private extension CoinDetailPageViewModel {
 // MARK: Recent trade
 private extension CoinDetailPageViewModel {
     func startRecentTradeStream() {
+        let updateTracker = PassthroughSubject<Void, Never>()
+        recentTradeStream?.cancel()
+        recentTradeStream = updateTracker
+            .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
+            .unretainedOnly(self)
+            .asyncTransform { vm in
+                let newList = await vm.tradeContainer.getList()
+                return Action.updateTrades(trades: newList)
+            }
+            .subscribe(self.action)
+        
         Task {
             useCase.connectToRecentTradeStream(symbolPair: symbolPair)
             for await entity in useCase.getRecentTrade(symbolPair: symbolPair) {
-                let dateFormatter = DateFormatter()
-                dateFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-                dateFormatter.dateFormat = "HH:mm:ss"
-                let renderObject: CoinTradeRO = .init(
-                    id: entity.tradeId,
-                    priceText: entity.price.roundDecimalPlaces(exact: 4),
-                    quantityText: entity.quantity.roundDecimalPlaces(exact: 4),
-                    timeText: dateFormatter.string(from: entity.tradeTime),
-                    textColor: entity.tradeType == .buy ? .green : .red,
-                    backgroundEffectColor: (entity.tradeType == .buy ? .green : .red)
-                )
-                action.send(.insertTrade(trade: renderObject))
+                await tradeContainer.insert(element: entity)
+                updateTracker.send(())
             }
         }
+    }
+    
+    func convertToRO(_ entity: CoinTradeVO) -> CoinTradeRO {
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        dateFormatter.dateFormat = "HH:mm:ss"
+        let renderObject: CoinTradeRO = .init(
+            id: entity.tradeId,
+            priceText: entity.price.roundDecimalPlaces(exact: 4),
+            quantityText: entity.quantity.roundDecimalPlaces(exact: 4),
+            timeText: dateFormatter.string(from: entity.tradeTime),
+            textColor: entity.tradeType == .buy ? .green : .red,
+            backgroundEffectColor: (entity.tradeType == .buy ? .green : .red)
+        )
+        return renderObject
     }
 }
 
@@ -227,6 +247,10 @@ extension CoinDetailPageViewModel {
         
         // Recent trade
         var trades: [CoinTradeRO] = []
+        
+        init(symbolText: String) {
+            self.symbolText = symbolText
+        }
     }
 }
 

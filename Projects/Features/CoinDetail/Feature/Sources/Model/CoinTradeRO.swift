@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CoinTradeRO: Identifiable {
+struct CoinTradeRO: Identifiable, Equatable {
     let id: String
     let priceText: String
     let quantityText: String
