@@ -18,6 +18,7 @@ enum CoinDetailPageAction {
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
     case updateTickerInfo(info: TickerInfo)
+    case insertTrade(trade: CoinTradeRO)
 }
 
 final class CoinDetailPageViewModel: UDFObservableObject {
@@ -59,6 +60,7 @@ final class CoinDetailPageViewModel: UDFObservableObject {
                 hasAppeared = true
                 startOrderbookStream()
                 start24hTickerStream()
+                startRecentTradeStream()
             }
             return Just(action).eraseToAnyPublisher()
         default:
@@ -188,6 +190,30 @@ private extension CoinDetailPageViewModel {
 }
 
 
+// MARK: Recent trade
+private extension CoinDetailPageViewModel {
+    func startRecentTradeStream() {
+        Task {
+            useCase.connectToRecentTradeStream(symbolPair: symbolPair)
+            for await entity in useCase.getRecentTrade(symbolPair: symbolPair) {
+                let dateFormatter = DateFormatter()
+                dateFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+                dateFormatter.dateFormat = "HH:mm:ss"
+                let renderObject: CoinTradeRO = .init(
+                    id: entity.tradeId,
+                    priceText: entity.price.roundDecimalPlaces(exact: 4),
+                    quantityText: entity.quantity.roundDecimalPlaces(exact: 4),
+                    timeText: dateFormatter.string(from: entity.tradeTime),
+                    textColor: entity.tradeType == .buy ? .green : .red,
+                    backgroundEffectColor: (entity.tradeType == .buy ? .green : .red)
+                )
+                action.send(.insertTrade(trade: renderObject))
+            }
+        }
+    }
+}
+
+
 // MARK: State
 extension CoinDetailPageViewModel {
     struct State {
@@ -198,6 +224,9 @@ extension CoinDetailPageViewModel {
         // Orderbook table
         var bidOrderbooks: [OrderbookCellRO] = []
         var askOrderbooks: [OrderbookCellRO] = []
+        
+        // Recent trade
+        var trades: [CoinTradeRO] = []
     }
 }
 
