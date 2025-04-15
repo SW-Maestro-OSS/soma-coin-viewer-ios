@@ -16,8 +16,8 @@ extension BinanceCoinTradeDTO {
         .init(
             tradeId: String(tradeID),
             tradeType: isBuyerMarketMaker ? .sell : .buy,
-            price: CVNumber(Decimal(string: self.price)!),
-            quantity: CVNumber(Decimal(string: self.quantity)!),
+            price: CVNumber(Decimal(string: self.price) ?? Decimal.zero),
+            quantity: CVNumber(Decimal(string: self.quantity) ?? Decimal.zero),
             tradeTime: Date(timeIntervalSince1970: TimeInterval(eventTime) / 1000)
         )
     }
