@@ -15,6 +15,7 @@ final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
 
     @Injected private var orderbookRepository: OrderbookRepository
     @Injected private var singleTickerRepository: SingleMarketTickerRepository
+    @Injected private var coinTradeRepository: TradeRepository
     @Injected private var webSocketHelper: WebSocketManagementHelper
     
     public init() { }
@@ -31,8 +32,12 @@ public extension DefaultCoinDetailPageUseCase {
         webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@ticker"])
     }
     
+    func connectToRecentTradeStream(symbolPair: String) {
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@trade"])
+    }
+    
     func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO {
-        try await orderbookRepository.getWhileTable(symbolPair: symbolPair)
+        try await orderbookRepository.getWholeTable(symbolPair: symbolPair)
     }
     
     func getChangeInOrderbook(symbolPair: String) -> AsyncStream<OrderbookUpdateVO> {
@@ -41,5 +46,9 @@ public extension DefaultCoinDetailPageUseCase {
     
     func get24hTickerChange(symbolPair: String) -> AsyncStream<Twenty4HourTickerForSymbolVO> {
         singleTickerRepository.request24hTickerChange(pairSymbol: symbolPair)
+    }
+    
+    func getRecentTrade(symbolPair: String) -> AsyncStream<CoinTradeVO> {
+        coinTradeRepository.getSingleTrade(symbolPair: symbolPair)
     }
 }

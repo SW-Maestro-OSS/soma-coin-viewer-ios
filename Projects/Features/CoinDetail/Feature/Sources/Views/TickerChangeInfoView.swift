@@ -17,34 +17,33 @@ struct TickerChangeInfoView: View {
     ]
     
     var body: some View {
-        LazyVGrid(columns: columns) {
+        LazyVGrid(columns: columns, spacing: 4) {
             Group {
                 Text("Current price")
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.black)
                     .padding(.horizontal, 3)
                 Text(info?.currentPriceText ?? "-")
                     .foregroundStyle(.black)
                     .padding(.horizontal, 3)
+                    .monospaced()
             }
             Group {
                 Text("Best bid price")
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.black)
                     .padding(.horizontal, 3)
                 Text(info?.bestBidPriceText ?? "-")
                     .foregroundStyle(.green)
                     .padding(.horizontal, 3)
+                    .monospaced()
             }
             Group {
                 Text("Best ask price")
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.black)
                     .padding(.horizontal, 3)
                 Text(info?.bestAskPriceText ?? "-")
                     .foregroundStyle(.red)
                     .padding(.horizontal, 3)
+                    .monospaced()
             }
         }
+        .font(.subheadline.bold())
+        .foregroundColor(.gray)
     }
 }

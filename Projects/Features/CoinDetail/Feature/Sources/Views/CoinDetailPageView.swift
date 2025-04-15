@@ -19,8 +19,12 @@ struct CoinDetailPageView: View {
         ScrollView {
             VStack(spacing: 0) {
                 coinTitleContent()
+                Divider()
                 tickerChangeInfoContent()
+                Divider()
                 orderbookTableContent()
+                Divider()
+                recentTradeContent()
             }
         }
         .onAppear { viewModel.action.send(.onAppear) }
@@ -34,37 +38,52 @@ struct CoinDetailPageView: View {
                 .foregroundStyle(.black)
             Spacer()
         }
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 3)
         .padding(.bottom, 5)
-        
-        Rectangle()
-            .frame(height: 1)
-            .foregroundStyle(.black)
     }
     
     @ViewBuilder
     private func tickerChangeInfoContent() -> some View {
         TickerChangeInfoView(info: $viewModel.state.tickerInfo)
-        Rectangle()
-            .frame(height: 1)
-            .foregroundStyle(.black)
     }
     
     @ViewBuilder
     private func orderbookTableContent() -> some View {
-        HStack(alignment: .top, spacing: 0) {
-            VStack(spacing: 0) {
-                ForEach(Array(viewModel.state.bidOrderbooks.enumerated()), id: \.offset) { index, _ in
-                    OrderbookCellView(renderObject: $viewModel.state.bidOrderbooks[index])
-                        .frame(height: 30)
-                }
+        VStack(spacing: 0) {
+            HStack {
+                Text("Qty")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text("Price")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Text("Qty")
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
-            VStack(spacing: 0) {
-                ForEach(Array(viewModel.state.askOrderbooks.enumerated()), id: \.offset) { index, _ in
-                    OrderbookCellView(renderObject: $viewModel.state.askOrderbooks[index])
-                        .frame(height: 30)
+            .font(.subheadline.bold())
+            .foregroundColor(.gray)
+            .padding(.horizontal, 3)
+            .padding(.vertical, 7)
+            
+            Divider()
+            
+            HStack(alignment: .top, spacing: 0) {
+                VStack(spacing: 0) {
+                    ForEach(Array(viewModel.state.bidOrderbooks.enumerated()), id: \.offset) { index, _ in
+                        OrderbookCellView(renderObject: $viewModel.state.bidOrderbooks[index])
+                            .frame(height: 30)
+                    }
+                }
+                VStack(spacing: 0) {
+                    ForEach(Array(viewModel.state.askOrderbooks.enumerated()), id: \.offset) { index, _ in
+                        OrderbookCellView(renderObject: $viewModel.state.askOrderbooks[index])
+                            .frame(height: 30)
+                    }
                 }
             }
         }
+    }
+    
+    @ViewBuilder
+    private func recentTradeContent() -> some View {
+        RecentTradeTableView(trades: $viewModel.state.trades)
     }
 }
