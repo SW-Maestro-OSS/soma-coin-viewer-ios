@@ -32,7 +32,7 @@ public extension DefaultCoinDetailPageUseCase {
     }
     
     func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO {
-        try await orderbookRepository.getWhileTable(symbolPair: symbolPair)
+        try await orderbookRepository.getWholeTable(symbolPair: symbolPair)
     }
     
     func getChangeInOrderbook(symbolPair: String) -> AsyncStream<OrderbookUpdateVO> {

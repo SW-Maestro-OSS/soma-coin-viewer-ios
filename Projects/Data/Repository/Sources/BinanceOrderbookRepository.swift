@@ -18,7 +18,7 @@ final public class BinanceOrderbookRepository: OrderbookRepository {
     
     public init() { }
     
-    public func getWhileTable(symbolPair: String) async throws -> OrderbookUpdateVO {
+    public func getWholeTable(symbolPair: String) async throws -> OrderbookUpdateVO {
         let requestBuiler = URLRequestBuilder(
             base: .init(string: "https://api.binance.com/api/v3")!,
             httpMethod: .get
