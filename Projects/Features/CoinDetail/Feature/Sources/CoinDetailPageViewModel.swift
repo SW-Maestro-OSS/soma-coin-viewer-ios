@@ -17,7 +17,7 @@ enum CoinDetailPageAction {
     case onAppear
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
-    case updateTickerInfo(info: TickerInfo)
+    case updateTickerInfo(entity: Twenty4HourTickerForSymbolVO)
     case updateTrades(trades: [CoinTradeVO])
 }
 
@@ -81,8 +81,20 @@ final class CoinDetailPageViewModel: UDFObservableObject {
             newState.askOrderbooks = asks.map {
                 transform(bigestQuantity: bigestQuantity, orderbook: $0, type: .ask)
             }
-        case .updateTickerInfo(let info):
-            newState.tickerInfo = info
+        case .updateTickerInfo(let entity):
+            
+            let (changePercentText, changeType) = createChangePercentTextConfig(percent: entity.changedPercent)
+            newState.priceChagePercentInfo = .init(
+                changeType: changeType,
+                percentText: changePercentText
+            )
+            newState.tickerInfo =
+                .init(
+                    currentPriceText: entity.price.roundDecimalPlaces(exact: 4),
+                    bestBidPriceText: entity.bestBidPrice.roundDecimalPlaces(exact: 4),
+                    bestAskPriceText: entity.bestAskPrice.roundDecimalPlaces(exact: 4)
+                )
+            
         case .updateTrades(let trades):
             newState.trades = trades.map(convertToRO)
         default:
@@ -110,27 +122,25 @@ private extension CoinDetailPageViewModel {
             guard let self else { return }
             useCase.connectToOrderbookStream(symbolPair: symbolPair)
             for await tickerVO in useCase.get24hTickerChange(symbolPair: symbolPair) {
-                let (changePercentText, changePercentTextColor) = createChangePercentTextConfig(percent: tickerVO.changedPercent)
-                action.send(.updateTickerInfo(info: .init(
-                    changePercentText: changePercentText,
-                    changePercentTextColor: changePercentTextColor,
-                    currentPriceText: tickerVO.price.roundDecimalPlaces(exact: 4),
-                    bestBidPriceText: tickerVO.bestBidPrice.roundDecimalPlaces(exact: 4),
-                    bestAskPriceText: tickerVO.bestAskPrice.roundDecimalPlaces(exact: 4)
-                )))
+                action.send(.updateTickerInfo(entity: tickerVO))
             }
         }
     }
     
-    func createChangePercentTextConfig(percent: CVNumber) -> (String, Color) {
+    func createChangePercentTextConfig(percent: CVNumber) -> (String, ChangeType) {
         let percentText = percent.roundToTwoDecimalPlaces()+"%"
         var displayText: String = percentText
-        var displayColor: Color = .red
         if percent >= 0.0 {
             displayText = "+"+displayText
-            displayColor = .green
         }
-        return (displayText, displayColor)
+        var changeType: ChangeType = .neutral
+        let percentNumber = percent.wrappedNumber
+        if percentNumber < 0 {
+            changeType = .minus
+        } else if percentNumber > 0 {
+            changeType = .plus
+        }
+        return (displayText, changeType)
     }
 }
 
@@ -247,6 +257,7 @@ extension CoinDetailPageViewModel {
     struct State {
         // 24h ticker
         var symbolText: String
+        var priceChagePercentInfo: PriceChagePercentRO?
         var tickerInfo: TickerInfo?
         
         // Orderbook table

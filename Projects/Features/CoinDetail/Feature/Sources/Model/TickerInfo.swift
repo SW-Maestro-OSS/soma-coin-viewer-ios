@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct TickerInfo {
-    var changePercentText: String
-    var changePercentTextColor: Color
     var currentPriceText: String
     var bestBidPriceText: String
     var bestAskPriceText: String
