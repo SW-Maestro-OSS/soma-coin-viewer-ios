@@ -102,15 +102,6 @@ final class CoinDetailPageViewModel: UDFObservableObject {
         }
         return newState
     }
-    
-    private func transform(bigestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
-        return OrderbookCellRO(
-            type: type,
-            priceText: orderbook.price.roundDecimalPlaces(exact: 4),
-            quantityText: orderbook.quantity.description,
-            relativePercentOfQuantity: orderbook.quantity.double / bigestQuantity.double
-        )
-    }
 }
 
 
@@ -203,6 +194,15 @@ private extension CoinDetailPageViewModel {
         for askOrder in asks {
             await askStore.update(key: askOrder.price, value: askOrder.quantity)
         }
+    }
+    
+    func transform(bigestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
+        return OrderbookCellRO(
+            type: type,
+            priceText: orderbook.price.roundDecimalPlaces(exact: 4),
+            quantityText: orderbook.quantity.roundDecimalPlaces(exact: 4),
+            relativePercentOfQuantity: orderbook.quantity.double / bigestQuantity.double
+        )
     }
 }
 

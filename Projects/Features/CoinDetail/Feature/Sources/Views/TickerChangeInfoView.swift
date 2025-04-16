@@ -24,7 +24,7 @@ struct TickerChangeInfoView: View {
                 Text(info?.currentPriceText ?? "-")
                     .foregroundStyle(.black)
                     .padding(.horizontal, 3)
-                    .monospaced()
+                    .monospacedDigit()
             }
             Group {
                 Text("Best bid price")
@@ -32,7 +32,7 @@ struct TickerChangeInfoView: View {
                 Text(info?.bestBidPriceText ?? "-")
                     .foregroundStyle(.green)
                     .padding(.horizontal, 3)
-                    .monospaced()
+                    .monospacedDigit()
             }
             Group {
                 Text("Best ask price")
@@ -40,7 +40,7 @@ struct TickerChangeInfoView: View {
                 Text(info?.bestAskPriceText ?? "-")
                     .foregroundStyle(.red)
                     .padding(.horizontal, 3)
-                    .monospaced()
+                    .monospacedDigit()
             }
         }
         .font(.subheadline.bold())
