@@ -41,9 +41,8 @@ final class CoinDetailPageViewModel: UDFObservableObject {
     
     
     // Streams
-    private var orderbookStream: AnyCancellable?
-    private var singleTickerStream: AnyCancellable?
-    private var recentTradeStream: AnyCancellable?
+    private var streamUpdateObserverStore: [CoinInfoStream: AnyCancellable] = [:]
+    private var streamTask: [CoinInfoStream: Task<Void, Never>] = [:]
     var store: Set<AnyCancellable> = .init()
     
     init(symbolPair: String, useCase: CoinDetailPageUseCase) {
@@ -107,7 +106,8 @@ final class CoinDetailPageViewModel: UDFObservableObject {
 // MARK: 24h ticker
 private extension CoinDetailPageViewModel {
     func start24hTickerStream() {
-        Task { [weak self] in
+        streamTask[.changeInTicker]?.cancel()
+        streamTask[.changeInTicker] = Task { [weak self] in
             guard let self else { return }
             useCase.connectToOrderbookStream(symbolPair: symbolPair)
             for await tickerVO in useCase.get24hTickerChange(symbolPair: symbolPair) {
@@ -140,8 +140,8 @@ private extension CoinDetailPageViewModel {
 private extension CoinDetailPageViewModel {
     func startOrderbookStream() {
         let updateTracker = PassthroughSubject<Void, Never>()
-        orderbookStream?.cancel()
-        orderbookStream = updateTracker
+        streamUpdateObserverStore[.orderbookTable]?.cancel()
+        streamUpdateObserverStore[.orderbookTable] = updateTracker
             .throttle(for: 0.3, scheduler: DispatchQueue.global(), latest: true)
             .unretainedOnly(self)
             .asyncTransform { vm in
@@ -151,7 +151,8 @@ private extension CoinDetailPageViewModel {
             }
             .subscribe(self.action)
         
-        Task { [weak self] in
+        streamTask[.orderbookTable]?.cancel()
+        streamTask[.orderbookTable] = Task { [weak self] in
             guard let self else { return }
             useCase.connectToTickerChangesStream(symbolPair: symbolPair)
             do {
@@ -200,8 +201,8 @@ private extension CoinDetailPageViewModel {
 private extension CoinDetailPageViewModel {
     func startRecentTradeStream() {
         let updateTracker = PassthroughSubject<Void, Never>()
-        recentTradeStream?.cancel()
-        recentTradeStream = updateTracker
+        streamUpdateObserverStore[.recentTrade]?.cancel()
+        streamUpdateObserverStore[.recentTrade] = updateTracker
             .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
             .unretainedOnly(self)
             .asyncTransform { vm in
@@ -210,7 +211,8 @@ private extension CoinDetailPageViewModel {
             }
             .subscribe(self.action)
         
-        Task { [weak self] in
+        streamTask[.recentTrade]?.cancel()
+        streamTask[.recentTrade] = Task { [weak self] in
             guard let self else { return }
             useCase.connectToRecentTradeStream(symbolPair: symbolPair)
             for await entity in useCase.getRecentTrade(symbolPair: symbolPair) {
