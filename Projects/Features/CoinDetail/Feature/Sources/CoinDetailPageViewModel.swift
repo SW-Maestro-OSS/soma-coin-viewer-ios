@@ -32,7 +32,7 @@ final class CoinDetailPageViewModel: UDFObservableObject {
     private var hasAppeared = false
     private let bidStore: OrderbookStore = .init()
     private let askStore: OrderbookStore = .init()
-    private var tradeContainer: TradeContainer = .init(maxCount: 15)
+    private let tradeContainer: TradeContainer = .init(maxCount: 15)
     
     
     // Action
