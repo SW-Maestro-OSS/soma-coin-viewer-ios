@@ -17,22 +17,20 @@ struct RecentTradeRowView: View {
             Text(trade.priceText)
                 .foregroundColor(trade.textColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .monospacedDigit()
                 .padding(.horizontal, 3)
             
             Text(trade.quantityText)
                 .foregroundColor(trade.textColor)
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .monospacedDigit()
                 .padding(.trailing, 40)
             
             Text(trade.timeText)
                 .foregroundColor(trade.textColor)
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .monospacedDigit()
                 .padding(.horizontal, 3)
         }
-        .font(.system(size: 14))
+        .font(.subheadline.bold())
+        .monospacedDigit()
         .padding(.vertical, 7)
         .background(trade.backgroundEffectColor.opacity(backgroundAlpha))
         .onAppear(perform: {

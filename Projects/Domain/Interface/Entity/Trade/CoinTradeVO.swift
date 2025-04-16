@@ -9,8 +9,8 @@ import Foundation
 
 import CoreUtil
 
-public struct CoinTradeVO {
-    public enum TradeType {
+public struct CoinTradeVO: Sendable {
+    public enum TradeType: Sendable {
         case buy, sell
     }
     
