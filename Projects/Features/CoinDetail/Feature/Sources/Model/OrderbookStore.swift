@@ -24,7 +24,7 @@ extension OrderbookStore {
     }
     
     func update(key: CVNumber, value: CVNumber) {
-        if let prev = orderQuantityTable[key] {
+        if orderQuantityTable[key] != nil {
             // 키값이 이미 존재하는 경우, 업데이트
             if value.wrappedNumber <= 0 {
                 orderQuantityTable.removeValue(forKey: key)
@@ -34,8 +34,10 @@ extension OrderbookStore {
             }
         } else {
             // 새로운 키값 등록
-            orderQuantityTable[key] = value
-            keyTree.insert(key)
+            if value.wrappedNumber > 0 {
+                orderQuantityTable[key] = value
+                keyTree.insert(key)
+            }
         }
     }
     
