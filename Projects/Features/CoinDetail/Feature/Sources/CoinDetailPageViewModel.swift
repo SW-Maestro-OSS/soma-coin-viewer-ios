@@ -107,7 +107,8 @@ final class CoinDetailPageViewModel: UDFObservableObject {
 // MARK: 24h ticker
 private extension CoinDetailPageViewModel {
     func start24hTickerStream() {
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
             useCase.connectToOrderbookStream(symbolPair: symbolPair)
             for await tickerVO in useCase.get24hTickerChange(symbolPair: symbolPair) {
                 let (changePercentText, changePercentTextColor) = createChangePercentTextConfig(percent: tickerVO.changedPercent)
@@ -150,7 +151,8 @@ private extension CoinDetailPageViewModel {
             }
             .subscribe(self.action)
         
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
             useCase.connectToTickerChangesStream(symbolPair: symbolPair)
             do {
                 // #1. 전체 테이블 요청
@@ -208,7 +210,8 @@ private extension CoinDetailPageViewModel {
             }
             .subscribe(self.action)
         
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
             useCase.connectToRecentTradeStream(symbolPair: symbolPair)
             for await entity in useCase.getRecentTrade(symbolPair: symbolPair) {
                 await tradeContainer.insert(element: entity)
