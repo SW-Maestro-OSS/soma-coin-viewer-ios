@@ -11,8 +11,6 @@ actor OrderbookStore {
     // State
     private let keyTree: AVLTree<CVNumber> = .init()
     private var orderQuantityTable: [CVNumber: CVNumber] = [:]
-    
-    func isRemovable(value: CVNumber) -> Bool { value.wrappedNumber <= 0 }
 }
 
 
@@ -28,12 +26,11 @@ extension OrderbookStore {
     func update(key: CVNumber, value: CVNumber) {
         if let prev = orderQuantityTable[key] {
             // 키값이 이미 존재하는 경우, 업데이트
-            let newValue = prev + value
-            if isRemovable(value: newValue) {
+            if value.wrappedNumber <= 0 {
                 orderQuantityTable.removeValue(forKey: key)
                 keyTree.remove(key)
             } else {
-                orderQuantityTable[key] = newValue
+                orderQuantityTable[key] = value
             }
         } else {
             // 새로운 키값 등록

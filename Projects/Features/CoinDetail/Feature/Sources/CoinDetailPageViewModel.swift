@@ -92,12 +92,11 @@ final class CoinDetailPageViewModel: UDFObservableObject {
     }
     
     private func transform(bigestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
-        let percent = sqrt(pow(bigestQuantity.double, 2) - pow(bigestQuantity.double-orderbook.quantity.double, 2)) / bigestQuantity.double
         return OrderbookCellRO(
             type: type,
             priceText: orderbook.price.roundDecimalPlaces(exact: 4),
             quantityText: orderbook.quantity.roundDecimalPlaces(exact: 1),
-            relativePercentOfQuantity: percent
+            relativePercentOfQuantity: orderbook.quantity.double / bigestQuantity.double
         )
     }
 }
@@ -139,12 +138,17 @@ private extension CoinDetailPageViewModel {
 // MARK: Orderbook table
 private extension CoinDetailPageViewModel {
     func startOrderbookStream() {
-        let updateTracker = PassthroughSubject<Void, Never>()
+        let updateTracker = PassthroughSubject<OrderbookUpdateVO, Never>()
         streamUpdateObserverStore[.orderbookTable]?.cancel()
         streamUpdateObserverStore[.orderbookTable] = updateTracker
-            .throttle(for: 0.3, scheduler: DispatchQueue.global(), latest: true)
-            .unretainedOnly(self)
-            .asyncTransform { vm in
+            .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
+            .unretained(self)
+            .asyncTransform { vm, update in
+                // - 테이블 업데이트
+                await vm.apply(bids: update.bids)
+                await vm.apply(asks: update.asks)
+                
+                // - 리스트 추출
                 let bidList = await vm.bidStore.getDescendingList(count: 15).map(Orderbook.init)
                 let askList = await vm.askStore.getAscendingList(count: 15).map(Orderbook.init)
                 return Action.updateOrderbook(bids: bidList, asks: askList)
@@ -159,18 +163,14 @@ private extension CoinDetailPageViewModel {
                 // #1. 전체 테이블 요청
                 let wholeTable = try await useCase.getWholeOrderbookTable(symbolPair: symbolPair)
                 await clearOrderbookStore()
-                await apply(bids: wholeTable.bids)
-                await apply(asks: wholeTable.asks)
-                updateTracker.send(())
+                updateTracker.send(wholeTable)
                 
                 // #2. 실시간 업데이트
                 let sequence = useCase.getChangeInOrderbook(symbolPair: symbolPair).filter { entity in
                     entity.lastUpdateId > wholeTable.lastUpdateId
                 }
                 for await update in sequence {
-                    await apply(bids: update.bids)
-                    await apply(asks: update.asks)
-                    updateTracker.send(())
+                    updateTracker.send(update)
                 }
             } catch {
                 print(error)
