@@ -95,7 +95,7 @@ final class CoinDetailPageViewModel: UDFObservableObject {
         return OrderbookCellRO(
             type: type,
             priceText: orderbook.price.roundDecimalPlaces(exact: 4),
-            quantityText: orderbook.quantity.roundDecimalPlaces(exact: 1),
+            quantityText: orderbook.quantity.description,
             relativePercentOfQuantity: orderbook.quantity.double / bigestQuantity.double
         )
     }
@@ -200,12 +200,16 @@ private extension CoinDetailPageViewModel {
 // MARK: Recent trade
 private extension CoinDetailPageViewModel {
     func startRecentTradeStream() {
-        let updateTracker = PassthroughSubject<Void, Never>()
+        let updateTracker = PassthroughSubject<CoinTradeVO, Never>()
         streamUpdateObserverStore[.recentTrade]?.cancel()
         streamUpdateObserverStore[.recentTrade] = updateTracker
-            .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
-            .unretainedOnly(self)
-            .asyncTransform { vm in
+            .throttle(for: 1.0, scheduler: DispatchQueue.global(), latest: true)
+            .unretained(self)
+            .asyncTransform { vm, update in
+                // - 주문정보 업데이트
+                await vm.tradeContainer.insert(element: update)
+                
+                // - 새로운 리스트 추출
                 let newList = await vm.tradeContainer.getList()
                 return Action.updateTrades(trades: newList)
             }
@@ -216,8 +220,7 @@ private extension CoinDetailPageViewModel {
             guard let self else { return }
             useCase.connectToRecentTradeStream(symbolPair: symbolPair)
             for await entity in useCase.getRecentTrade(symbolPair: symbolPair) {
-                await tradeContainer.insert(element: entity)
-                updateTracker.send(())
+                updateTracker.send(entity)
             }
         }
     }
