@@ -26,6 +26,7 @@ public protocol CoinDetailPageRouting: AnyObject { }
 enum CoinDetailPageAction {
     case onAppear
     case exitButtonTapped
+    case enterBackground
     case getbackToForeground
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
@@ -75,9 +76,16 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
         case .onAppear:
             if !hasAppeared {
                 hasAppeared = true
-                startOrderbookStream()
-                start24hTickerStream()
-                startRecentTradeStream()
+                
+                // 스크림 구독
+                listenToOrderbookStream()
+                listenToChangeInTickerStream()
+                listenToRecentTradeStream()
+                
+                // 스트림 연결
+                useCase.connectToTickerChangesStream(symbolPair: symbolPair)
+                useCase.connectToOrderbookStream(symbolPair: symbolPair)
+                useCase.connectToRecentTradeStream(symbolPair: symbolPair)
             }
             return Just(action).eraseToAnyPublisher()
         case .exitButtonTapped:
@@ -87,7 +95,15 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             // 페이지 닫기
             listener?.request(.closePage)
         case .getbackToForeground:
-            startOrderbookStream()
+            // 오더북 스트림만 상태 초기화 및 재구독
+            listenToOrderbookStream()
+            
+            // 스트림 연결
+            useCase.connectToTickerChangesStream(symbolPair: symbolPair)
+            useCase.connectToOrderbookStream(symbolPair: symbolPair)
+            useCase.connectToRecentTradeStream(symbolPair: symbolPair)
+        case .enterBackground:
+            useCase.disconnectToStreams(symbolPair: symbolPair)
         default:
             break
         }
@@ -129,11 +145,10 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
 
 // MARK: 24h ticker
 private extension CoinDetailPageViewModel {
-    func start24hTickerStream() {
+    func listenToChangeInTickerStream() {
         streamTask[.changeInTicker]?.cancel()
         streamTask[.changeInTicker] = Task { [weak self] in
             guard let self else { return }
-            useCase.connectToTickerChangesStream(symbolPair: symbolPair)
             for await tickerVO in useCase.get24hTickerChange(symbolPair: symbolPair) {
                 action.send(.updateTickerInfo(entity: tickerVO))
             }
@@ -160,7 +175,7 @@ private extension CoinDetailPageViewModel {
 
 // MARK: Orderbook table
 private extension CoinDetailPageViewModel {
-    func startOrderbookStream() {
+    func listenToOrderbookStream() {
         let updateTracker = PassthroughSubject<OrderbookUpdateVO, Never>()
         streamUpdateObserverStore[.orderbookTable]?.cancel()
         streamUpdateObserverStore[.orderbookTable] = updateTracker
@@ -181,7 +196,6 @@ private extension CoinDetailPageViewModel {
         streamTask[.orderbookTable]?.cancel()
         streamTask[.orderbookTable] = Task { [weak self] in
             guard let self else { return }
-            useCase.connectToOrderbookStream(symbolPair: symbolPair)
             do {
                 // #1. 전체 테이블 요청
                 let wholeTable = try await useCase.getWholeOrderbookTable(symbolPair: symbolPair)
@@ -231,7 +245,7 @@ private extension CoinDetailPageViewModel {
 
 // MARK: Recent trade
 private extension CoinDetailPageViewModel {
-    func startRecentTradeStream() {
+    func listenToRecentTradeStream() {
         let updateTracker = PassthroughSubject<CoinTradeVO, Never>()
         streamUpdateObserverStore[.recentTrade]?.cancel()
         streamUpdateObserverStore[.recentTrade] = updateTracker
@@ -250,10 +264,7 @@ private extension CoinDetailPageViewModel {
         streamTask[.recentTrade]?.cancel()
         streamTask[.recentTrade] = Task { [weak self] in
             guard let self else { return }
-            useCase.connectToRecentTradeStream(symbolPair: symbolPair)
-            for await entity in useCase.getRecentTrade(symbolPair: symbolPair) {
-                updateTracker.send(entity)
-            }
+            for await entity in useCase.getRecentTrade(symbolPair: symbolPair) { updateTracker.send(entity) }
         }
     }
     

@@ -39,7 +39,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
     }
     
     
-    public func requestSubscribeToStream(streams: [Stream], autoReconnectionEnabled: Bool) {
+    public func requestSubscribeToStream(streams: [Stream]) {
         subscribedStreamManageQueue.async { [weak self] in
             guard let self else { return }
             // 스트림 구독 메세지 전송
@@ -51,7 +51,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                         printIfDebug("\(Self.self): ✅\(stream)구독 성공")
                     }
                     // 구독에 성공한 스트림들을 기록합니다.
-                    if autoReconnectionEnabled { add(streams: streams) }
+                    add(streams: streams)
                 case .failure(let webSocketError):
                     switch webSocketError {
                     case .messageTransferFailed(_):
@@ -72,7 +72,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                             titleKey: TextKey.Alert.ActionTitle.retry.rawValue,
                             action: { [weak self] in
                                 guard let self else { return }
-                                requestSubscribeToStream(streams: streams, autoReconnectionEnabled: autoReconnectionEnabled)
+                                requestSubscribeToStream(streams: streams)
                             })
                         )
                         alertShooter.shoot(alertModel)
@@ -198,7 +198,7 @@ private extension DefaultWebSocketManagementHelper {
             guard let self else { return }
             printIfDebug("\(Self.self) 스트림 복구 실행 \(currentSubscribtions)")
             let recoveringStreamList = Array(currentSubscribtions)
-            requestSubscribeToStream(streams: recoveringStreamList, autoReconnectionEnabled: true)
+            requestSubscribeToStream(streams: recoveringStreamList)
         }
     }
 }
