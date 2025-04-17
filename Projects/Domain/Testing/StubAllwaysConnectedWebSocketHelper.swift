@@ -15,8 +15,8 @@ class StubAllwaysConnectedWebSocketHelper: WebSocketManagementHelper {
     
     init() { }
     
-    func requestSubscribeToStream(streams: [String]) { }
-    func requestUnsubscribeToStream(streams: [String]) { }
+    func requestSubscribeToStream(streams: [String], mustDeliver: Bool) { }
+    func requestUnsubscribeToStream(streams: [String], mustDeliver: Bool) { }
     func requestDisconnection() { }
     func requestConnection(connectionType: ConnectionType) { }
 }

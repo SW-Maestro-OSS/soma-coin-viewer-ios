@@ -22,9 +22,10 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
     public weak var listener: WebSocketServiceListener?
     
 
-    // Message coders
+    // Message
     private let messageEncoder = JSONEncoder()
     private let messageDecoder: JSONDecoder = .init()
+    private let unsentMessages: MessageStore = .init()
     
     
     // Internal publishers
@@ -50,9 +51,37 @@ public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebS
         setupWebSocketSession()
         subscribeToWebSocketMessageStreamForMessageError()
     }
+}
+
+
+// MARK: Send message
+private extension BinanceWebSocketService {
+    typealias MessageDTO = BinanceWebSocketStreamMessageDTO
     
+    class MessageStore {
+        struct Bundle {
+            let message: MessageDTO
+            let completion: WebsocketCompletion
+        }
+        private var bundles: [Bundle] = []
+        private let lock = NSLock()
+        
+        func append(bundle: Bundle) {
+            defer { lock.unlock() }
+            lock.lock()
+            bundles.append(bundle)
+        }
+        
+        func getAndClear() -> [Bundle] {
+            defer { lock.unlock() }
+            lock.lock()
+            let copy = bundles
+            bundles.removeAll()
+            return copy
+        }
+    }
     
-    private func sendMessage(_ message: BinanceWebSocketStreamMessageDTO, completion: @escaping (Result<Void, Error>) -> Void) {
+    func sendMessage(_ message: BinanceWebSocketStreamMessageDTO, completion: @escaping (Result<Void, WebSocketError>) -> Void) {
         let jsonData = try! messageEncoder.encode(message)
         let stringedMessage = String(data: jsonData, encoding: .utf8)!
         currentWebSocketTask?.send(.string(stringedMessage)) { [weak self] error in
@@ -79,7 +108,7 @@ private extension BinanceWebSocketService {
 
 // MARK: Stream subscription or unsubscription
 public extension BinanceWebSocketService {
-    func subscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
+    func subscribeTo(message: [String], mustDeliver: Bool, completion: @escaping WebsocketCompletion) {
         webSocketManagementQueue.async { [weak self] in
             guard let self, !message.isEmpty else { return }
             let messageDTO = BinanceWebSocketStreamMessageDTO(
@@ -87,22 +116,31 @@ public extension BinanceWebSocketService {
                 params: message,
                 id: 1
             )
+            
             // 구독 메세지 전송
-            sendMessage(messageDTO) { [weak self] result in
-                guard let self else { return }
-                switch result {
-                case .success:
-                    completion(.success(()))
-                case .failure(let error):
-                    let webSocketError = handleNSError(error as NSError)
-                    completion(.failure(.messageTransferFailed(error: webSocketError)))
+            if currentWebSocketTask?.state != .running {
+                // 웹소켓이 연결되어있지 않은 경우
+                if mustDeliver {
+                    // 반드시 전달해야하는 매세지인 경우
+                    unsentMessages.append(bundle: .init(message: messageDTO, completion: completion))
+                }
+            } else {
+                sendMessage(messageDTO) { [weak self] result in
+                    guard let self else { return }
+                    switch result {
+                    case .success:
+                        completion(.success(()))
+                    case .failure(let error):
+                        let webSocketError = handleNSError(error as NSError)
+                        completion(.failure(.messageTransferFailed(error: webSocketError)))
+                    }
                 }
             }
         }
     }
     
     
-    func unsubscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
+    func unsubscribeTo(message: [String], mustDeliver: Bool, completion: @escaping WebsocketCompletion) {
         webSocketManagementQueue.async { [weak self] in
             guard let self, !message.isEmpty else { return }
             let messageDTO = BinanceWebSocketStreamMessageDTO(
@@ -110,15 +148,24 @@ public extension BinanceWebSocketService {
                 params: message,
                 id: 1
             )
+            
             // 구독취소 메세지 전송
-            sendMessage(messageDTO) { [weak self] result in
-                guard let self else { return }
-                switch result {
-                case .success:
-                    completion(.success(()))
-                case .failure(let error):
-                    let webSocketError = handleNSError(error as NSError)
-                    completion(.failure(.messageTransferFailed(error: webSocketError)))
+            if currentWebSocketTask?.state != .running {
+                // 웹소켓이 연결되어있지 않은 경우
+                if mustDeliver {
+                    // 반드시 전달해야하는 매세지인 경우
+                    unsentMessages.append(bundle: .init(message: messageDTO, completion: completion))
+                }
+            } else {
+                sendMessage(messageDTO) { [weak self] result in
+                    guard let self else { return }
+                    switch result {
+                    case .success:
+                        completion(.success(()))
+                    case .failure(let error):
+                        let webSocketError = handleNSError(error as NSError)
+                        completion(.failure(.messageTransferFailed(error: webSocketError)))
+                    }
                 }
             }
         }
@@ -242,6 +289,11 @@ public extension BinanceWebSocketService {
         if let completion = connectionCompletion[taskId] {
             completion(.success(()))
             connectionCompletion.remove(key: taskId)
+        }
+        
+        // 전송되지 못한 메세지 전송
+        unsentMessages.getAndClear().forEach { bundle in
+            sendMessage(bundle.message, completion: bundle.completion)
         }
     }
     

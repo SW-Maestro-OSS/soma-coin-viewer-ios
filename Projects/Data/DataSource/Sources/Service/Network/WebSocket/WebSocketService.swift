@@ -35,9 +35,9 @@ public protocol WebSocketService: AnyObject {
     
     
     /// 특정 스트림에 구독할 것을 요청합니다.
-    func subscribeTo(message: [String], completion: @escaping WebsocketCompletion)
+    func subscribeTo(message: [String], mustDeliver: Bool, completion: @escaping WebsocketCompletion)
     
     
     /// 특정 스트림에 구독을 해제할 것을 요청합니다.
-    func unsubscribeTo(message: [String], completion: @escaping WebsocketCompletion)
+    func unsubscribeTo(message: [String], mustDeliver: Bool, completion: @escaping WebsocketCompletion)
 }

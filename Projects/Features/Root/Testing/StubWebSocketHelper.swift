@@ -17,11 +17,11 @@ public class StubWebSocketHelper: WebSocketManagementHelper {
     
     public var isWebSocketConnected: AnyPublisher<Bool, Never> = Just(false).eraseToAnyPublisher()
     
-    public func requestSubscribeToStream(streams: [String]) {
+    public func requestSubscribeToStream(streams: [String], mustDeliver: Bool) {
         
     }
     
-    public func requestUnsubscribeToStream(streams: [String]) {
+    public func requestUnsubscribeToStream(streams: [String], mustDeliver: Bool) {
         
     }
     

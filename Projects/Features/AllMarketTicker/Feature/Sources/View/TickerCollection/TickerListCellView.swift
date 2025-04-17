@@ -20,7 +20,6 @@ struct TickerListCellView: View {
     }
     
     var body: some View {
-        
         GeometryReader { geo in
             
             VStack(spacing: 0) {
@@ -74,5 +73,6 @@ struct TickerListCellView: View {
                 Spacer(minLength: 0)
             }
         }
+        .background { Rectangle().foregroundStyle(.white) }
     }
 }

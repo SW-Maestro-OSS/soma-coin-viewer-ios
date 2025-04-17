@@ -10,7 +10,7 @@ import DataSource
 import CoreUtil
 
 final public class BinanceSingleMarketTickerRepository: SingleMarketTickerRepository {
-    
+    // Dependency
     @Injected private var webSocketService: WebSocketService
     
     public init() { }

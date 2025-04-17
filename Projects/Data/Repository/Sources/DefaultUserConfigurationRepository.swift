@@ -15,14 +15,11 @@ import CoreUtil
 import SwiftStructures
 
 public class DefaultUserConfigurationRepository: UserConfigurationRepository {
-    
-    // Service locator
+    // Dependency
     @Injected var userConfigurationService: UserConfigurationService
-    
     
     // Cache configuration
     private let cachedConfiguration: LockedDictionary<String, Any> = .init()
-    
     
     public init() { }
     

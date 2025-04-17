@@ -28,7 +28,7 @@ struct WebSocketManagementHelperTests {
         
         // When
         let testStreams = ["test1", "test2", "test3", "test4"]
-        webSocketHelper.requestSubscribeToStream(streams: testStreams)
+        webSocketHelper.requestSubscribeToStream(streams: testStreams, mustDeliver: false)
         try? await Task.sleep(for: .seconds(3))
         
         
@@ -54,7 +54,7 @@ struct WebSocketManagementHelperTests {
         
         // When
         let testStreams = ["test1", "test2", "test3", "test4"]
-        webSocketHelper.requestSubscribeToStream(streams: testStreams)
+        webSocketHelper.requestSubscribeToStream(streams: testStreams, mustDeliver: false)
         try? await Task.sleep(for: .seconds(3))
         
         
@@ -75,7 +75,7 @@ struct WebSocketManagementHelperTests {
         )
         
         // When
-        webSocketHelper.requestUnsubscribeToStream(streams: ["Test"])
+        webSocketHelper.requestUnsubscribeToStream(streams: ["Test"], mustDeliver: false)
         try? await Task.sleep(for: .seconds(3))
         
         

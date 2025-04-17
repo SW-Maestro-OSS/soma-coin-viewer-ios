@@ -32,6 +32,7 @@ extension InfoPlist {
                 ]
             ]
         ],
+        "UIUserInterfaceStyle": "Light",
         
         // API keys
         "OPENEX_API_KEY": "$(OPENEX_API_KEY)"

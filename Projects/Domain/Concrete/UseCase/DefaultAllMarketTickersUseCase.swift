@@ -14,8 +14,7 @@ import WebSocketManagementHelper
 import CoreUtil
 
 public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
-    
-    // Service locator
+    // Dependency
     @Injected private var allMarketTickersRepository: AllMarketTickersRepository
     @Injected private var webSocketManagementHelper: WebSocketManagementHelper
     
@@ -28,12 +27,13 @@ public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     
     public init() { }
     
-    
-    public func prepareStream() {
-        webSocketManagementHelper
-            .requestSubscribeToStream(streams: ["!ticker@arr"])
+    public func connectToAllMarketTickerStream() {
+        webSocketManagementHelper.requestSubscribeToStream(streams: ["!ticker@arr"], mustDeliver: true)
     }
     
+    public func disConnectToAllMarketTickerStream() {
+        webSocketManagementHelper.requestUnsubscribeToStream(streams: ["!ticker@arr"], mustDeliver: false)
+    }
     
     public func requestTickers() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> {
         

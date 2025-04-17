@@ -12,7 +12,7 @@ import WebSocketManagementHelper
 import CoreUtil
 
 final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
-
+    // Dependency
     @Injected private var orderbookRepository: OrderbookRepository
     @Injected private var singleTickerRepository: SingleMarketTickerRepository
     @Injected private var coinTradeRepository: TradeRepository
@@ -25,15 +25,24 @@ final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
 // MARK: Orderbook
 public extension DefaultCoinDetailPageUseCase {
     func connectToOrderbookStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth"])
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth"], mustDeliver: true)
     }
     
     func connectToTickerChangesStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@ticker"])
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@ticker"], mustDeliver: true)
     }
     
     func connectToRecentTradeStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@trade"])
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@trade"], mustDeliver: true)
+    }
+    
+    func disconnectToStreams(symbolPair: String) {
+        let symbol = symbolPair.lowercased()
+        webSocketHelper.requestUnsubscribeToStream(streams: [
+            "\(symbol)@depth",
+            "\(symbol)@ticker",
+            "\(symbol)@trade",
+        ], mustDeliver: false)
     }
     
     func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO {
