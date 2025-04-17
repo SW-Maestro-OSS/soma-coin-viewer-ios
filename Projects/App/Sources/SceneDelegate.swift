@@ -18,12 +18,10 @@ class SceneDelegate: NSObject, UISceneDelegate {
     
     // MARK: App life cycle management
     func sceneDidEnterBackground(_ scene: UIScene) {
-        webSocketManagementHelper
-            .requestDisconnection()
+        webSocketManagementHelper.requestDisconnection()
     }
     
     func sceneWillEnterForeground(_ scene: UIScene) {
-        webSocketManagementHelper
-            .requestConnection(connectionType: .recoverPreviousStreams)
+        webSocketManagementHelper.requestConnection(connectionType: .freshStart)
     }
 }
