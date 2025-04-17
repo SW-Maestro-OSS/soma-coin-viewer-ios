@@ -12,7 +12,7 @@ public protocol Routable: AnyObject {
     associatedtype ViewModel
 }
 
-open class Router<ViewModel>: ObservableObject, Routable {
+open class Router<ViewModel>: Routable {
     
     public let view: AnyView
     public let viewModel: ViewModel
