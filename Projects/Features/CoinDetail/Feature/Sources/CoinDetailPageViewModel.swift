@@ -36,7 +36,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     
     
     // Listener
-    private weak var listener: CoinDetailPageListener?
+    weak var listener: CoinDetailPageListener?
     
     
     // State
@@ -59,8 +59,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     private var streamTask: [CoinInfoStream: Task<Void, Never>] = [:]
     var store: Set<AnyCancellable> = .init()
     
-    init(listener: CoinDetailPageListener, symbolInfo: CoinSymbolInfo, useCase: CoinDetailPageUseCase) {
-        self.listener = listener
+    init(symbolInfo: CoinSymbolInfo, useCase: CoinDetailPageUseCase) {
         self.symbolInfo = symbolInfo
         self.useCase = useCase
         self.state = .init(symbolText: symbolInfo.pairSymbol.uppercased())

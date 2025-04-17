@@ -16,10 +16,10 @@ public final class CoinDetailPageBuilder {
     
     public func build(listener: CoinDetailPageListener, symbolInfo: CoinSymbolInfo) -> CoinDetailPageRouter {
         let viewModel = CoinDetailPageViewModel(
-            listener: listener,
             symbolInfo: symbolInfo,
             useCase: coinDetailPageUseCase
         )
+        viewModel.listener = listener
         let view = CoinDetailPageView(viewModel: viewModel)
         let router = CoinDetailPageRouter(
             view: view,
