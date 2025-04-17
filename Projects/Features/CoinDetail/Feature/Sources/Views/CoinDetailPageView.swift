@@ -32,10 +32,11 @@ struct CoinDetailPageView: View {
     
     @ViewBuilder
     private func coinTitleContent() -> some View {
-        HStack {
+        HStack(alignment: .bottom, spacing: 3) {
             Text(viewModel.state.symbolText)
                 .font(.title)
                 .foregroundStyle(.black)
+            PriceChangePercentView(renderObject: $viewModel.state.priceChagePercentInfo)
             Spacer()
         }
         .padding(.horizontal, 3)

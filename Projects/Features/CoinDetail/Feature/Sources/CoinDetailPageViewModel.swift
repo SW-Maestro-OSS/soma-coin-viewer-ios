@@ -17,7 +17,7 @@ enum CoinDetailPageAction {
     case onAppear
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
-    case updateTickerInfo(info: TickerInfo)
+    case updateTickerInfo(entity: Twenty4HourTickerForSymbolVO)
     case updateTrades(trades: [CoinTradeVO])
 }
 
@@ -32,7 +32,7 @@ final class CoinDetailPageViewModel: UDFObservableObject {
     private var hasAppeared = false
     private let bidStore: OrderbookStore = .init()
     private let askStore: OrderbookStore = .init()
-    private var tradeContainer: TradeContainer = .init(maxCount: 15)
+    private let tradeContainer: TradeContainer = .init(maxCount: 15)
     
     
     // Action
@@ -41,9 +41,8 @@ final class CoinDetailPageViewModel: UDFObservableObject {
     
     
     // Streams
-    private var orderbookStream: AnyCancellable?
-    private var singleTickerStream: AnyCancellable?
-    private var recentTradeStream: AnyCancellable?
+    private var streamUpdateObserverStore: [CoinInfoStream: AnyCancellable] = [:]
+    private var streamTask: [CoinInfoStream: Task<Void, Never>] = [:]
     var store: Set<AnyCancellable> = .init()
     
     init(symbolPair: String, useCase: CoinDetailPageUseCase) {
@@ -82,8 +81,20 @@ final class CoinDetailPageViewModel: UDFObservableObject {
             newState.askOrderbooks = asks.map {
                 transform(bigestQuantity: bigestQuantity, orderbook: $0, type: .ask)
             }
-        case .updateTickerInfo(let info):
-            newState.tickerInfo = info
+        case .updateTickerInfo(let entity):
+            
+            let (changePercentText, changeType) = createChangePercentTextConfig(percent: entity.changedPercent)
+            newState.priceChagePercentInfo = .init(
+                changeType: changeType,
+                percentText: changePercentText
+            )
+            newState.tickerInfo =
+                .init(
+                    currentPriceText: entity.price.roundDecimalPlaces(exact: 4),
+                    bestBidPriceText: entity.bestBidPrice.roundDecimalPlaces(exact: 4),
+                    bestAskPriceText: entity.bestAskPrice.roundDecimalPlaces(exact: 4)
+                )
+            
         case .updateTrades(let trades):
             newState.trades = trades.map(convertToRO)
         default:
@@ -91,46 +102,36 @@ final class CoinDetailPageViewModel: UDFObservableObject {
         }
         return newState
     }
-    
-    private func transform(bigestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
-        let percent = sqrt(pow(bigestQuantity.double, 2) - pow(bigestQuantity.double-orderbook.quantity.double, 2)) / bigestQuantity.double
-        return OrderbookCellRO(
-            type: type,
-            priceText: orderbook.price.roundDecimalPlaces(exact: 4),
-            quantityText: orderbook.quantity.roundDecimalPlaces(exact: 1),
-            relativePercentOfQuantity: percent
-        )
-    }
 }
 
 
 // MARK: 24h ticker
 private extension CoinDetailPageViewModel {
     func start24hTickerStream() {
-        Task {
+        streamTask[.changeInTicker]?.cancel()
+        streamTask[.changeInTicker] = Task { [weak self] in
+            guard let self else { return }
             useCase.connectToOrderbookStream(symbolPair: symbolPair)
             for await tickerVO in useCase.get24hTickerChange(symbolPair: symbolPair) {
-                let (changePercentText, changePercentTextColor) = createChangePercentTextConfig(percent: tickerVO.changedPercent)
-                action.send(.updateTickerInfo(info: .init(
-                    changePercentText: changePercentText,
-                    changePercentTextColor: changePercentTextColor,
-                    currentPriceText: tickerVO.price.roundDecimalPlaces(exact: 4),
-                    bestBidPriceText: tickerVO.bestBidPrice.roundDecimalPlaces(exact: 4),
-                    bestAskPriceText: tickerVO.bestAskPrice.roundDecimalPlaces(exact: 4)
-                )))
+                action.send(.updateTickerInfo(entity: tickerVO))
             }
         }
     }
     
-    func createChangePercentTextConfig(percent: CVNumber) -> (String, Color) {
+    func createChangePercentTextConfig(percent: CVNumber) -> (String, ChangeType) {
         let percentText = percent.roundToTwoDecimalPlaces()+"%"
         var displayText: String = percentText
-        var displayColor: Color = .red
         if percent >= 0.0 {
             displayText = "+"+displayText
-            displayColor = .green
         }
-        return (displayText, displayColor)
+        var changeType: ChangeType = .neutral
+        let percentNumber = percent.wrappedNumber
+        if percentNumber < 0 {
+            changeType = .minus
+        } else if percentNumber > 0 {
+            changeType = .plus
+        }
+        return (displayText, changeType)
     }
 }
 
@@ -138,36 +139,39 @@ private extension CoinDetailPageViewModel {
 // MARK: Orderbook table
 private extension CoinDetailPageViewModel {
     func startOrderbookStream() {
-        let updateTracker = PassthroughSubject<Void, Never>()
-        orderbookStream?.cancel()
-        orderbookStream = updateTracker
-            .throttle(for: 0.3, scheduler: DispatchQueue.global(), latest: true)
-            .unretainedOnly(self)
-            .asyncTransform { vm in
+        let updateTracker = PassthroughSubject<OrderbookUpdateVO, Never>()
+        streamUpdateObserverStore[.orderbookTable]?.cancel()
+        streamUpdateObserverStore[.orderbookTable] = updateTracker
+            .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
+            .unretained(self)
+            .asyncTransform { vm, update in
+                // - 테이블 업데이트
+                await vm.apply(bids: update.bids)
+                await vm.apply(asks: update.asks)
+                
+                // - 리스트 추출
                 let bidList = await vm.bidStore.getDescendingList(count: 15).map(Orderbook.init)
                 let askList = await vm.askStore.getAscendingList(count: 15).map(Orderbook.init)
                 return Action.updateOrderbook(bids: bidList, asks: askList)
             }
             .subscribe(self.action)
         
-        Task {
+        streamTask[.orderbookTable]?.cancel()
+        streamTask[.orderbookTable] = Task { [weak self] in
+            guard let self else { return }
             useCase.connectToTickerChangesStream(symbolPair: symbolPair)
             do {
                 // #1. 전체 테이블 요청
                 let wholeTable = try await useCase.getWholeOrderbookTable(symbolPair: symbolPair)
                 await clearOrderbookStore()
-                await apply(bids: wholeTable.bids)
-                await apply(asks: wholeTable.asks)
-                updateTracker.send(())
+                updateTracker.send(wholeTable)
                 
                 // #2. 실시간 업데이트
                 let sequence = useCase.getChangeInOrderbook(symbolPair: symbolPair).filter { entity in
                     entity.lastUpdateId > wholeTable.lastUpdateId
                 }
                 for await update in sequence {
-                    await apply(bids: update.bids)
-                    await apply(asks: update.asks)
-                    updateTracker.send(())
+                    updateTracker.send(update)
                 }
             } catch {
                 print(error)
@@ -191,28 +195,42 @@ private extension CoinDetailPageViewModel {
             await askStore.update(key: askOrder.price, value: askOrder.quantity)
         }
     }
+    
+    func transform(bigestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
+        return OrderbookCellRO(
+            type: type,
+            priceText: orderbook.price.roundDecimalPlaces(exact: 4),
+            quantityText: orderbook.quantity.roundDecimalPlaces(exact: 4),
+            relativePercentOfQuantity: orderbook.quantity.double / bigestQuantity.double
+        )
+    }
 }
 
 
 // MARK: Recent trade
 private extension CoinDetailPageViewModel {
     func startRecentTradeStream() {
-        let updateTracker = PassthroughSubject<Void, Never>()
-        recentTradeStream?.cancel()
-        recentTradeStream = updateTracker
-            .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
-            .unretainedOnly(self)
-            .asyncTransform { vm in
+        let updateTracker = PassthroughSubject<CoinTradeVO, Never>()
+        streamUpdateObserverStore[.recentTrade]?.cancel()
+        streamUpdateObserverStore[.recentTrade] = updateTracker
+            .throttle(for: 1.0, scheduler: DispatchQueue.global(), latest: true)
+            .unretained(self)
+            .asyncTransform { vm, update in
+                // - 주문정보 업데이트
+                await vm.tradeContainer.insert(element: update)
+                
+                // - 새로운 리스트 추출
                 let newList = await vm.tradeContainer.getList()
                 return Action.updateTrades(trades: newList)
             }
             .subscribe(self.action)
         
-        Task {
+        streamTask[.recentTrade]?.cancel()
+        streamTask[.recentTrade] = Task { [weak self] in
+            guard let self else { return }
             useCase.connectToRecentTradeStream(symbolPair: symbolPair)
             for await entity in useCase.getRecentTrade(symbolPair: symbolPair) {
-                await tradeContainer.insert(element: entity)
-                updateTracker.send(())
+                updateTracker.send(entity)
             }
         }
     }
@@ -239,6 +257,7 @@ extension CoinDetailPageViewModel {
     struct State {
         // 24h ticker
         var symbolText: String
+        var priceChagePercentInfo: PriceChangePercentRO?
         var tickerInfo: TickerInfo?
         
         // Orderbook table

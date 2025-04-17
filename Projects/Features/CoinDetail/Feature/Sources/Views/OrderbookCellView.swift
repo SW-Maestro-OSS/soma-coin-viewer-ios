@@ -62,7 +62,7 @@ struct OrderbookCellView: View {
                     .foregroundStyle(renderObject.priceTextColor)
             }
         }
-        .monospaced()
+        .monospacedDigit()
         .font(.subheadline.bold())
     }
 }
