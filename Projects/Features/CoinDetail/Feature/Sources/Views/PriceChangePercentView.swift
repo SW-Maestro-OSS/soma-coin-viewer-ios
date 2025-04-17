@@ -9,7 +9,7 @@ import SwiftUI
 
 struct PriceChangePercentView: View {
     
-    @Binding var renderObject: PriceChagePercentRO?
+    @Binding var renderObject: PriceChangePercentRO?
     
     var body: some View {
         HStack(spacing: 2) {

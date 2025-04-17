@@ -1,5 +1,5 @@
 //
-//  PriceChagePercentRO.swift
+//  PriceChangePercentRO.swift
 //  CoinDetailModule
 //
 //  Created by choijunios on 4/16/25.
@@ -33,7 +33,7 @@ enum ChangeType {
     }
 }
 
-struct PriceChagePercentRO {
+struct PriceChangePercentRO {
     var changeType: ChangeType
     var percentText: String
 }

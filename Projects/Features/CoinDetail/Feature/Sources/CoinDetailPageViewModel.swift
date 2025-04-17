@@ -257,7 +257,7 @@ extension CoinDetailPageViewModel {
     struct State {
         // 24h ticker
         var symbolText: String
-        var priceChagePercentInfo: PriceChagePercentRO?
+        var priceChagePercentInfo: PriceChangePercentRO?
         var tickerInfo: TickerInfo?
         
         // Orderbook table
