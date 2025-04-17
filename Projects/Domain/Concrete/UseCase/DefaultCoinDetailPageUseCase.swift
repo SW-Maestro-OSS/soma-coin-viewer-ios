@@ -25,15 +25,15 @@ final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
 // MARK: Orderbook
 public extension DefaultCoinDetailPageUseCase {
     func connectToOrderbookStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth"])
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth"], autoReconnectionEnabled: false)
     }
     
     func connectToTickerChangesStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@ticker"])
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@ticker"], autoReconnectionEnabled: true)
     }
     
     func connectToRecentTradeStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@trade"])
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@trade"], autoReconnectionEnabled: true)
     }
     
     func disconnectToStreams(symbolPair: String) {

@@ -31,7 +31,7 @@ public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     
     public func prepareStream() {
         webSocketManagementHelper
-            .requestSubscribeToStream(streams: ["!ticker@arr"])
+            .requestSubscribeToStream(streams: ["!ticker@arr"], autoReconnectionEnabled: true)
     }
     
     

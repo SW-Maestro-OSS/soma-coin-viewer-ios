@@ -107,7 +107,6 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 transform(bigestQuantity: bigestQuantity, orderbook: $0, type: .ask)
             }
         case .updateTickerInfo(let entity):
-            
             let (changePercentText, changeType) = createChangePercentTextConfig(percent: entity.changedPercent)
             newState.priceChagePercentInfo = .init(
                 changeType: changeType,
@@ -119,7 +118,6 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                     bestBidPriceText: entity.bestBidPrice.roundDecimalPlaces(exact: 4),
                     bestAskPriceText: entity.bestAskPrice.roundDecimalPlaces(exact: 4)
                 )
-            
         case .updateTrades(let trades):
             newState.trades = trades.map(convertToRO)
         default:
