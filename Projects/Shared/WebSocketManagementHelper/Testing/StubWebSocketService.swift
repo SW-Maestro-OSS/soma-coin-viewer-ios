@@ -31,11 +31,11 @@ class StubAllwaysSuccessWebSocketService: WebSocketService {
         fakeStatePublisher.send(.disconnected)
     }
     
-    func subscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
+    func subscribeTo(message: [String], mustDeliver: Bool, completion: @escaping WebsocketCompletion) {
         completion(.success(()))
     }
     
-    func unsubscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
+    func unsubscribeTo(message: [String], mustDeliver: Bool, completion: @escaping WebsocketCompletion) {
         completion(.success(()))
     }
 }
@@ -63,11 +63,11 @@ class StubAllwaysFailureWebSocketService: WebSocketService {
         fakeStatePublisher.send(.disconnected)
     }
     
-    func subscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
+    func subscribeTo(message: [String], mustDeliver: Bool, completion: @escaping WebsocketCompletion) {
         completion(.failure(WebSocketError.messageTransferFailed(error: nil)))
     }
     
-    func unsubscribeTo(message: [String], completion: @escaping WebsocketCompletion) {
+    func unsubscribeTo(message: [String], mustDeliver: Bool, completion: @escaping WebsocketCompletion) {
         completion(.failure(WebSocketError.messageTransferFailed(error: nil)))
     }
 }
