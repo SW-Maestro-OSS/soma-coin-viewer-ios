@@ -21,6 +21,8 @@ public protocol CoinDetailPageListener: AnyObject {
     func request(_ request: CoinDetailPageListnerRequest)
 }
 
+public protocol CoinDetailPageRouting: AnyObject { }
+
 enum CoinDetailPageAction {
     case onAppear
     case exitButtonTapped

@@ -9,12 +9,19 @@ import SwiftUI
 import Combine
 
 import DomainInterface
-
 import BaseFeature
-
 import I18N
 import AlertShooter
 import CoreUtil
+
+public enum RootRoutingRequest {
+    case presentTabBarPage
+}
+
+public protocol RootRouting: AnyObject {
+    func request(_ request: RootRoutingRequest)
+    func view(destination: RootDestination) -> AnyView
+}
 
 final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterListener {
     
@@ -24,22 +31,13 @@ final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterL
     private let alertShooter: AlertShooter
     
 
-    // Public state interface
-    @Published var state: State = .init(
-        splashRO: .init(displayTitleText: ""),
-        isLoading: true
-    )
-    
-    
     // Router
-    @Published private var _router: WeakRootRouting = .init(nil)
-    var router: RootRouting? {
-        get { self._router.value }
-        set { self._router = WeakRootRouting(newValue) }
-    }
+    weak var router: RootRouting!
     
     
     // State
+    @Published var state: State = .init()
+    private var alertQueue: [AlertRO] = []
     private var isFirstAppear: Bool = true
     
     
@@ -60,31 +58,23 @@ final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterL
         // Listener
         alertShooter.request(listener: self)
         
+        // Splash
         let languageType = i18NManager.getLanguageType()
-        let initialSplashRO = createSplashRO(languageType: languageType)
-        
-        let initialState: State = .init(
-            splashRO: initialSplashRO,
-            isLoading: true
-        )
-        self.state = initialState
+        let splashRO = createSplashRO(languageType: languageType)
+        self.state = .init(splashRO: splashRO)
         
         // Create state stream
         createStateStream()
     }
     
-    
-    func action(_ action: Action) {
-        self.action.send(action)
-    }
-    
+    func action(_ action: Action) { self.action.send(action) }
     
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
-        
         switch action {
         case .onAppear:
             if isFirstAppear {
                 isFirstAppear = false
+                
                 // 화면 최초 등장시 2초간의 지연 발생
                 return Just(.appIsLoaded)
                     .delay(for: 2, scheduler: RunLoop.main)
@@ -105,11 +95,10 @@ final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterL
         var newState = state
         switch action {
         case .appIsLoaded:
-            newState.isLoading = false
-            router?.presentMainTabBar()
+            router?.request(.presentTabBarPage)
         case .alertIsDismissed:
-            if !state.alertQueue.isEmpty {
-                let nextAlertRO = newState.alertQueue.removeFirst()
+            if !alertQueue.isEmpty {
+                let nextAlertRO = alertQueue.removeFirst()
                 newState.presentingAlertRO = nextAlertRO
                 newState.isAlertPresenting = true
             } else {
@@ -118,11 +107,13 @@ final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterL
             }
         case .presentAlert(let alertRO):
             if state.isAlertPresenting {
-                newState.alertQueue.append(alertRO)
+                alertQueue.append(alertRO)
             } else {
                 newState.presentingAlertRO = alertRO
                 newState.isAlertPresenting = true
             }
+        case .updateDestination(let destination):
+            newState.rootDestination = destination
         default:
             return state
         }
@@ -141,17 +132,25 @@ extension RootViewModel {
         case presentAlert(ro: AlertRO)
         
         case alertIsDismissed
+        case updateDestination(RootDestination)
     }
     
     struct State {
-        var splashRO: SplashRO
-        var isLoading: Bool
-        
-        fileprivate var alertQueue: [AlertRO] = []
+        var splashRO: SplashRO?
+        var rootDestination: RootDestination?
         var presentingAlertRO: AlertRO? = nil
         var isAlertPresenting: Bool = false
     }
 }
+
+
+// MARK: Navigation state
+extension RootViewModel {
+    func updateDestination(destination: RootDestination) {
+        action.send(.updateDestination(destination))
+    }
+}
+
 
 
 // MARK: Splash
@@ -207,15 +206,3 @@ extension RootViewModel {
     }
 }
 
-
-// MARK: WeakRootRouting
-private extension RootViewModel {
-    class WeakRootRouting {
-        
-        weak var value: RootRouting?
-        
-        init(_ value: RootRouting?) {
-            self.value = value
-        }
-    }
-}

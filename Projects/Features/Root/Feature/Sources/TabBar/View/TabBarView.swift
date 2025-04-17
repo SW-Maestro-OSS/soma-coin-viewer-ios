@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct TabBarView: View {
-    
     @StateObject private var viewModel: TabBarViewModel
     
     init(viewModel: TabBarViewModel) {
@@ -16,10 +15,23 @@ struct TabBarView: View {
     }
     
     var body: some View {
+        NavigationStack(path: $viewModel.state.destinationPath) {
+            tabBarContent()
+                .navigationDestination(for: TabBarPageDestination.self) { desination in
+                    viewModel.router?.view(desination)
+                        .navigationBarBackButtonHidden()
+                }
+        }
+        .onAppear { viewModel.action(.onAppear) }
+    }
+    
+    
+    @ViewBuilder
+    private func tabBarContent() -> some View {
         TabView {
             ForEach(viewModel.state.tabItemROs) { ro in
                 Tab {
-                    AnyView(viewModel.router!.destinationView(ro.page))
+                    AnyView(viewModel.router?.tabBarPage(ro.page))
                 } label: {
                     VStack {
                         Image(systemName: ro.displayIconName)
@@ -28,7 +40,6 @@ struct TabBarView: View {
                 }
             }
         }
-        .onAppear { viewModel.action(.onAppear) }
     }
 }
 

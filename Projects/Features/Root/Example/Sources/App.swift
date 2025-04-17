@@ -26,7 +26,7 @@ struct RootModuleApp: App {
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     
-    var rootRouter: RootRouter!
+    var rootRouter: RootRoutable!
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         

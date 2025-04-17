@@ -10,8 +10,6 @@ import SwiftUI
 import BaseFeature
 
 struct RootView: View {
-    
-    // View model
     @StateObject private var viewModel: RootViewModel
     
     init(viewModel: RootViewModel) {
@@ -20,19 +18,13 @@ struct RootView: View {
     
     var body: some View {
         Group {
-            if viewModel.state.isLoading {
-                SplashView(renderObject: viewModel.state.splashRO)
-            } else {
-                NavigationStack(path: viewModel.router?.getPath() ?? .constant(.init())) {
-                    EmptyView()
-                        .navigationDestination(for: RootDestination.self) { destination in
-                            AnyView(viewModel.router!.destinationView(destination: destination))
-                                .navigationBarBackButtonHidden()
-                        }
-                }
-            }
+            if let splashRO = viewModel.state.splashRO {
+                SplashView(renderObject: splashRO)
+            } else { EmptyView() }
         }
-        .animation(.easeIn(duration: 0.2), value: viewModel.state.isLoading)
+        .fullScreenCover(item: $viewModel.state.rootDestination) { destination in
+            viewModel.router.view(destination: destination)
+        }
         .onAppear { viewModel.action(.onAppear) }
         .alertable(
             presented: $viewModel.state.isAlertPresenting,
@@ -40,5 +32,14 @@ struct RootView: View {
         ) { [weak viewModel] in
             viewModel?.action(.alertIsDismissed)
         }
+    }
+}
+
+struct RootBrachView: View {
+    @Binding var destination: RootDestination
+    var destinationView: (RootDestination) -> AnyView
+    
+    var body: some View {
+        destinationView(destination)
     }
 }

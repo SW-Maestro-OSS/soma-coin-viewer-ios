@@ -6,9 +6,7 @@
 //
 
 enum TabBarPage: String, Identifiable, CaseIterable {
-    
     var id: String { self.rawValue }
-    
     case allMarketTicker
     case setting
     

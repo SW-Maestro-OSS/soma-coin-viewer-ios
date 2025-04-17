@@ -67,6 +67,7 @@ let project = Project(
             dependencies: [
                 
                 D.Feature.BaseFeature,
+                D.Feature.CoinDetailFeature,
                 
                 D.Shared.I18N,
                 D.Shared.AlertShooter,

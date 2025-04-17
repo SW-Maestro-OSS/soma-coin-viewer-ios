@@ -9,7 +9,11 @@ import SwiftUI
 
 import BaseFeature
 
-public class CoinDetailPageRouter: Router<CoinDetailPageViewModelable> {
+public protocol CoinDetailPageViewModelable { }
+
+public typealias CoinDetailPageRoutable = Router<CoinDetailPageViewModelable> & CoinDetailPageRouting
+
+class CoinDetailPageRouter: CoinDetailPageRoutable {
     
     init(view: CoinDetailPageView, viewModel: CoinDetailPageViewModel) {
         super.init(view: AnyView(view), viewModel: viewModel)

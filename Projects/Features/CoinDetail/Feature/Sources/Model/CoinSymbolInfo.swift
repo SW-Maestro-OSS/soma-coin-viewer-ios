@@ -5,7 +5,7 @@
 //  Created by choijunios on 4/17/25.
 //
 
-public struct CoinSymbolInfo {
+public struct CoinSymbolInfo: Hashable {
     public let firstSymbol: String
     public let secondSymbol: String
     

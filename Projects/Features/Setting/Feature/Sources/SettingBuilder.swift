@@ -9,7 +9,7 @@ public class SettingBuilder {
     
     public init() { }
     
-    public func build(listener: SettingViewModelListener) -> SettingRoutable {
+    public func build(listener: SettingPageListener) -> SettingRoutable {
         let viewModel = SettingViewModel()
         viewModel.listener = listener
         let view = SettingView(viewModel: viewModel)
