@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CoinDetailPageView: View {
-    
+    @Environment(\.scenePhase) var scenePhase
     @StateObject var viewModel: CoinDetailPageViewModel
     
     init(viewModel: CoinDetailPageViewModel) {
@@ -30,6 +30,11 @@ struct CoinDetailPageView: View {
             }
         }
         .onAppear { viewModel.action.send(.onAppear) }
+        .onChange(of: scenePhase) { oldValue, newValue in
+            if oldValue == .background && (newValue == .active || newValue == .inactive) {
+                viewModel.action.send(.getbackToForeground)
+            }
+        }
     }
     
     @ViewBuilder

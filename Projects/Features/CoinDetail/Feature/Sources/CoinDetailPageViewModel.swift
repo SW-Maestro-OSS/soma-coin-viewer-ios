@@ -26,6 +26,7 @@ public protocol CoinDetailPageRouting: AnyObject { }
 enum CoinDetailPageAction {
     case onAppear
     case exitButtonTapped
+    case getbackToForeground
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
     case updateTickerInfo(entity: Twenty4HourTickerForSymbolVO)
@@ -69,10 +70,6 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
         createStateStream()
     }
     
-    deinit {
-        print("asd")
-    }
-    
     func mutate(_ action: CoinDetailPageAction) -> AnyPublisher<CoinDetailPageAction, Never> {
         switch action {
         case .onAppear:
@@ -89,6 +86,8 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             
             // 페이지 닫기
             listener?.request(.closePage)
+        case .getbackToForeground:
+            startOrderbookStream()
         default:
             break
         }
@@ -134,7 +133,7 @@ private extension CoinDetailPageViewModel {
         streamTask[.changeInTicker]?.cancel()
         streamTask[.changeInTicker] = Task { [weak self] in
             guard let self else { return }
-            useCase.connectToOrderbookStream(symbolPair: symbolPair)
+            useCase.connectToTickerChangesStream(symbolPair: symbolPair)
             for await tickerVO in useCase.get24hTickerChange(symbolPair: symbolPair) {
                 action.send(.updateTickerInfo(entity: tickerVO))
             }
@@ -182,7 +181,7 @@ private extension CoinDetailPageViewModel {
         streamTask[.orderbookTable]?.cancel()
         streamTask[.orderbookTable] = Task { [weak self] in
             guard let self else { return }
-            useCase.connectToTickerChangesStream(symbolPair: symbolPair)
+            useCase.connectToOrderbookStream(symbolPair: symbolPair)
             do {
                 // #1. 전체 테이블 요청
                 let wholeTable = try await useCase.getWholeOrderbookTable(symbolPair: symbolPair)

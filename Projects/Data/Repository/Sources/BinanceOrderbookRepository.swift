@@ -39,14 +39,14 @@ final public class BinanceOrderbookRepository: OrderbookRepository {
                 dto.symbol.lowercased() == symbolPair.lowercased()
             })
             .map({ $0.toEntity() })
-            return AsyncStream { continuation in
-                let cancellable = publisher
-                    .sink(receiveValue: { entity in
-                        continuation.yield(entity)
-                    })
-                continuation.onTermination = { @Sendable _ in
-                    cancellable.cancel()
-                }
+        return AsyncStream { continuation in
+            let cancellable = publisher
+                .sink(receiveValue: { entity in
+                    continuation.yield(entity)
+                })
+            continuation.onTermination = { @Sendable [cancellable] _ in
+                cancellable.cancel()
             }
+        }
     }
 }
