@@ -14,7 +14,9 @@ class StubEmptyAllMarketTickerUseCase: AllMarketTickersUseCase {
     
     init() { }
     
-    func prepareStream() { }
+    func disConnectToAllMarketTickerStream() { }
+    
+    func connectToAllMarketTickerStream() { }
     
     func requestTickers() -> AnyPublisher<[DomainInterface.Twenty4HourTickerForSymbolVO], Never> {
         

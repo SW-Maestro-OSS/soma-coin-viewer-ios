@@ -17,13 +17,16 @@ class FakeAllMarketTickersUseCase: AllMarketTickersUseCase {
     
     init() { }
     
-    func prepareStream() {
-        
+    func connectToAllMarketTickerStream() {
         self.timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             guard let self else { return }
             let fakeTickers = createFakeTickers()
             fakeTickerPublisher.send(fakeTickers)
         }
+    }
+    
+    func disConnectToAllMarketTickerStream() {
+        timer?.invalidate()
     }
     
     func requestTickers() -> AnyPublisher<[DomainInterface.Twenty4HourTickerForSymbolVO], Never> {

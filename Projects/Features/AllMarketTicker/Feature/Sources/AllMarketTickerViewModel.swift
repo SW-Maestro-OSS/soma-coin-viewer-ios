@@ -30,9 +30,11 @@ enum AllMarketTickerViewAction {
     
     // View event
     case onAppear
+    case onDisappear
     case sortSelectionButtonTapped(type: SortSelectionCellType)
     case coinRowIsTapped(id: String)
-    
+    case enterBackground
+    case getbackToForeground
     
     // Side effect
     case tickerListFetched(list: [Twenty4HourTickerForSymbolVO])
@@ -119,13 +121,15 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
         case .onAppear:
             if self.isFirstAppear {
                 self.isFirstAppear = false
-                
-                // AllMarketTicker스트림 구독
-                subscribeToTickerDataStream()
+                // 웹소켓 스트림 구독
+                listenToTickerDataStream()
                 
                 // 환율정보 가져오기
                 getExchangeRate(base: .dollar, to: state.currencyType)
             }
+            
+            // AllMarketTicker스트림 구독
+            allMarketTickersUseCase.connectToAllMarketTickerStream()
             
             // i18N 변경사항 확인
             // - 언어
@@ -167,6 +171,10 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
             if actions.isEmpty { break }
             
             return Publishers.MergeMany(actions).eraseToAnyPublisher()
+        case .onDisappear, .enterBackground:
+            allMarketTickersUseCase.disConnectToAllMarketTickerStream()
+        case .getbackToForeground:
+            allMarketTickersUseCase.connectToAllMarketTickerStream()
         case .tickerListFetched(let newList):
             self.tickerCellVO = newList
         case .coinRowIsTapped(let id):
@@ -353,11 +361,7 @@ extension AllMarketTickerViewModel {
 // MARK: Websocket stream subscription
 private extension AllMarketTickerViewModel {
     
-    func subscribeToTickerDataStream() {
-        
-        // 스트림 준비
-        allMarketTickersUseCase.prepareStream()
-        
+    func listenToTickerDataStream() {
         // 스트림 메시지 구독
         allMarketTickersUseCase
             .requestTickers()

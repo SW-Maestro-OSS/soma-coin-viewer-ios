@@ -11,7 +11,7 @@ import CommonUI
 import CoreUtil
 
 struct AllMarketTickerView: View {
-    
+    @Environment(\.scenePhase) var scenePhase
     @StateObject private var viewModel: AllMarketTickerViewModel
     
     
@@ -40,6 +40,14 @@ struct AllMarketTickerView: View {
             tickerListContent()
         }
         .onAppear { viewModel.action(.onAppear) }
+        .onDisappear { viewModel.action(.onDisappear) }
+        .onChange(of: scenePhase) { oldValue, newValue in
+            if oldValue == .background && (newValue == .active || newValue == .inactive) {
+                viewModel.action(.getbackToForeground)
+            } else if newValue == .background {
+                viewModel.action(.enterBackground)
+            }
+        }
     }
     
     @ViewBuilder
