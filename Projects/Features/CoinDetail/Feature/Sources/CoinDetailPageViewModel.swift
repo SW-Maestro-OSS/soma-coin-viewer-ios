@@ -21,14 +21,15 @@ enum CoinDetailPageAction {
     case updateTrades(trades: [CoinTradeVO])
 }
 
-final class CoinDetailPageViewModel: UDFObservableObject {
+final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewModelable {
     // Dependency
     private let useCase: CoinDetailPageUseCase
     
     
     // State
     @Published var state: State
-    private let symbolPair: String
+    private let symbolInfo: CoinSymbolInfo
+    private var symbolPair: String { symbolInfo.pairSymbol }
     private var hasAppeared = false
     private let bidStore: OrderbookStore = .init()
     private let askStore: OrderbookStore = .init()
@@ -45,10 +46,10 @@ final class CoinDetailPageViewModel: UDFObservableObject {
     private var streamTask: [CoinInfoStream: Task<Void, Never>] = [:]
     var store: Set<AnyCancellable> = .init()
     
-    init(symbolPair: String, useCase: CoinDetailPageUseCase) {
-        self.symbolPair = symbolPair
+    init(symbolInfo: CoinSymbolInfo, useCase: CoinDetailPageUseCase) {
+        self.symbolInfo = symbolInfo
         self.useCase = useCase
-        self.state = .init(symbolText: symbolPair.uppercased())
+        self.state = .init(symbolText: symbolInfo.pairSymbol.uppercased())
         
         createStateStream()
     }
