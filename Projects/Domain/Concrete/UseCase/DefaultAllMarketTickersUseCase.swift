@@ -14,8 +14,7 @@ import WebSocketManagementHelper
 import CoreUtil
 
 public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
-    
-    // Service locator
+    // Dependency
     @Injected private var allMarketTickersRepository: AllMarketTickersRepository
     @Injected private var webSocketManagementHelper: WebSocketManagementHelper
     

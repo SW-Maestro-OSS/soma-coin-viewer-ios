@@ -13,8 +13,7 @@ import DomainInterface
 import CoreUtil
 
 public class BinanceAllMarketTickersRepository: AllMarketTickersRepository {
-    
-    // Service locator
+    // Dependency
     @Injected var webSocketService: WebSocketService
     
     public init() { }

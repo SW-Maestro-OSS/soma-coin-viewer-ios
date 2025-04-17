@@ -15,8 +15,7 @@ import I18N
 import CoreUtil
 
 public final class DefaultExchangeRateUseCase: ExchangeRateUseCase {
-    
-    // Service locator
+    // Dependency
     @Injected private var exchangeRateRepository: ExchangeRateRepository
     @Injected private var alertShooter: AlertShooter
     

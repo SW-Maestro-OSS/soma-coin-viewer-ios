@@ -12,7 +12,7 @@ import WebSocketManagementHelper
 import CoreUtil
 
 final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
-
+    // Dependency
     @Injected private var orderbookRepository: OrderbookRepository
     @Injected private var singleTickerRepository: SingleMarketTickerRepository
     @Injected private var coinTradeRepository: TradeRepository
