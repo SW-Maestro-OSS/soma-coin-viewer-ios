@@ -9,72 +9,48 @@ import SwiftUI
 
 import BaseFeature
 
-protocol RootRouting: AnyObject {
-    
-    func presentMainTabBar()
-    
-    func getPath() -> Binding<NavigationPath>
-    
-    func destinationView(destination: RootDestination) -> any View
+public protocol RootViewModelable {
+    func updateDestination(destination: RootDestination)
 }
 
-public class RootRouter: Router<RootViewModelable>, RootRouting {
-    
-    @Published private var path: NavigationPath = .init()
-    
+public typealias RootRoutable = Router<RootViewModelable> & RootRouting
+
+class RootRouter: RootRoutable {
+    // Navigation
+    private var destination: RootDestination?
     
     // Builder
     private let tabBarBuilder: TabBarBuilder
     
+    // Router
+    private var tabBarRouter: TabBarRouter?
     
-    init(tabBarBuilder: TabBarBuilder, view: RootView, viewModel: RootViewModel) {
-        
+    init(view: RootView, viewModel: RootViewModel, tabBarBuilder: TabBarBuilder) {
         self.tabBarBuilder = tabBarBuilder
-        
         super.init(view: AnyView(view), viewModel: viewModel)
-        
         viewModel.router = self
-    }
-    
-    private func present(_ destination: RootDestination) {
-        path.append(destination)
-    }
-    
-    private func pop() {
-        path.removeLast()
     }
 }
 
 
 // MARK: RootRouting
 extension RootRouter {
-    
-    func presentMainTabBar() {
-        
-        present(.mainTabBarPage)
+    func request(_ request: RootRoutingRequest) {
+        switch request {
+        case .presentTabBarPage:
+            destination = .tabBarPage
+            viewModel.updateDestination(destination: .tabBarPage)
+        }
     }
     
-    func getPath() -> Binding<NavigationPath> {
-        Binding(get: { [weak self] in
-            self?.path ?? .init()
-        }, set: { [weak self] newPath in
-            self?.path = newPath
-        })
-    }
-    
-    func destinationView(destination: RootDestination) -> any View {
-        
+    func view(destination: RootDestination) -> AnyView {
         switch destination {
-        case .mainTabBarPage:
-            
-            let tabBarRouter = tabBarBuilder.build()
-            attach(tabBarRouter)
-            
-            return tabBarRouter.view
-            
-        case .coinDetailPage:
-            
-            return Text("coinDetailPage")
+        case .tabBarPage:
+            let router = tabBarBuilder.build()
+            if let tabBarRouter { dettach(tabBarRouter) }
+            tabBarRouter = router
+            attach(router)
+            return router.view
         }
     }
 }

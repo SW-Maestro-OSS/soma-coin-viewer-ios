@@ -17,12 +17,6 @@ import WebSocketManagementHelper
 import AlertShooter
 import CoreUtil
 
-public enum RootDestination: Hashable {
-    
-    case mainTabBarPage
-    case coinDetailPage
-}
-
 public final class RootBuilder {
     
     // Service locator
@@ -32,7 +26,7 @@ public final class RootBuilder {
 
     public init() { }
     
-    public func build() -> RootRouter {
+    public func build() -> RootRoutable {
         let viewModel = RootViewModel(
             i18NManager: i18NManager,
             languageRepository: languageLocalizationRepository,
@@ -41,9 +35,9 @@ public final class RootBuilder {
         let view = RootView(viewModel: viewModel)
         let tabBarBuilder = TabBarBuilder()
         let router = RootRouter(
-            tabBarBuilder: tabBarBuilder,
             view: view,
-            viewModel: viewModel
+            viewModel: viewModel,
+            tabBarBuilder: tabBarBuilder
         )
         return router
     }

@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 import DomainInterface
-
+import CoinDetailFeature
 import CoreUtil
 import AlertShooter
 import I18N
@@ -26,8 +26,7 @@ public final class AllMarketTickerBuilder {
     
     public init() { }
     
-    public func build() -> AllMarketTickerRouter {
-        
+    public func build(listener: AllMarketTickerPageListener) -> AllMarketTickerRoutable {
         let viewModel = AllMarketTickerViewModel(
             i18NManager: i18NManager,
             languageLocalizationRepository: languageLocalizationRepository,
@@ -36,11 +35,9 @@ public final class AllMarketTickerBuilder {
             userConfigurationRepository: userConfigurationRepository,
             alertShooter: alertShooter
         )
+        viewModel.listener = listener
         let view = AllMarketTickerView(viewModel: viewModel)
-        let router = AllMarketTickerRouter(
-            view: view,
-            viewModel: viewModel
-        )
+        let router = AllMarketTickerRouter(view: view, viewModel: viewModel)
         return router
     }
 }

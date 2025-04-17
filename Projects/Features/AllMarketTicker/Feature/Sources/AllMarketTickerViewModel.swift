@@ -9,16 +9,47 @@ import SwiftUI
 import Combine
 
 import BaseFeature
-
+import CoinDetailFeature
 import DomainInterface
-
 import CoreUtil
 import I18N
 import AlertShooter
 
+public protocol AllMarketTickerRouting: AnyObject { }
+
+public enum AllMarketTickerPageListenerRequest {
+    case presentCoinDetailPage(listener: CoinDetailPageListener, symbolInfo: CoinSymbolInfo)
+    case dismissCoinDetailPage
+}
+
+public protocol AllMarketTickerPageListener: AnyObject {
+    func request(_ request: AllMarketTickerPageListenerRequest)
+}
+
+enum AllMarketTickerViewAction {
+    
+    // View event
+    case onAppear
+    case sortSelectionButtonTapped(type: SortSelectionCellType)
+    case coinRowIsTapped(id: String)
+    
+    
+    // Side effect
+    case tickerListFetched(list: [Twenty4HourTickerForSymbolVO])
+    
+    
+    // Configuration changed
+    case i18NUpdated(
+        languageType: LanguageType?=nil,
+        currenyType: CurrencyType?=nil,
+        exchangeRate: Double?=nil
+    )
+    case gridTypeUpdated(type: GridType)
+}
+
 final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewModelable {
     
-    // Service locator
+    // Dependency
     private let i18NManager: I18NManager
     private let languageLocalizationRepository: LanguageLocalizationRepository
     private let allMarketTickersUseCase: AllMarketTickersUseCase
@@ -27,11 +58,22 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     private let alertShooter: AlertShooter
     
     
+    // Router
+    weak var router: AllMarketTickerRouting?
+    
+    
+    // Listener
+    weak var listener: AllMarketTickerPageListener?
+    
+    
     // State
     @Published var state: State = .init()
+    private var tickerCellVO: [Twenty4HourTickerForSymbolVO] = []
     private var isFirstAppear: Bool = true
     
     
+    // Action
+    typealias Action = AllMarketTickerViewAction
     var action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = []
     
@@ -125,7 +167,21 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
             if actions.isEmpty { break }
             
             return Publishers.MergeMany(actions).eraseToAnyPublisher()
-            
+        case .tickerListFetched(let newList):
+            self.tickerCellVO = newList
+        case .coinRowIsTapped(let id):
+            if let entity = tickerCellVO.first(where: { $0.pairSymbol.lowercased() == id.lowercased() }) {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    listener?.request(.presentCoinDetailPage(
+                        listener: self,
+                        symbolInfo: .init(
+                            firstSymbol: entity.firstSymbol,
+                            secondSymbol: entity.secondSymbol
+                        )
+                    ))
+                }
+            }
         default:
             break
         }
@@ -134,16 +190,12 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     
     
     func reduce(_ action: Action, state: State) -> State {
-        
         var newState = state
-        
         switch action {
         case .tickerListFetched(let tickerVOs):
-            
             let currentComparator = state.sortComparator
             let sortedTickerVOs = tickerVOs.sorted(by: currentComparator.compare)
             guard let exchangeRate = state.exchangeRate else { break }
-            newState.tickerCellVO = sortedTickerVOs
             newState.tickerCellRO = sortedTickerVOs.map {
                 createRO($0, currencyConfig: .init(
                     type: state.currencyType,
@@ -174,7 +226,9 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
 
             // ticker cell 변경
             guard let exchangeRate else { break }
-            newState.tickerCellRO = state.tickerCellVO.map {
+            let currentComparator = state.sortComparator
+            let sortedTickerVOs = tickerCellVO.sorted(by: currentComparator.compare)
+            newState.tickerCellRO = sortedTickerVOs.map {
                 createRO($0, currencyConfig: .init(
                     type: newState.currencyType,
                     rate: exchangeRate
@@ -222,16 +276,14 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
                 newSortComparator = selectedType.getSortComparator(type: .descending)
             }
             newState.sortComparator = newSortComparator
-            let sortedTickerVOs = state.tickerCellVO.sorted(by: newSortComparator.compare)
+            let sortedTickerVOs = tickerCellVO.sorted(by: newSortComparator.compare)
             guard let exchangeRate = state.exchangeRate else { break }
-            newState.tickerCellVO = sortedTickerVOs
             newState.tickerCellRO = sortedTickerVOs.map {
                 createRO($0, currencyConfig: .init(
                     type: state.currencyType,
                     rate: exchangeRate
                 ))
             }
-            
         default:
             return state
         }
@@ -263,7 +315,6 @@ extension AllMarketTickerViewModel {
         }
         
         // Ticker cell
-        fileprivate var tickerCellVO: [Twenty4HourTickerForSymbolVO] = []
         var tickerGridType: GridType
         var tickerCellRO: [TickerCellRO] = []
         
@@ -281,7 +332,6 @@ extension AllMarketTickerViewModel {
         init(
             sortSelectionCellROs: [SortSelectionCellType: SortSelectionCellRO] = [:],
             sortComparator: TickerSortComparator=TickerNoneComparator(),
-            tickerCellVO: [Twenty4HourTickerForSymbolVO] = [],
             tickerDisplayType: GridType = .list,
             tickerCellRO: [TickerCellRO] = [],
             languageType: LanguageType = .english,
@@ -290,33 +340,12 @@ extension AllMarketTickerViewModel {
         ) {
             self.sortSelectionCellROs = sortSelectionCellROs
             self.sortComparator = sortComparator
-            self.tickerCellVO = tickerCellVO
             self.tickerGridType = tickerDisplayType
             self.tickerCellRO = tickerCellRO
             self.languageType = languageType
             self.currencyType = currencyType
             self.exchangeRate = exchangeRate
         }
-    }
-    
-    enum Action {
-        
-        // View event
-        case onAppear
-        case sortSelectionButtonTapped(type: SortSelectionCellType)
-        
-        
-        // Side effect
-        case tickerListFetched(list: [Twenty4HourTickerForSymbolVO])
-        
-        
-        // Configuration changed
-        case i18NUpdated(
-            languageType: LanguageType?=nil,
-            currenyType: CurrencyType?=nil,
-            exchangeRate: Double?=nil
-        )
-        case gridTypeUpdated(type: GridType)
     }
 }
 
@@ -332,6 +361,7 @@ private extension AllMarketTickerViewModel {
         // 스트림 메시지 구독
         allMarketTickersUseCase
             .requestTickers()
+            .receive(on: DispatchQueue.main)
             .map { Action.tickerListFetched(list: $0) }
             .subscribe(action)
             .store(in: &store)
@@ -418,9 +448,7 @@ private extension AllMarketTickerViewModel {
 
 // MARK: I18N
 private extension AllMarketTickerViewModel {
-    
     func createSelectionCellLocalizedText(type: SortSelectionCellType, languageType: LanguageType, currenyType: CurrencyType) -> String {
-        
         switch type {
         case .symbol:
             let localizedString = languageLocalizationRepository.getString(
@@ -477,5 +505,16 @@ private extension AllMarketTickerViewModel {
             getExchangeRate(base: base, to: to)
         })
         alertShooter.shoot(alertModel)
+    }
+}
+
+
+// MARK: CoinDetailPageListener
+extension AllMarketTickerViewModel: CoinDetailPageListener {
+    func request(_ request: CoinDetailPageListenerRequest) {
+        switch request {
+        case .closePage:
+            listener?.request(.dismissCoinDetailPage)
+        }
     }
 }

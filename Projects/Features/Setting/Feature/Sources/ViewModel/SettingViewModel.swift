@@ -15,7 +15,9 @@ import DomainInterface
 import I18N
 import CoreUtil
 
-public protocol SettingViewModelListener: AnyObject { }
+public protocol SettingPageRouting: AnyObject { }
+
+public protocol SettingPageListener: AnyObject { }
 
 class SettingViewModel : UDFObservableObject, SettingViewModelable {
     
@@ -26,7 +28,11 @@ class SettingViewModel : UDFObservableObject, SettingViewModelable {
     
     
     // Listener
-    weak var listener: SettingViewModelListener?
+    weak var listener: SettingPageListener?
+    
+    
+    // Router
+    weak var router: SettingPageRouting?
     
     
     // State

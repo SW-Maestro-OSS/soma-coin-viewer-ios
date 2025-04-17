@@ -9,33 +9,52 @@ import SwiftUI
 import Combine
 
 import BaseFeature
-
+import AllMarketTickerFeature
+import CoinDetailFeature
 import DomainInterface
-
 import I18N
 import CoreUtil
 
-class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
+enum TabBarRoutingRequest {
+    case presentCoinDetailPage(listener: CoinDetailPageListener, symbolInfo: CoinSymbolInfo)
+    case dismissCoinDetailPage
+}
 
+protocol TabBarRouting: AnyObject {
+    func request(_ request: TabBarRoutingRequest)
+    func view(_ destination: TabBarPageDestination) -> AnyView
+    func tabBarPage(_ page: TabBarPage) -> AnyView
+}
+
+enum TabBarViewAction {
+    case onAppear
+    case languageTypeUpdated(LanguageType)
+    case upateDestination(NavigationPath)
+    case popDestination
+}
+
+class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
+    // Dependency
     private let i18NManager: I18NManager
     private let languageRepository: LanguageLocalizationRepository
     
     
     // State
     @Published var state: State = .init(tabItemROs: [], languageType: .english)
-    
-    var action: PassthroughSubject<Action, Never> = .init()
-    var store: Set<AnyCancellable> = .init()
     private var isFirstAppear: Bool = true
     
     
-    // Router
-    @Published private var _router: WeakTabBarRouting = .init(nil)
-    var router: TabBarRouting? {
-        get { _router.value }
-        set { _router = WeakTabBarRouting(newValue) }
-    }
+    // Action
+    typealias Action = TabBarViewAction
+    var action: PassthroughSubject<Action, Never> = .init()
     
+    
+    // Stream
+    var store: Set<AnyCancellable> = .init()
+    
+    
+    // Router
+    weak var router: TabBarRouting?
     
     init(i18NManager: I18NManager, languageRepository: LanguageLocalizationRepository) {
         
@@ -77,6 +96,8 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
             newState.languageType = languageType
             let newTabBarROs = createTabBarItemROs(languageType: languageType)
             newState.tabItemROs = newTabBarROs
+        case .upateDestination(let newPath):
+            newState.destinationPath = newPath
         default:
             return state
         }
@@ -85,18 +106,23 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
 }
 
 
+// MARK: Navigation state
+extension TabBarViewModel {
+    func updateDestinationPath(path: NavigationPath) {
+        action.send(.upateDestination(path))
+    }
+}
+
+
 // MARK: Tab bar item creation & modification
 private extension TabBarViewModel {
-    
     func createTabBarItemROs(languageType: LanguageType) -> [TabBarItemRO] {
         let orderedPage: [TabBarPage] = [.allMarketTicker, .setting]
         return orderedPage.map { page in
-            
             let displayText = languageRepository.getString(
                 key: page.titleTextLocalizationKey,
                 lanCode: languageType.lanCode
             )
-            
             return TabBarItemRO(
                 page: page,
                 displayText: displayText,
@@ -109,7 +135,6 @@ private extension TabBarViewModel {
 
 // MARK: Stream subscription
 private extension TabBarViewModel {
-    
     func subscribeToI18NMutation() {
         i18NManager
             .getChangePublisher()
@@ -126,7 +151,6 @@ private extension TabBarViewModel {
 
 // MARK: Public interface
 extension TabBarViewModel {
-    
     func action(_ action: Action) {
         self.action.send(action)
     }
@@ -135,28 +159,22 @@ extension TabBarViewModel {
 
 // MARK: Action & State
 extension TabBarViewModel {
-    
     struct State {
         var tabItemROs: [TabBarItemRO]
         var languageType: LanguageType
-    }
-    
-    enum Action {
-        
-        case onAppear
-        case languageTypeUpdated(LanguageType)
+        var destinationPath: NavigationPath = .init()
     }
 }
 
 
-private extension TabBarViewModel {
- 
-    class WeakTabBarRouting {
-        
-        weak var value: TabBarRouting?
-        
-        init(_ value: TabBarRouting?) {
-            self.value = value
+// MARK: AllMarketTickerListener
+extension TabBarViewModel {
+    func request(_ request: AllMarketTickerPageListenerRequest) {
+        switch request {
+        case .presentCoinDetailPage(let listener, let symbolInfo):
+            router?.request(.presentCoinDetailPage(listener: listener, symbolInfo: symbolInfo))
+        case .dismissCoinDetailPage:
+            router?.request(.dismissCoinDetailPage)
         }
     }
 }

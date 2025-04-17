@@ -5,6 +5,6 @@
 //  Created by choijunios on 1/26/25.
 //
 
-struct SplashRO {
+public struct SplashRO: Hashable {
     var displayTitleText: String
 }

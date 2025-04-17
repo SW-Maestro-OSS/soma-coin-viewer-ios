@@ -13,22 +13,38 @@ import BaseFeature
 import CoreUtil
 import PresentationUtil
 
+public enum CoinDetailPageListenerRequest {
+    case closePage
+}
+
+public protocol CoinDetailPageListener: AnyObject {
+    func request(_ request: CoinDetailPageListenerRequest)
+}
+
+public protocol CoinDetailPageRouting: AnyObject { }
+
 enum CoinDetailPageAction {
     case onAppear
+    case exitButtonTapped
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
     case updateTickerInfo(entity: Twenty4HourTickerForSymbolVO)
     case updateTrades(trades: [CoinTradeVO])
 }
 
-final class CoinDetailPageViewModel: UDFObservableObject {
+final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewModelable {
     // Dependency
     private let useCase: CoinDetailPageUseCase
     
     
+    // Listener
+    weak var listener: CoinDetailPageListener?
+    
+    
     // State
     @Published var state: State
-    private let symbolPair: String
+    private let symbolInfo: CoinSymbolInfo
+    private var symbolPair: String { symbolInfo.pairSymbol }
     private var hasAppeared = false
     private let bidStore: OrderbookStore = .init()
     private let askStore: OrderbookStore = .init()
@@ -45,10 +61,10 @@ final class CoinDetailPageViewModel: UDFObservableObject {
     private var streamTask: [CoinInfoStream: Task<Void, Never>] = [:]
     var store: Set<AnyCancellable> = .init()
     
-    init(symbolPair: String, useCase: CoinDetailPageUseCase) {
-        self.symbolPair = symbolPair
+    init(symbolInfo: CoinSymbolInfo, useCase: CoinDetailPageUseCase) {
+        self.symbolInfo = symbolInfo
         self.useCase = useCase
-        self.state = .init(symbolText: symbolPair.uppercased())
+        self.state = .init(symbolText: symbolInfo.pairSymbol.uppercased())
         
         createStateStream()
     }
@@ -64,6 +80,8 @@ final class CoinDetailPageViewModel: UDFObservableObject {
                 startRecentTradeStream()
             }
             return Just(action).eraseToAnyPublisher()
+        case .exitButtonTapped:
+            listener?.request(.closePage)
         default:
             break
         }

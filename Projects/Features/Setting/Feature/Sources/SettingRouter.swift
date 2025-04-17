@@ -9,11 +9,14 @@ import SwiftUI
 
 import BaseFeature
 
-public typealias SettingRoutable = Router<SettingViewModelable>
+public protocol SettingViewModelable { }
 
-public class SettingRouter: SettingRoutable {
+public typealias SettingRoutable = Router<SettingViewModelable> & SettingPageRouting
+
+class SettingRouter: SettingRoutable {
     
     init(view: SettingView, viewModel: SettingViewModel) {
         super.init(view: AnyView(view), viewModel: viewModel)
+        viewModel.router = self
     }
 }

@@ -11,7 +11,7 @@ import CoreUtil
 @MainActor
 class AppDelegate: NSObject, UIApplicationDelegate {
     
-    private(set) var rootRouter: RootRouter!
+    private(set) var rootRouter: RootRoutable!
     
     func application(
         _ application: UIApplication,

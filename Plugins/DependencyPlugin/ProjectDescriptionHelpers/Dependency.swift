@@ -5,7 +5,7 @@
 //  Created by 최준영 on 9/26/24.
 //
 
-import ProjectDescription
+@preconcurrency import ProjectDescription
 import Foundation
 
 public typealias D = ModuleDependency
@@ -37,6 +37,8 @@ public enum ModuleDependency {
         
         
         public static let SettingFeature: TargetDependency = .project(target: "SettingFeature", path: .relativeToRoot("Projects/Features/Setting"))
+        
+        public static let CoinDetailFeature: TargetDependency = .project(target: "CoinDetailFeature", path: .relativeToRoot("Projects/Features/CoinDetail"))
     }
     
     public enum Shared {
