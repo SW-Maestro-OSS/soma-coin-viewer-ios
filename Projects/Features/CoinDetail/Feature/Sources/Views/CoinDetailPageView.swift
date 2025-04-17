@@ -16,15 +16,17 @@ struct CoinDetailPageView: View {
     }
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                coinTitleContent()
-                Divider()
-                tickerChangeInfoContent()
-                Divider()
-                orderbookTableContent()
-                Divider()
-                recentTradeContent()
+        VStack(spacing: 0) {
+            coinTitleContent()
+            Divider()
+            ScrollView {
+                VStack(spacing: 0) {
+                    tickerChangeInfoContent()
+                    Divider()
+                    orderbookTableContent()
+                    Divider()
+                    recentTradeContent()
+                }
             }
         }
         .onAppear { viewModel.action.send(.onAppear) }
@@ -32,11 +34,22 @@ struct CoinDetailPageView: View {
     
     @ViewBuilder
     private func coinTitleContent() -> some View {
-        HStack(alignment: .bottom, spacing: 3) {
-            Text(viewModel.state.symbolText)
-                .font(.title)
-                .foregroundStyle(.black)
-            PriceChangePercentView(renderObject: $viewModel.state.priceChagePercentInfo)
+        HStack(spacing: 6) {
+            Button { viewModel.action.send(.exitButtonTapped)
+            } label: {
+                Image(systemName: "chevron.left")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .foregroundStyle(.black)
+            }
+            HStack(alignment: .bottom, spacing: 3) {
+                Text(viewModel.state.symbolText)
+                    .font(.title)
+                    .foregroundStyle(.black)
+                PriceChangePercentView(renderObject: $viewModel.state.priceChagePercentInfo)
+                    .padding(.bottom, 3)
+            }
             Spacer()
         }
         .padding(.horizontal, 3)

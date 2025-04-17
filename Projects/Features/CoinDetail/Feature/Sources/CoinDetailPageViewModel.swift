@@ -13,8 +13,17 @@ import BaseFeature
 import CoreUtil
 import PresentationUtil
 
+public enum CoinDetailPageListnerRequest {
+    case closePage
+}
+
+public protocol CoinDetailPageListener: AnyObject {
+    func request(_ request: CoinDetailPageListnerRequest)
+}
+
 enum CoinDetailPageAction {
     case onAppear
+    case exitButtonTapped
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
     case updateTickerInfo(entity: Twenty4HourTickerForSymbolVO)
@@ -24,6 +33,10 @@ enum CoinDetailPageAction {
 final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewModelable {
     // Dependency
     private let useCase: CoinDetailPageUseCase
+    
+    
+    // Listener
+    private weak var listener: CoinDetailPageListener?
     
     
     // State
@@ -46,7 +59,8 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     private var streamTask: [CoinInfoStream: Task<Void, Never>] = [:]
     var store: Set<AnyCancellable> = .init()
     
-    init(symbolInfo: CoinSymbolInfo, useCase: CoinDetailPageUseCase) {
+    init(listener: CoinDetailPageListener, symbolInfo: CoinSymbolInfo, useCase: CoinDetailPageUseCase) {
+        self.listener = listener
         self.symbolInfo = symbolInfo
         self.useCase = useCase
         self.state = .init(symbolText: symbolInfo.pairSymbol.uppercased())
@@ -65,6 +79,8 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 startRecentTradeStream()
             }
             return Just(action).eraseToAnyPublisher()
+        case .exitButtonTapped:
+            listener?.request(.closePage)
         default:
             break
         }

@@ -14,8 +14,9 @@ public final class CoinDetailPageBuilder {
     
     public init() { }
     
-    public func build(symbolInfo: CoinSymbolInfo) -> CoinDetailPageRouter {
+    public func build(listener: CoinDetailPageListener, symbolInfo: CoinSymbolInfo) -> CoinDetailPageRouter {
         let viewModel = CoinDetailPageViewModel(
+            listener: listener,
             symbolInfo: symbolInfo,
             useCase: coinDetailPageUseCase
         )

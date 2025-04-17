@@ -14,14 +14,22 @@ import CoreUtil
 @main
 struct ExampleApp: App {
     @UIApplicationDelegateAdaptor var appDelegate: AppDelegate
+    private let listener = FakeListener()
     
     var body: some Scene {
         WindowGroup {
             CoinDetailPageView(viewModel: CoinDetailPageViewModel(
-                symbolPair: "xrpusdt",
+                listener: listener,
+                symbolInfo: .init(firstSymbol: "xrp", secondSymbol: "usdt"),
                 useCase: DependencyInjector.shared.resolve()
             ))
         }
+    }
+}
+
+class FakeListener: CoinDetailPageListener {
+    func request(_ request: CoinDetailPageListnerRequest) {
+        print(request)
     }
 }
 
