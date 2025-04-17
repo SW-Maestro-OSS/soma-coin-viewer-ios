@@ -16,9 +16,10 @@ struct TradeContainerRuntimeErrorTest {
         let container = TradeContainer(maxCount: 1000)
         
         // When
+        var tasks: [Task<Void, Never>] = []
         for index in 0..<1000 {
-            Task.detached {
-                try await Task.sleep(for: .seconds(1))
+            let insertTask = Task<Void, Never>.detached {
+                try? await Task.sleep(for: .seconds(1))
                 await container.insert(element: .init(
                     tradeId: String(index),
                     tradeType: .buy,
@@ -27,14 +28,19 @@ struct TradeContainerRuntimeErrorTest {
                     tradeTime: .now
                 ))
             }
-            Task.detached {
-                try await Task.sleep(for: .seconds(0.5))
+            tasks.append(insertTask)
+            
+            let getTask = Task<Void, Never>.detached {
+                try? await Task.sleep(for: .seconds(0.5))
                 _ = await container.getList()
             }
+            tasks.append(getTask)
         }
-        try? await Task.sleep(for: .seconds(10))
         
         // Then
+        for task in tasks {
+            _ = await task.value
+        }
         #expect(await container.getList().count == 1000)
     }
 }
