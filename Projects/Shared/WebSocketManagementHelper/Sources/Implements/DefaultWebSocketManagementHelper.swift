@@ -39,11 +39,11 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
     }
     
     
-    public func requestSubscribeToStream(streams: [Stream]) {
+    public func requestSubscribeToStream(streams: [Stream], mustDeliver: Bool) {
         subscribedStreamManageQueue.async { [weak self] in
             guard let self else { return }
             // 스트림 구독 메세지 전송
-            webSocketService.subscribeTo(message: streams) { [weak self] result in
+            webSocketService.subscribeTo(message: streams, mustDeliver: mustDeliver) { [weak self] result in
                 guard let self else { return }
                 switch result {
                 case .success:
@@ -72,7 +72,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                             titleKey: TextKey.Alert.ActionTitle.retry.rawValue,
                             action: { [weak self] in
                                 guard let self else { return }
-                                requestSubscribeToStream(streams: streams)
+                                requestSubscribeToStream(streams: streams, mustDeliver: mustDeliver)
                             })
                         )
                         alertShooter.shoot(alertModel)
@@ -87,10 +87,10 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
     }
     
     
-    public func requestUnsubscribeToStream(streams willRemoveStreams: [Stream]) {
+    public func requestUnsubscribeToStream(streams willRemoveStreams: [Stream], mustDeliver: Bool) {
         
         // 특정스트림에 대해 구독을 해제 메세지 전송
-        webSocketService.unsubscribeTo(message: willRemoveStreams) { [weak self] result in
+        webSocketService.unsubscribeTo(message: willRemoveStreams, mustDeliver: mustDeliver) { [weak self] result in
                        
             guard let self else { return }
             
@@ -122,7 +122,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                     titleKey: TextKey.Alert.ActionTitle.retry.rawValue
                 ) { [weak self] in
                     guard let self else { return }
-                    requestUnsubscribeToStream(streams: willRemoveStreams)
+                    requestUnsubscribeToStream(streams: willRemoveStreams, mustDeliver: mustDeliver)
                 })
                 alertShooter.shoot(alertModel)
             }
@@ -198,7 +198,7 @@ private extension DefaultWebSocketManagementHelper {
             guard let self else { return }
             printIfDebug("\(Self.self) 스트림 복구 실행 \(currentSubscribtions)")
             let recoveringStreamList = Array(currentSubscribtions)
-            requestSubscribeToStream(streams: recoveringStreamList)
+            requestSubscribeToStream(streams: recoveringStreamList, mustDeliver: true)
         }
     }
 }

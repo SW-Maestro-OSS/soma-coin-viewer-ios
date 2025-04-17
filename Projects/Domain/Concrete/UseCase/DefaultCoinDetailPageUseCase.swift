@@ -25,15 +25,15 @@ final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
 // MARK: Orderbook
 public extension DefaultCoinDetailPageUseCase {
     func connectToOrderbookStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth"])
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth"], mustDeliver: true)
     }
     
     func connectToTickerChangesStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@ticker"])
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@ticker"], mustDeliver: true)
     }
     
     func connectToRecentTradeStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@trade"])
+        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@trade"], mustDeliver: true)
     }
     
     func disconnectToStreams(symbolPair: String) {
@@ -42,7 +42,7 @@ public extension DefaultCoinDetailPageUseCase {
             "\(symbol)@depth",
             "\(symbol)@ticker",
             "\(symbol)@trade",
-        ])
+        ], mustDeliver: false)
     }
     
     func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO {
