@@ -46,10 +46,11 @@ extension RootRouter {
     func view(destination: RootDestination) -> AnyView {
         switch destination {
         case .tabBarPage:
-            let tabBarRouter = tabBarBuilder.build()
-            self.tabBarRouter = tabBarRouter
-            attach(tabBarRouter)
-            return tabBarRouter.view
+            let router = tabBarBuilder.build()
+            if let tabBarRouter { dettach(tabBarRouter) }
+            tabBarRouter = router
+            attach(router)
+            return router.view
         }
     }
 }

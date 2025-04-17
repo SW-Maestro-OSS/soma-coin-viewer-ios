@@ -55,6 +55,9 @@ extension TabBarRouter {
             path.append(TabBarPageDestination.coinDetailPage(listener: listener, symbolInfo: symbolInfo))
             viewModel.updateDestinationPath(path: path)
         case .dismissCoinDetailPage:
+            guard let coinDetailPageRouter else { return }
+            self.coinDetailPageRouter = nil
+            dettach(coinDetailPageRouter)
             path.removeLast()
             viewModel.updateDestinationPath(path: path)
         }
@@ -72,11 +75,13 @@ extension TabBarRouter {
         switch page {
         case .allMarketTicker:
             let router = allMarketTickerBuilder.build(listener: viewModel)
+            if let allMarketTickerRouter { dettach(allMarketTickerRouter) }
             allMarketTickerRouter = router
             attach(router)
             return router.view
         case .setting:
             let router = settingBuilder.build(listener: viewModel)
+            if let settingRouter { dettach(settingRouter) }
             settingRouter = router
             attach(router)
             return router.view
@@ -87,6 +92,7 @@ extension TabBarRouter {
         switch destination {
         case .coinDetailPage(let listener, let symbolInfo):
             let router = coinDetailPageBuilder.build(listener: listener, symbolInfo: symbolInfo)
+            if let coinDetailPageRouter { dettach(coinDetailPageRouter) }
             coinDetailPageRouter = router
             attach(router)
             return router.view
