@@ -43,7 +43,7 @@ struct AllMarketTickerView: View {
         .onDisappear { viewModel.action(.onDisappear) }
         .onChange(of: scenePhase) { oldValue, newValue in
             if oldValue == .background && (newValue == .active || newValue == .inactive) {
-                viewModel.action(.getbackToForeground)
+                viewModel.action(.getBackToForeground)
             } else if newValue == .background {
                 viewModel.action(.enterBackground)
             }

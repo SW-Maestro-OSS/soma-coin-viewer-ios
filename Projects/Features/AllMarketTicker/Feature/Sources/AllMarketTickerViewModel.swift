@@ -34,7 +34,7 @@ enum AllMarketTickerViewAction {
     case sortSelectionButtonTapped(type: SortSelectionCellType)
     case coinRowIsTapped(id: String)
     case enterBackground
-    case getbackToForeground
+    case getBackToForeground
     
     // Side effect
     case tickerListFetched(list: [Twenty4HourTickerForSymbolVO])
@@ -173,7 +173,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
             return Publishers.MergeMany(actions).eraseToAnyPublisher()
         case .onDisappear, .enterBackground:
             allMarketTickersUseCase.disConnectToAllMarketTickerStream()
-        case .getbackToForeground:
+        case .getBackToForeground:
             allMarketTickersUseCase.connectToAllMarketTickerStream()
         case .tickerListFetched(let newList):
             self.tickerCellVO = newList

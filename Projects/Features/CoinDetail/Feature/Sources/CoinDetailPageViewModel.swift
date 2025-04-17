@@ -27,7 +27,7 @@ enum CoinDetailPageAction {
     case onAppear
     case exitButtonTapped
     case enterBackground
-    case getbackToForeground
+    case getBackToForeground
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
     case updateTickerInfo(entity: Twenty4HourTickerForSymbolVO)
@@ -94,7 +94,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             
             // 페이지 닫기
             listener?.request(.closePage)
-        case .getbackToForeground:
+        case .getBackToForeground:
             // 오더북 스트림만 상태 초기화 및 재구독
             listenToOrderbookStream()
             
