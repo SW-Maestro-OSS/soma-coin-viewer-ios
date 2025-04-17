@@ -103,9 +103,13 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                 }
             }
             
-            if case .failure(let error) = result {
+            switch result {
+            case .success:
+                willRemoveStreams.forEach { stream in
+                    printIfDebug("\(Self.self): ☑️\(stream)구독 해제 성공")
+                }
+            case .failure(let error):
                 printIfDebug("\(Self.self): 스트림 구독 해제 메세지 전송 실패 \(error.localizedDescription)")
-                
                 var alertModel = AlertModel(
                     titleKey: TextKey.Alert.Title.webSocketError.rawValue,
                     messageKey: TextKey.Alert.Message.streamUnsubFailure.rawValue

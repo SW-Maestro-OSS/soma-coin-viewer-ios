@@ -11,6 +11,7 @@ public protocol CoinDetailPageUseCase {
     func connectToOrderbookStream(symbolPair: String)
     func connectToTickerChangesStream(symbolPair: String)
     func connectToRecentTradeStream(symbolPair: String)
+    func disconnectToStreams(symbolPair: String)
     
     func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO
     func getChangeInOrderbook(symbolPair: String) -> AsyncStream<OrderbookUpdateVO>

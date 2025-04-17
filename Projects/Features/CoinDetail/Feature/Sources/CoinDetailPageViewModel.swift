@@ -69,6 +69,9 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
         createStateStream()
     }
     
+    deinit {
+        print("asd")
+    }
     
     func mutate(_ action: CoinDetailPageAction) -> AnyPublisher<CoinDetailPageAction, Never> {
         switch action {
@@ -81,6 +84,10 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             }
             return Just(action).eraseToAnyPublisher()
         case .exitButtonTapped:
+            // 연결 스트림 종료
+            useCase.disconnectToStreams(symbolPair: symbolPair)
+            
+            // 페이지 닫기
             listener?.request(.closePage)
         default:
             break

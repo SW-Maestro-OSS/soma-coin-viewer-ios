@@ -36,6 +36,15 @@ public extension DefaultCoinDetailPageUseCase {
         webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@trade"])
     }
     
+    func disconnectToStreams(symbolPair: String) {
+        let symbol = symbolPair.lowercased()
+        webSocketHelper.requestUnsubscribeToStream(streams: [
+            "\(symbol)@depth",
+            "\(symbol)@ticker",
+            "\(symbol)@trade",
+        ])
+    }
+    
     func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO {
         try await orderbookRepository.getWholeTable(symbolPair: symbolPair)
     }
