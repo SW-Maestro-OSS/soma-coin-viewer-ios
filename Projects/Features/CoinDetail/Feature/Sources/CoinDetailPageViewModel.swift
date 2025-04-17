@@ -13,12 +13,12 @@ import BaseFeature
 import CoreUtil
 import PresentationUtil
 
-public enum CoinDetailPageListnerRequest {
+public enum CoinDetailPageListenerRequest {
     case closePage
 }
 
 public protocol CoinDetailPageListener: AnyObject {
-    func request(_ request: CoinDetailPageListnerRequest)
+    func request(_ request: CoinDetailPageListenerRequest)
 }
 
 public protocol CoinDetailPageRouting: AnyObject { }

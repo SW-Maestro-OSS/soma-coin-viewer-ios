@@ -511,7 +511,7 @@ private extension AllMarketTickerViewModel {
 
 // MARK: CoinDetailPageListener
 extension AllMarketTickerViewModel: CoinDetailPageListener {
-    func request(_ request: CoinDetailPageListnerRequest) {
+    func request(_ request: CoinDetailPageListenerRequest) {
         switch request {
         case .closePage:
             listener?.request(.dismissCoinDetailPage)
