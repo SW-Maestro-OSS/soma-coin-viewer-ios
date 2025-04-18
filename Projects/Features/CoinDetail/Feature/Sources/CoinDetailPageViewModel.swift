@@ -95,12 +95,10 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
         case .onDisappear:
             // 연결 스트림 종료
             useCase.disconnectToStreams(symbolPair: symbolPair)
+            
+            // AsyncStream종료
             streamTask.values.forEach({ $0.cancel() })
             streamTask.removeAll()
-            
-            // 오더북 저장소 비우기
-            Task { await clearOrderbookStore() }
-            
         case .exitButtonTapped:
             // 페이지 닫기
             listener?.request(.closePage)

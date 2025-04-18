@@ -21,6 +21,8 @@ open class BinarySearchTree<Value: Comparable, TreeNode: Node<Value>> {
     
     public init() { }
     
+    deinit { clear() }
+    
     func createNode(value: Value, parent: Node<Value>) -> TreeNode {
         TreeNode(value: value, parent: parent)
     }
