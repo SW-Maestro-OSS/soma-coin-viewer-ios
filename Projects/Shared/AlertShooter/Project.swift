@@ -44,6 +44,7 @@ let project = Project(
             bundleId: "com.choijunios.shared.AlertShooter",
             sources: ["Sources/**"],
             dependencies: [
+                D.Shared.I18N,
                 D.Util.CoreUtil,
             ]
         ),

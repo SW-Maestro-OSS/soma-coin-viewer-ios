@@ -10,6 +10,7 @@ import SwiftUI
 @testable import CoinDetailFeature
 import WebSocketManagementHelper
 import CoreUtil
+import AlertShooter
 
 @main
 struct ExampleApp: App {
@@ -21,6 +22,7 @@ struct ExampleApp: App {
                 symbolInfo: .init(firstSymbol: "xrp", secondSymbol: "usdt"),
                 useCase: DependencyInjector.shared.resolve()
             ))
+            .environmentObject(DependencyInjector.shared.resolve(AlertShooter.self))
         }
     }
 }

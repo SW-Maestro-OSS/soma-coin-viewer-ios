@@ -8,6 +8,8 @@
 import SwiftUI
 
 import RootFeature
+import CoreUtil
+import AlertShooter
 
 @main
 struct CoinViewerApp: App {
@@ -18,6 +20,7 @@ struct CoinViewerApp: App {
         
         WindowGroup {
             appDelegate.rootRouter.view
+                .environmentObject(DependencyInjector.shared.resolve(AlertShooter.self))
         }
     }
 }

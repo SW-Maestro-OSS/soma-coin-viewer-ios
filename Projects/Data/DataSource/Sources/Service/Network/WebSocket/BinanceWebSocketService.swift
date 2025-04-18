@@ -314,7 +314,6 @@ public extension BinanceWebSocketService {
 extension BinanceWebSocketService {
     
     private func sendHeartbeatMessage() {
-        
         currentWebSocketTask?.sendPing(pongReceiveHandler: { error in
             if let error {
                 printIfDebug("Pong수신 실패 \(error.localizedDescription)")
@@ -335,7 +334,8 @@ extension BinanceWebSocketService {
         // 3분에 한번씩 하트비트 유지 메세지 전송
         scheduledTimer.schedule(deadline: .now(), repeating: 180)
         scheduledTimer.setEventHandler { [weak self] in
-            self?.sendHeartbeatMessage()
+            guard let self else { return }
+            sendHeartbeatMessage()
         }
                 
         // 타이머 시작
@@ -439,5 +439,4 @@ extension BinanceWebSocketService {
             self.id = id
         }
     }
-
 }

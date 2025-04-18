@@ -22,15 +22,13 @@ public final class RootBuilder {
     // Service locator
     @Injected private var i18NManager: I18NManager
     @Injected private var languageLocalizationRepository: LanguageLocalizationRepository
-    @Injected private var alertShooter: AlertShooter
 
     public init() { }
     
     public func build() -> RootRoutable {
         let viewModel = RootViewModel(
             i18NManager: i18NManager,
-            languageRepository: languageLocalizationRepository,
-            alertShooter: alertShooter
+            languageRepository: languageLocalizationRepository
         )
         let view = RootView(viewModel: viewModel)
         let tabBarBuilder = TabBarBuilder()
