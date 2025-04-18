@@ -27,7 +27,7 @@ final public class BinanceSingleMarketTickerRepository: SingleMarketTickerReposi
                     .sink(receiveValue: { entity in
                         continuation.yield(entity)
                     })
-                continuation.onTermination = { @Sendable _ in
+                continuation.onTermination = { @Sendable [cancellable] _ in
                     cancellable.cancel()
                 }
             }

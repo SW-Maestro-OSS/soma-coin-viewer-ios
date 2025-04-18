@@ -24,6 +24,7 @@ public protocol CoinDetailPageRouting: AnyObject { }
 
 enum CoinDetailPageAction {
     case onAppear
+    case onDisappear
     case exitButtonTapped
     case enterBackground
     case getBackToForeground
@@ -81,8 +82,8 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 hasAppeared = true
                 
                 // 스크림 구독
-                listenToOrderbookStream()
                 listenToChangeInTickerStream()
+                listenToOrderbookStream()
                 listenToRecentTradeStream()
                 
                 // 스트림 연결
@@ -91,10 +92,16 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 useCase.connectToRecentTradeStream(symbolPair: symbolPair)
             }
             return Just(action).eraseToAnyPublisher()
-        case .exitButtonTapped:
+        case .onDisappear:
             // 연결 스트림 종료
             useCase.disconnectToStreams(symbolPair: symbolPair)
+            streamTask.values.forEach({ $0.cancel() })
+            streamTask.removeAll()
             
+            // 오더북 저장소 비우기
+            Task { await clearOrderbookStore() }
+            
+        case .exitButtonTapped:
             // 페이지 닫기
             listener?.request(.closePage)
         case .getBackToForeground:
@@ -197,7 +204,7 @@ private extension CoinDetailPageViewModel {
             .subscribe(self.action)
         
         streamTask[.orderbookTable]?.cancel()
-        streamTask[.orderbookTable] = Task { [weak self] in
+        streamTask[.orderbookTable] = Task { [updateTracker, weak self] in
             guard let self else { return }
             do {
                 // #1. 전체 테이블 요청
@@ -265,7 +272,7 @@ private extension CoinDetailPageViewModel {
             .subscribe(self.action)
         
         streamTask[.recentTrade]?.cancel()
-        streamTask[.recentTrade] = Task { [weak self] in
+        streamTask[.recentTrade] = Task { [updateTracker, weak self] in
             guard let self else { return }
             for await entity in useCase.getRecentTrade(symbolPair: symbolPair) { updateTracker.send(entity) }
         }
