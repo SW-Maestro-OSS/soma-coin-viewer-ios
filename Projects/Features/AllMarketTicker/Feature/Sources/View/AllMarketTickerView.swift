@@ -54,15 +54,12 @@ struct AllMarketTickerView: View {
     private func sortSelectionTabContent() -> some View {
         LazyVGrid(columns: sortSelectionViewColumn, spacing: 0) {
             ForEach(viewModel.state.displayingSortSelectionCellROs) { ro in
-                Group {
-                    if viewModel.state.isLoaded {
-                        TickerSortSelectorView(renderObject: ro)
-                            .onTapGesture {
-                                viewModel.action(.sortSelectionButtonTapped(type: ro.type))
-                            }
-                    } else { SkeletonUI() }
-                }
-                .frame(height: 45)
+                TickerSortSelectorView(renderObject: ro)
+                    .onTapGesture {
+                        viewModel.action(.sortSelectionButtonTapped(type: ro.type))
+                    }
+                    .frame(height: 45)
+                    .skeleton(presentOrigin: viewModel.state.isLoaded)
             }
         }
     }

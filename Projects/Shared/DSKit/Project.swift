@@ -11,9 +11,7 @@ let project = Project(
             bundleId: "com.CoinViewer.DSKit.CommonUI",
             sources: ["./CommonUI/Sources/**"],
             resources: ["./CommonUI/Resources/**"],
-            dependencies: [
-                D.Util.PresentationUtil,
-            ]
+            dependencies: [ ]
         ),
     ]
 )
