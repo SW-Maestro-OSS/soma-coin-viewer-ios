@@ -439,5 +439,4 @@ extension BinanceWebSocketService {
             self.id = id
         }
     }
-
 }

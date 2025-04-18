@@ -8,6 +8,7 @@
 import SwiftUI
 
 import CommonUI
+import AlertShooter
 
 struct CoinDetailPageView: View {
     @Environment(\.scenePhase) var scenePhase
@@ -39,6 +40,7 @@ struct CoinDetailPageView: View {
                 viewModel.action.send(.enterBackground)
             }
         }
+        .alertShootable()
     }
     
     @ViewBuilder

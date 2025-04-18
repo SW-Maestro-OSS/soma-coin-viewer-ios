@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+import AlertShooter
+
 struct TabBarView: View {
     @StateObject private var viewModel: TabBarViewModel
     
@@ -23,6 +25,7 @@ struct TabBarView: View {
                 }
         }
         .onAppear { viewModel.action(.onAppear) }
+        .alertShootable()
     }
     
     

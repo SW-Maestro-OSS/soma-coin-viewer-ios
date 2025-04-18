@@ -26,12 +26,6 @@ struct RootView: View {
             viewModel.router.view(destination: destination)
         }
         .onAppear { viewModel.action(.onAppear) }
-        .alertable(
-            presented: $viewModel.state.isAlertPresenting,
-            renderObject: viewModel.state.presentingAlertRO
-        ) { [weak viewModel] in
-            viewModel?.action(.alertIsDismissed)
-        }
     }
 }
 

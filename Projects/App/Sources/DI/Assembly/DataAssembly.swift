@@ -61,11 +61,5 @@ public class DataAssembly: Assembly {
         container.register(TradeRepository.self) { _ in
             BinanceTradeRepository()
         }
-        
-        // I18N
-        container.register(LanguageLocalizationRepository.self) { _ in
-            DefaultLanguageLocalizationRepository()
-        }
-        .inObjectScope(.container)
     }
 }

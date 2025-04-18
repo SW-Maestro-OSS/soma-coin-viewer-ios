@@ -34,7 +34,7 @@ public class Assemblies: Assembly {
         container.register(WebSocketManagementHelper.self) { resolver in
             DefaultWebSocketManagementHelper(
                 webSocketService: resolver.resolve(WebSocketService.self)!,
-                alertShooter: resolver.resolve(AlertShooter.self)!
+                alertShootable: resolver.resolve(AlertShooter.self)!
             )
         }
         .inObjectScope(.container)

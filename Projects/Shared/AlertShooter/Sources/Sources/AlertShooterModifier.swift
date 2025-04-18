@@ -18,28 +18,21 @@ public struct AlertShooterModifier: ViewModifier {
     public func body(content: Content) -> some View {
         content
             .alert(
-                alertShooter.alertModel?.titleKey ?? "",
+                alertShooter.alertModel?.titleText ?? "",
                 isPresented: $alertShooter.present,
-                presenting: alertShooter.alertModel) { model in
+                presenting: alertShooter.alertModel) { (model: AlertRO) in
                     VStack {
                         ForEach(model.actions) { actionModel in
                             Button {
                                 actionModel.action?()
                             } label: {
-                                Text(actionModel.titleKey)
-                                    .foregroundStyle({
-                                        switch actionModel.role {
-                                        case .normal:
-                                            return Color.black
-                                        case .cancel:
-                                            return Color.red
-                                        }
-                                    }())
+                                Text(actionModel.titleText)
+                                    .foregroundStyle(actionModel.titleTextColor)
                             }
                         }
                     }
                 } message: { model in
-                    if let message = model.messageKey {
+                    if let message = model.messageText {
                         Text(message)
                     }
                 }

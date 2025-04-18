@@ -23,12 +23,11 @@ public protocol RootRouting: AnyObject {
     func view(destination: RootDestination) -> AnyView
 }
 
-final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterListener {
+final class RootViewModel: UDFObservableObject, RootViewModelable {
     
     // Dependency
     private let i18NManager: I18NManager
     private let languageRepository: LanguageLocalizationRepository
-    private let alertShooter: AlertShooter
     
 
     // Router
@@ -48,15 +47,10 @@ final class RootViewModel: UDFObservableObject, RootViewModelable, AlertShooterL
     
     init(
         i18NManager: I18NManager,
-        languageRepository: LanguageLocalizationRepository,
-        alertShooter: AlertShooter
+        languageRepository: LanguageLocalizationRepository
     ) {
         self.i18NManager = i18NManager
         self.languageRepository = languageRepository
-        self.alertShooter = alertShooter
-        
-        // Listener
-        alertShooter.request(listener: self)
         
         // Splash
         let languageType = i18NManager.getLanguageType()
@@ -161,48 +155,3 @@ private extension RootViewModel {
         return .init(displayTitleText: titleText)
     }
 }
-
-
-// MARK: AlertShooterListener
-extension RootViewModel {
-    func alert(model: AlertModel) {
-        let currentLan = i18NManager.getLanguageType()
-        let alertActionROs = model.actions.map { actionModel in
-            let titleText = languageRepository.getString(
-                key: actionModel.titleKey,
-                lanCode: currentLan.lanCode
-            )
-            var titleTextColor: Color!
-            switch actionModel.role {
-            case .normal:
-                titleTextColor = .black
-            case .cancel:
-                titleTextColor = .red
-            }
-            return AlertActionRO(
-                titleText: titleText,
-                titleTextColor: titleTextColor,
-                action: actionModel.action
-            )
-        }
-        
-        // Alert RO
-        var messageText: String = ""
-        if let messageKey = model.messageKey {
-            messageText = languageRepository.getString(
-                key: messageKey,
-                lanCode: currentLan.lanCode
-            )
-        }
-        let alertRO = AlertRO(
-            titleText: languageRepository.getString(
-                key: model.titleKey,
-                lanCode: currentLan.lanCode
-            ),
-            messageText: messageText,
-            actions: alertActionROs
-        )
-        self.action.send(.presentAlert(ro: alertRO))
-    }
-}
-
