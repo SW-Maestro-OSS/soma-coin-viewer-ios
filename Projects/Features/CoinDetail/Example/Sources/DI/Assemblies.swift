@@ -27,9 +27,7 @@ public class Assemblies: Assembly {
         .inObjectScope(.container)
         
         // MARK: Shared
-        container.register(AlertShooter.self) { _ in
-            DefaultAlertShooter()
-        }
+        container.register(AlertShooter.self) { _ in AlertShooter() }
         .inObjectScope(.container)
         container.register(WebSocketManagementHelper.self) { resolver in
             DefaultWebSocketManagementHelper(
