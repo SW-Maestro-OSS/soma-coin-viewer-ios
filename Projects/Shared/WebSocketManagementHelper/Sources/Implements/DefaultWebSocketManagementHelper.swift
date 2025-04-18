@@ -16,7 +16,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
     
     // Dependency
     private let webSocketService: WebSocketService
-    private let alertShooter: AlertShooter
+    private let alertShootable: AlertShootable
     
     
     // Stream
@@ -31,9 +31,9 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
     private let subscribedStreamManageQueue: DispatchQueue = .init(label: "com.WebSocketManagementHelper")
     private var store: Set<AnyCancellable> = .init()
     
-    public init(webSocketService: WebSocketService, alertShooter: AlertShooter) {
+    public init(webSocketService: WebSocketService, alertShootable: AlertShootable) {
         self.webSocketService = webSocketService
-        self.alertShooter = alertShooter
+        self.alertShootable = alertShootable
         
         webSocketService.listener = self
     }
@@ -58,25 +58,9 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                         streams.forEach { stream in
                             printIfDebug("\(Self.self): ❌\(stream)구독 실패")
                         }
-                    
-                        var alertModel = AlertModel(
-                            titleKey: TextKey.Alert.Title.webSocketError.rawValue,
-                            messageKey: TextKey.Alert.Message.streamSubFailure.rawValue
-                        )
-                        alertModel
-                            .add(action: .init(
-                                titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
-                                role: .cancel
-                            ))
-                        alertModel.add(action: .init(
-                            titleKey: TextKey.Alert.ActionTitle.retry.rawValue,
-                            action: { [weak self] in
-                                guard let self else { return }
-                                requestSubscribeToStream(streams: streams, mustDeliver: mustDeliver)
-                            })
-                        )
-                        alertShooter.shoot(alertModel)
-                        
+                        // 재요청
+                        printIfDebug("\(Self.self): 🔄스트림 구독 재요청...")
+                        requestSubscribeToStream(streams: streams, mustDeliver: mustDeliver)
                         return
                     default:
                         return
@@ -110,21 +94,9 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                 }
             case .failure(let error):
                 printIfDebug("\(Self.self): 스트림 구독 해제 메세지 전송 실패 \(error.localizedDescription)")
-                var alertModel = AlertModel(
-                    titleKey: TextKey.Alert.Title.webSocketError.rawValue,
-                    messageKey: TextKey.Alert.Message.streamUnsubFailure.rawValue
-                )
-                alertModel.add(action: .init(
-                    titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
-                    role: .cancel
-                ))
-                alertModel.add(action: .init(
-                    titleKey: TextKey.Alert.ActionTitle.retry.rawValue
-                ) { [weak self] in
-                    guard let self else { return }
-                    requestUnsubscribeToStream(streams: willRemoveStreams, mustDeliver: mustDeliver)
-                })
-                alertShooter.shoot(alertModel)
+                // 재요청
+                printIfDebug("\(Self.self): 🔄스트림 구독 해제 재요청...")
+                requestUnsubscribeToStream(streams: willRemoveStreams, mustDeliver: mustDeliver)
             }
         }
     }
@@ -160,7 +132,7 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                     guard let self else { return }
                     requestConnection(connectionType: .recoverPreviousStreams)
                 })
-                alertShooter.shoot(alertModel)
+                alertShootable.shoot(alertModel)
                 return
             }
         }
@@ -196,7 +168,7 @@ private extension DefaultWebSocketManagementHelper {
     func recoverPreviouslySubscribedStreams() {
         subscribedStreamManageQueue.async { [weak self] in
             guard let self else { return }
-            printIfDebug("\(Self.self) 스트림 복구 실행 \(currentSubscribtions)")
+            printIfDebug("[\(Self.self)] 🔄스트림 복구 실행 \(currentSubscribtions)")
             let recoveringStreamList = Array(currentSubscribtions)
             requestSubscribeToStream(streams: recoveringStreamList, mustDeliver: true)
         }
@@ -222,21 +194,8 @@ public extension DefaultWebSocketManagementHelper {
         switch error {
         case .unintentionalDisconnection(let error):
             printIfDebug("\(Self.self) 비정상적 웹소켓연결 해제 \(error?.localizedDescription ?? "")")
-            var alertModel = AlertModel(
-                titleKey: TextKey.Alert.Title.webSocketError.rawValue,
-                messageKey: TextKey.Alert.Message.unintendedDisconnection.rawValue
-            )
-            alertModel.add(action: .init(
-                titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
-                role: .cancel
-            ))
-            alertModel.add(action: .init(
-                titleKey: TextKey.Alert.ActionTitle.retry.rawValue
-            ) { [weak self] in
-                guard let self else { return }
-                requestConnection(connectionType: .recoverPreviousStreams)
-            })
-            alertShooter.shoot(alertModel)
+            printIfDebug("\(Self.self): 🔄웹소켓 재연결 요청...")
+            requestConnection(connectionType: .recoverPreviousStreams)
             break
         case .internetConnectionError(let error):
             printIfDebug("\(Self.self) 인터넷 연결오류 \(error?.localizedDescription ?? "")")
@@ -254,7 +213,7 @@ public extension DefaultWebSocketManagementHelper {
                 guard let self else { return }
                 requestConnection(connectionType: .recoverPreviousStreams)
             })
-            alertShooter.shoot(alertModel)
+            alertShootable.shoot(alertModel)
             break
         case .serverIsBusy, .tooManyRequests:
             var alertModel = AlertModel(
@@ -271,7 +230,7 @@ public extension DefaultWebSocketManagementHelper {
                 guard let self else { return }
                 requestConnection(connectionType: .recoverPreviousStreams)
             })
-            alertShooter.shoot(alertModel)
+            alertShootable.shoot(alertModel)
             break
         case .unknown(let error):
             printIfDebug("\(Self.self) 알 수 없는 오류 \(error?.localizedDescription ?? "")")
@@ -282,7 +241,7 @@ public extension DefaultWebSocketManagementHelper {
             alertModel.add(action: .init(
                 titleKey: TextKey.Alert.ActionTitle.cancel.rawValue
             ))
-            alertShooter.shoot(alertModel)
+            alertShootable.shoot(alertModel)
             break
         default:
             break
