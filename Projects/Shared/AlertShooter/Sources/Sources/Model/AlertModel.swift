@@ -5,7 +5,7 @@
 //  Created by choijunios on 1/31/25.
 //
 
-public struct AlertModel {
+public struct AlertModel: Sendable {
     
     // Imformation
     public let titleKey: String
