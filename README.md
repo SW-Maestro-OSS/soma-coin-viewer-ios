@@ -104,7 +104,7 @@
 해당 프로젝트는 다운로드 후 실행할 수 있습니다.
 
 1. 레포지토리를 다운로드 합니다.
-2. `tuist install`을 통해 외부의존성을 install합니다.
+2. `tuist install`을 통해 외부의존성을 install합니다. (Tuist버전: 4.12.1)
 3. 요구하는 xcconfig파일을 생성합니다.
 4. `tuist generate`를 CLI에 입력합니다.
 
