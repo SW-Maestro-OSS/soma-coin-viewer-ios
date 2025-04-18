@@ -48,6 +48,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     private let symbolInfo: CoinSymbolInfo
     private var symbolPair: String { symbolInfo.pairSymbol }
     private var hasAppeared = false
+    private let orderbookRowCount: Int = 15
     private let bidStore: OrderbookStore = .init()
     private let askStore: OrderbookStore = .init()
     private let tradeContainer: TradeContainer = .init(maxCount: 15)
@@ -66,7 +67,10 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     init(symbolInfo: CoinSymbolInfo, useCase: CoinDetailPageUseCase) {
         self.symbolInfo = symbolInfo
         self.useCase = useCase
-        self.state = .init(symbolText: symbolInfo.pairSymbol.uppercased())
+        self.state = .init(
+            symbolText: symbolInfo.pairSymbol.uppercased(),
+            fixedOrderbookRowCount: orderbookRowCount
+        )
         
         createStateStream()
     }
@@ -187,8 +191,8 @@ private extension CoinDetailPageViewModel {
                 await vm.apply(asks: update.asks)
                 
                 // - 리스트 추출
-                let bidList = await vm.bidStore.getDescendingList(count: 15).map(Orderbook.init)
-                let askList = await vm.askStore.getAscendingList(count: 15).map(Orderbook.init)
+                let bidList = await vm.bidStore.getDescendingList(count: vm.orderbookRowCount).map(Orderbook.init)
+                let askList = await vm.askStore.getAscendingList(count: vm.orderbookRowCount).map(Orderbook.init)
                 return Action.updateOrderbook(bids: bidList, asks: askList)
             }
             .subscribe(self.action)
@@ -289,19 +293,28 @@ private extension CoinDetailPageViewModel {
 extension CoinDetailPageViewModel {
     struct State {
         // 24h ticker
-        var symbolText: String
+        let symbolText: String
         var priceChagePercentInfo: PriceChangePercentRO?
         var tickerInfo: TickerInfo?
         
         // Orderbook table
+        let fixedOrderbookRowCount: Int
         var bidOrderbooks: [OrderbookCellRO] = []
         var askOrderbooks: [OrderbookCellRO] = []
         
         // Recent trade
         var trades: [CoinTradeRO] = []
         
-        init(symbolText: String) {
+        // View Loading
+        var isLoad: Bool {
+            tickerInfo != nil &&
+            !bidOrderbooks.isEmpty &&
+            !askOrderbooks.isEmpty
+        }
+        
+        init(symbolText: String, fixedOrderbookRowCount: Int) {
             self.symbolText = symbolText
+            self.fixedOrderbookRowCount = fixedOrderbookRowCount
         }
     }
 }
