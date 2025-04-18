@@ -305,7 +305,7 @@ extension CoinDetailPageViewModel {
         var trades: [CoinTradeRO] = []
         
         // View Loading
-        var isLoad: Bool {
+        var isLoaded: Bool {
             tickerInfo != nil &&
             !bidOrderbooks.isEmpty &&
             !askOrderbooks.isEmpty

@@ -68,7 +68,7 @@ struct CoinDetailPageView: View {
     @ViewBuilder
     private func tickerChangeInfoContent() -> some View {
         TickerChangeInfoView(info: $viewModel.state.tickerInfo)
-            .skeleton(presentOrigin: viewModel.state.isLoad)
+            .skeleton(presentOrigin: viewModel.state.isLoaded)
     }
     
     @ViewBuilder
@@ -105,13 +105,13 @@ struct CoinDetailPageView: View {
             }
             .frame(height: CGFloat(viewModel.state.fixedOrderbookRowCount*30))
         }
-        .skeleton(presentOrigin: viewModel.state.isLoad)
+        .skeleton(presentOrigin: viewModel.state.isLoaded)
     }
     
     @ViewBuilder
     private func recentTradeContent() -> some View {
         RecentTradeTableView(trades: $viewModel.state.trades)
             .frame(minHeight: 150)
-            .skeleton(presentOrigin: viewModel.state.isLoad)
+            .skeleton(presentOrigin: viewModel.state.isLoaded)
     }
 }
