@@ -54,8 +54,6 @@ public enum ModuleDependency {
     
     public enum Util {
         public static let CoreUtil: TargetDependency = .project(target: "CoreUtil", path: .relativeToRoot("Projects/Utils/CoreUtil"))
-        
-        public static let PresentationUtil: TargetDependency = .project(target: "PresentationUtil", path: .relativeToRoot("Projects/Utils/PresentationUtil"))
     }
 }
 

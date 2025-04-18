@@ -22,7 +22,6 @@ let project = Project(
             sources: ["Sources/**"],
             resources: ["Resources/**"],
             dependencies: [
-                
                 // Features
                 D.Feature.RootFeature,
 
@@ -33,9 +32,6 @@ let project = Project(
                 // Data
                 D.Data.dataSource,
                 D.Data.repository,
-                
-                // Util
-                D.Util.PresentationUtil,
                 
                 // Shared
                 D.Shared.AlertShooter,

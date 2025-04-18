@@ -11,7 +11,6 @@ import SwiftUI
 import DomainInterface
 import BaseFeature
 import CoreUtil
-import PresentationUtil
 
 public enum CoinDetailPageListenerRequest {
     case closePage
@@ -162,7 +161,7 @@ private extension CoinDetailPageViewModel {
     func createChangePercentTextConfig(percent: CVNumber) -> (String, ChangeType) {
         let percentText = percent.roundToTwoDecimalPlaces()+"%"
         var displayText: String = percentText
-        if percent >= 0.0 {
+        if percent > 0.0 {
             displayText = "+"+displayText
         }
         var changeType: ChangeType = .neutral

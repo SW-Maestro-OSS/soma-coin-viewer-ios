@@ -64,9 +64,6 @@ let project = Project(
             bundleId: "com.choijunios.feature.Base",
             sources: ["Feature/Sources/**"],
             dependencies: [
-                
-                D.Util.PresentationUtil,
-                
                 D.Shared.CommonUI,
                 
                 D.Domain.interface,
