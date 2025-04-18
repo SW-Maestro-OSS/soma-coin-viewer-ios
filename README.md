@@ -112,7 +112,7 @@
   
   (./Secrets/xcconfigs/Release and Debug.xcconfig) **Debug**빌드시 xcconfig파일내 값을 사용하지 않기 때문에 실행시 Debug스킴을 사용하시길 바랍니다.
   
-  두 xcconfig파일에 "OPENEX_API_KEY"키을 할당해야합니다. [환율 API 사이트(Open exchange rates)](https://openexchangerates.org/)의 API_KEY값을 할당해주면 프로젝트가 정상적으로 실행됩니다.
+  두 xcconfig파일에 "OPENEX_API_KEY"키값을 할당해야합니다. [환율 API 사이트(Open exchange rates)](https://openexchangerates.org/)의 API_KEY값을 할당해주면 프로젝트가 정상적으로 실행됩니다.
 ```
 OPENEX_API_KEY="API Key for open exchange rates"
 ```
