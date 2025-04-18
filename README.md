@@ -2,25 +2,44 @@
 
 소프트웨어 마에스트로 15기에서, Best Practice 용도로 만든 코인뷰어 어플리케이션 입니다.
 
+## 기능 소개
+
+### 웹소켓 스트림
+
 <table>
   <tr>
     <td>
-      <b>웹소켓 데이터 표출 & 정렬</b>
+      <b>실시간 코인 가격 변동</b>
     </td>
     <td>
-      <b>코인가격 표시화폐 동적변경</b>
+      <b>코인 디테일 정보(오더북테이블, 채결 거래정보)</b>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/1e842b6a-692c-4e77-935c-8114688aa716" width=300 />
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/0a0cff90-b28d-4e5f-b444-029085841b2e" width=300 />
+    </td>
+  </tr>
+</table>
+
+### UI동적 변경
+
+<table>
+  <tr>
+    <td>
+      <b>화폐 동적변경</b>
     </td>
     <td>
       <b>언어 동적변경</b>
     </td>
     <td>
-      <b>코인표츌UI 동적변경</b>
+      <b>리스트 타입 동적변경</b>
     </td>
   </tr>
   <tr>
-    <td>
-      <img src="https://github.com/user-attachments/assets/1e842b6a-692c-4e77-935c-8114688aa716" width=200 />
-    </td>
     <td>
        <img src="https://github.com/user-attachments/assets/5cd0509a-e2b2-4692-a1c2-f9bdd1475d7b" width=200 />
     </td>
@@ -59,7 +78,7 @@
             <b>디자인 패턴</b>
         </td>
         <td>
-            <b>MVVM, 커스텀 MVI</b>
+            <b>MVVM</b>
         </td>
     </tr>
     <tr>
