@@ -13,6 +13,7 @@ let project = Project(
             dependencies: [
                 // Third Party
                 D.ThirdParty.Swinject,
+                D.ThirdParty.AdvancedSwift,
             ]
         ),
     ]

@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "advancedswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/J0onYEong/AdvancedSwift.git",
+      "state" : {
+        "revision" : "533510c60f19714b386f63a32750156b99261607",
+        "version" : "1.0.0"
+      }
+    },
+    {
       "identity" : "simpleimageprovider",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/J0onYEong/SimpleImageProvider.git",
