@@ -49,9 +49,8 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     private var symbolPair: String { symbolInfo.pairSymbol }
     private var hasAppeared = false
     private let orderbookRowCount: Int = 15
-    private let tradeContainer: TradeContainer = .init(maxCount: 15)
-    
-    
+    private let recentTradeRowCount: Int = 20
+
     // Action
     typealias Action = CoinDetailPageAction
     let action: PassthroughSubject<CoinDetailPageAction, Never> = .init()
@@ -213,26 +212,14 @@ private extension CoinDetailPageViewModel {
 // MARK: Recent trade
 private extension CoinDetailPageViewModel {
     func listenToRecentTradeStream() {
-        let updateTracker = PassthroughSubject<CoinTradeVO, Never>()
         streamUpdateObserverStore[.recentTrade]?.cancel()
-        streamUpdateObserverStore[.recentTrade] = updateTracker
+        streamUpdateObserverStore[.recentTrade] = useCase
+            .getRecentTrade(symbolPair: symbolPair, maxRowCount: UInt(recentTradeRowCount))
             .throttle(for: 1.0, scheduler: DispatchQueue.global(), latest: true)
-            .unretained(self)
-            .asyncTransform { vm, update in
-                // - 주문정보 업데이트
-                await vm.tradeContainer.insert(element: update)
-                
-                // - 새로운 리스트 추출
-                let newList = await vm.tradeContainer.getList()
-                return Action.updateTrades(trades: newList)
+            .map { list in
+                return Action.updateTrades(trades: list)
             }
             .subscribe(self.action)
-        
-        streamTask[.recentTrade]?.cancel()
-        streamTask[.recentTrade] = Task { [updateTracker, weak self] in
-            guard let self else { return }
-            for await entity in useCase.getRecentTrade(symbolPair: symbolPair) { updateTracker.send(entity) }
-        }
     }
     
     func convertToRO(_ entity: CoinTradeVO) -> CoinTradeRO {

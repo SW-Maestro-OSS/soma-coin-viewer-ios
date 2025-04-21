@@ -30,6 +30,11 @@ public class Assemblies: Assembly {
         }
         .inObjectScope(.container)
         
+        // MARK: DataSource
+        container.register(CoinTradeDataSource.self) { _ in
+            BinanceCoinTradeDataSource()
+        }
+        
         // MARK: Shared
         container.register(AlertShooter.self) { _ in AlertShooter() }
         .inObjectScope(.container)
@@ -48,8 +53,8 @@ public class Assemblies: Assembly {
         container.register(SingleMarketTickerRepository.self) { _ in
             BinanceSingleMarketTickerRepository()
         }
-        container.register(TradeRepository.self) { _ in
-            BinanceTradeRepository()
+        container.register(CoinTradeRepository.self) { _ in
+            BinanceCoinTradeRepository()
         }
         
         // MARK: UseCase
