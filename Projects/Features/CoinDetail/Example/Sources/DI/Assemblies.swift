@@ -25,6 +25,10 @@ public class Assemblies: Assembly {
             BinanceWebSocketService()
         }
         .inObjectScope(.container)
+        container.register(HTTPService.self) { _ in
+            DefaultHTTPService()
+        }
+        .inObjectScope(.container)
         
         // MARK: Shared
         container.register(AlertShooter.self) { _ in AlertShooter() }

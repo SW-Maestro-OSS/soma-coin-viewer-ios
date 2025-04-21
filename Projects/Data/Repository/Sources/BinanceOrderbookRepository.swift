@@ -14,8 +14,8 @@ import CoreUtil
 
 public final class BinanceOrderbookRepository: OrderbookRepository {
     // Dependency
-    @Injected var webSocketService: WebSocketService
-    private let httpService: HTTPService = .init()
+    @Injected private var webSocketService: WebSocketService
+    @Injected private var httpService: HTTPService
     
     // Store
     private let bidOrderbookStore = ThreadSafeOrderbookHashMap()

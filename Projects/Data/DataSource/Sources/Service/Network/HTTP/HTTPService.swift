@@ -8,7 +8,12 @@
 import Foundation
 import Combine
 
-public struct HTTPService {
+public protocol HTTPService {
+    func request<DTO: Decodable>(_ requestBuilder: URLRequestBuilder, dtoType: DTO.Type, retry: Int) async throws -> SuccessResponse<DTO>
+    func request<DTO>(_ requestBuilder: URLRequestBuilder, dtoType: DTO.Type) -> Future<SuccessResponse<DTO>, NetworkServiceError> where DTO : Decodable
+}
+
+public struct DefaultHTTPService: HTTPService {
     
     private let networkSession: URLSession = .init(configuration: .default)
     private let jsonDecoder: JSONDecoder = .init()
