@@ -64,8 +64,8 @@ public extension DefaultCoinDetailPageUseCase {
                     .keys(order: .ASC, maxCount: rowCount)
                     .map { Orderbook(price: $0, quantity: orderbookTable.askOrderbooks[$0]!) }
                 return OrderbookTableVO(
-                    askOrderbooks: bidOrderbookList,
-                    bidOrderbooks: askOrderbookList
+                    bidOrderbooks: bidOrderbookList,
+                    askOrderbooks: askOrderbookList
                 )
             }
             .eraseToAnyPublisher()

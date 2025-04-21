@@ -6,11 +6,11 @@
 //
 
 public struct OrderbookTableVO {
-    public let askOrderbooks: [Orderbook]
     public let bidOrderbooks: [Orderbook]
+    public let askOrderbooks: [Orderbook]
     
-    public init(askOrderbooks: [Orderbook], bidOrderbooks: [Orderbook]) {
-        self.askOrderbooks = askOrderbooks
+    public init(bidOrderbooks: [Orderbook], askOrderbooks: [Orderbook]) {
         self.bidOrderbooks = bidOrderbooks
+        self.askOrderbooks = askOrderbooks
     }
 }

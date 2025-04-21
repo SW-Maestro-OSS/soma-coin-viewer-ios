@@ -188,7 +188,7 @@ private extension CoinDetailPageViewModel {
             .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
             .catch({ error in
                 printIfDebug("[\(Self.self)]: \(error.localizedDescription)")
-                return Just(OrderbookTableVO(askOrderbooks: [], bidOrderbooks: []))
+                return Just(OrderbookTableVO(bidOrderbooks: [], askOrderbooks: []))
             })
             .map { table in
                 Action.updateOrderbook(
