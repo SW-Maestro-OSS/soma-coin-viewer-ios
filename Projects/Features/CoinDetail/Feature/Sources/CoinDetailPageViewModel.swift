@@ -49,8 +49,6 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     private var symbolPair: String { symbolInfo.pairSymbol }
     private var hasAppeared = false
     private let orderbookRowCount: Int = 15
-    private let bidStore: OrderbookStore = .init()
-    private let askStore: OrderbookStore = .init()
     private let tradeContainer: TradeContainer = .init(maxCount: 15)
     
     
@@ -83,7 +81,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 
                 // 스크림 구독
                 listenToChangeInTickerStream()
-                listenToOrderbookStream2()
+                listenToOrderbookStream()
                 listenToRecentTradeStream()
                 
                 // 스트림 연결
@@ -104,7 +102,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             listener?.request(.closePage)
         case .getBackToForeground:
             // 오더북 스트림만 상태 초기화 및 재구독
-            listenToOrderbookStream2()
+            listenToOrderbookStream()
             
             // 스트림 연결
             useCase.connectToTickerChangesStream(symbolPair: symbolPair)
@@ -183,14 +181,14 @@ private extension CoinDetailPageViewModel {
 
 // MARK: Orderbook table
 private extension CoinDetailPageViewModel {
-    func listenToOrderbookStream2() {
+    func listenToOrderbookStream() {
         streamUpdateObserverStore[.orderbookTable]?.cancel()
         streamUpdateObserverStore[.orderbookTable] = useCase
-            .getOrderbookTable(symbolPair: symbolPair, rowCount: 15)
+            .getOrderbookTable(symbolPair: symbolPair, rowCount: UInt(orderbookRowCount))
             .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
             .catch({ error in
                 printIfDebug("[\(Self.self)]: \(error.localizedDescription)")
-                return Just(OrderbookTableVO2(askOrderbooks: [], bidOrderbooks: []))
+                return Just(OrderbookTableVO(askOrderbooks: [], bidOrderbooks: []))
             })
             .map { table in
                 Action.updateOrderbook(
@@ -199,67 +197,6 @@ private extension CoinDetailPageViewModel {
                 )
             }
             .subscribe(self.action)
-    }
-    
-    
-    func listenToOrderbookStream() {
-        let updateTracker = PassthroughSubject<OrderbookUpdateVO, Never>()
-        streamUpdateObserverStore[.orderbookTable]?.cancel()
-        streamUpdateObserverStore[.orderbookTable] = updateTracker
-            .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
-            .unretained(self)
-            .asyncTransform { vm, update in
-                // - 테이블 업데이트
-                await vm.apply(bids: update.bids)
-                await vm.apply(asks: update.asks)
-                
-                // - 리스트 추출
-                let bidList = await vm.bidStore.getDescendingList(count: vm.orderbookRowCount).map(Orderbook.init)
-                let askList = await vm.askStore.getAscendingList(count: vm.orderbookRowCount).map(Orderbook.init)
-                return Action.updateOrderbook(
-                    bids: bidList,
-                    asks: askList
-                )
-            }
-            .subscribe(self.action)
-        
-        streamTask[.orderbookTable]?.cancel()
-        streamTask[.orderbookTable] = Task { [updateTracker, weak self] in
-            guard let self else { return }
-            do {
-                // #1. 전체 테이블 요청
-                let wholeTable = try await useCase.getWholeOrderbookTable(symbolPair: symbolPair)
-                await clearOrderbookStore()
-                updateTracker.send(wholeTable)
-                
-                // #2. 실시간 업데이트
-                let sequence = useCase.getChangeInOrderbook(symbolPair: symbolPair).filter { entity in
-                    entity.lastUpdateId > wholeTable.lastUpdateId
-                }
-                for await update in sequence {
-                    updateTracker.send(update)
-                }
-            } catch {
-                print(error)
-            }
-        }
-    }
-    
-    func clearOrderbookStore() async {
-        await bidStore.clearStore()
-        await askStore.clearStore()
-    }
-    
-    func apply(bids: [Orderbook]) async {
-        for bidOrder in bids {
-            await bidStore.update(key: bidOrder.price, value: bidOrder.quantity)
-        }
-    }
-    
-    func apply(asks: [Orderbook]) async {
-        for askOrder in asks {
-            await askStore.update(key: askOrder.price, value: askOrder.quantity)
-        }
     }
     
     func transform(bigestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {

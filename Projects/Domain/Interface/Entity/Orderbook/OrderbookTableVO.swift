@@ -5,7 +5,7 @@
 //  Created by choijunios on 4/20/25.
 //
 
-public struct OrderbookTableVO2 {
+public struct OrderbookTableVO {
     public let askOrderbooks: [Orderbook]
     public let bidOrderbooks: [Orderbook]
     

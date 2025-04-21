@@ -13,10 +13,7 @@ public protocol CoinDetailPageUseCase {
     func connectToRecentTradeStream(symbolPair: String)
     func disconnectToStreams(symbolPair: String)
     
-    func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO
-    func getChangeInOrderbook(symbolPair: String) -> AsyncStream<OrderbookUpdateVO>
+    func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO, Error>
     func get24hTickerChange(symbolPair: String) -> AsyncStream<Twenty4HourTickerForSymbolVO>
     func getRecentTrade(symbolPair: String) -> AsyncStream<CoinTradeVO>
-    
-    func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO2, Error>
 }

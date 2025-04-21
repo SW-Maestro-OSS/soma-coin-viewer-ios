@@ -45,14 +45,6 @@ public extension DefaultCoinDetailPageUseCase {
         ], mustDeliver: false)
     }
     
-    func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO {
-        try await orderbookRepository.getWholeTable(symbolPair: symbolPair)
-    }
-    
-    func getChangeInOrderbook(symbolPair: String) -> AsyncStream<OrderbookUpdateVO> {
-        orderbookRepository.getUpdate(symbolPair: symbolPair)
-    }
-    
     func get24hTickerChange(symbolPair: String) -> AsyncStream<Twenty4HourTickerForSymbolVO> {
         singleTickerRepository.request24hTickerChange(pairSymbol: symbolPair)
     }
@@ -61,7 +53,7 @@ public extension DefaultCoinDetailPageUseCase {
         coinTradeRepository.getSingleTrade(symbolPair: symbolPair)
     }
     
-    func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO2, Error> {
+    func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO, Error> {
         orderbookRepository
             .getOrderbookTable(symbolPair: symbolPair)
             .map { orderbookTable in
@@ -71,7 +63,7 @@ public extension DefaultCoinDetailPageUseCase {
                 let askOrderbookList = orderbookTable.askOrderbooks
                     .keys(order: .ASC, maxCount: rowCount)
                     .map { Orderbook(price: $0, quantity: orderbookTable.askOrderbooks[$0]!) }
-                return OrderbookTableVO2(
+                return OrderbookTableVO(
                     askOrderbooks: bidOrderbookList,
                     bidOrderbooks: askOrderbookList
                 )

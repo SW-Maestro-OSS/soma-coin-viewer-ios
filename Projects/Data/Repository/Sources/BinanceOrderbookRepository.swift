@@ -27,38 +27,6 @@ public final class BinanceOrderbookRepository: OrderbookRepository {
 
 // MARK: OrderbookRepository
 public extension BinanceOrderbookRepository {
-    func getWholeTable(symbolPair: String) async throws -> OrderbookUpdateVO {
-        let requestBuiler = URLRequestBuilder(
-            base: .init(string: "https://api.binance.com/api/v3")!,
-            httpMethod: .get
-        )
-        .add(path: "depth")
-        .add(queryParam: [
-            "symbol": symbolPair.uppercased(),
-            "limit": "5000"
-        ])
-        let dto = try await httpService.request(requestBuiler, dtoType: BinanceOrderbookTableDTO.self, retry: 1)
-        return dto.body!.toEntity()
-    }
-    
-    func getUpdate(symbolPair: String) -> AsyncStream<DomainInterface.OrderbookUpdateVO> {
-        let publisher = webSocketService
-            .getMessageStream()
-            .filter({ (dto: BinacneOrderbookUpdateDTO) in
-                dto.symbol.lowercased() == symbolPair.lowercased()
-            })
-            .map({ $0.toEntity() })
-        return AsyncStream { continuation in
-            let cancellable = publisher
-                .sink(receiveValue: { entity in
-                    continuation.yield(entity)
-                })
-            continuation.onTermination = { @Sendable [cancellable] _ in
-                cancellable.cancel()
-            }
-        }
-    }
-    
     func getOrderbookTable(symbolPair: String) -> AnyPublisher<OrderbookTable, Error> {
         let httpRequest = getWholeOrderbookTable(symbolPair: symbolPair).share()
         let httpTableUpdate = httpRequest
