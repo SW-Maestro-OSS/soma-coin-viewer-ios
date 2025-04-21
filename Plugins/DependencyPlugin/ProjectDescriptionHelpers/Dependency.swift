@@ -64,6 +64,7 @@ public extension ModuleDependency {
         public static let Swinject: TargetDependency = .external(name: "Swinject")
         public static let SwiftStructures: TargetDependency = .external(name: "SwiftStructures")
         public static let SimpleImageProvider: TargetDependency = .external(name: "SimpleImageProvider")
+        public static let AdvancedSwift: TargetDependency = .external(name: "AdvancedSwift")
     }
 }
 

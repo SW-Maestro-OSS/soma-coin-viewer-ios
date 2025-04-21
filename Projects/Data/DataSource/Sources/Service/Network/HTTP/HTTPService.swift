@@ -6,8 +6,14 @@
 //
 
 import Foundation
+import Combine
 
-public struct HTTPService {
+public protocol HTTPService {
+    func request<DTO: Decodable>(_ requestBuilder: URLRequestBuilder, dtoType: DTO.Type, retry: Int) async throws -> SuccessResponse<DTO>
+    func request<DTO>(_ requestBuilder: URLRequestBuilder, dtoType: DTO.Type) -> Future<SuccessResponse<DTO>, NetworkServiceError> where DTO : Decodable
+}
+
+public struct DefaultHTTPService: HTTPService {
     
     private let networkSession: URLSession = .init(configuration: .default)
     private let jsonDecoder: JSONDecoder = .init()
@@ -44,6 +50,38 @@ public struct HTTPService {
                 if error is NetworkServiceError { throw error }
                 throw NetworkServiceError.underlying(error: error)
             }
+        }
+    }
+    
+    public func request<DTO>(_ requestBuilder: URLRequestBuilder, dtoType: DTO.Type) -> Future<SuccessResponse<DTO>, NetworkServiceError> where DTO : Decodable {
+        Future { [weak networkSession] promise in
+            guard let request = requestBuilder.build() else {
+                return promise(.failure(.requestCreationFailed))
+            }
+            networkSession?.dataTask(with: request) { data, response, error in
+                if let error {
+                    promise(.failure(.underlying(error: error)))
+                } else {
+                    if let httpResponse = response as? HTTPURLResponse {
+                        let statusCode = httpResponse.statusCode
+                        if !(200..<300).contains(statusCode) {
+                            // 상태코드가 비정상인 경우
+                            let httpError = HTTPResponseException(status: .create(code: statusCode))
+                            promise(.failure(.invalidStatusCode(exception: httpError)))
+                        } else {
+                            // 상태코드가 정상인 경우
+                            var successResponse = SuccessResponse<DTO>()
+                            successResponse.set(headers: httpResponse.allHeaderFields)
+                            if let data, let dto = try? jsonDecoder.decode(DTO.self, from: data) {
+                                // DTO획득에 성공한 경우
+                                successResponse.set(body: dto)
+                            }
+                            promise(.success(successResponse))
+                        }
+                    }
+                }
+            }
+            .resume()
         }
     }
 }

@@ -21,13 +21,18 @@ public class DataAssembly: Assembly {
     
     public func assemble(container: Swinject.Container) {
         
-        // MARK: DataSource
+        // MARK: Servcie
         container.register(UserConfigurationService.self) { _ in
             DefaultUserConfigurationService()
         }
         
         container.register(WebSocketService.self) { _ in
             BinanceWebSocketService()
+        }
+        .inObjectScope(.container)
+        
+        container.register(HTTPService.self) { _ in
+            DefaultHTTPService()
         }
         .inObjectScope(.container)
         

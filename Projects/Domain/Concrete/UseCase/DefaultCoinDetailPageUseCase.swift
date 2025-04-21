@@ -22,7 +22,7 @@ final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
 }
 
 
-// MARK: Orderbook
+// MARK: CoinDetailPageUseCase
 public extension DefaultCoinDetailPageUseCase {
     func connectToOrderbookStream(symbolPair: String) {
         webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth"], mustDeliver: true)
@@ -45,19 +45,29 @@ public extension DefaultCoinDetailPageUseCase {
         ], mustDeliver: false)
     }
     
-    func getWholeOrderbookTable(symbolPair: String) async throws -> OrderbookUpdateVO {
-        try await orderbookRepository.getWholeTable(symbolPair: symbolPair)
-    }
-    
-    func getChangeInOrderbook(symbolPair: String) -> AsyncStream<OrderbookUpdateVO> {
-        orderbookRepository.getUpdate(symbolPair: symbolPair)
-    }
-    
     func get24hTickerChange(symbolPair: String) -> AsyncStream<Twenty4HourTickerForSymbolVO> {
         singleTickerRepository.request24hTickerChange(pairSymbol: symbolPair)
     }
     
     func getRecentTrade(symbolPair: String) -> AsyncStream<CoinTradeVO> {
         coinTradeRepository.getSingleTrade(symbolPair: symbolPair)
+    }
+    
+    func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO, Error> {
+        orderbookRepository
+            .getOrderbookTable(symbolPair: symbolPair)
+            .map { orderbookTable in
+                let bidOrderbookList = orderbookTable.bidOrderbooks
+                    .keys(order: .DESC, maxCount: rowCount)
+                    .map { Orderbook(price: $0, quantity: orderbookTable.bidOrderbooks[$0]!) }
+                let askOrderbookList = orderbookTable.askOrderbooks
+                    .keys(order: .ASC, maxCount: rowCount)
+                    .map { Orderbook(price: $0, quantity: orderbookTable.askOrderbooks[$0]!) }
+                return OrderbookTableVO(
+                    bidOrderbooks: bidOrderbookList,
+                    askOrderbooks: askOrderbookList
+                )
+            }
+            .eraseToAnyPublisher()
     }
 }

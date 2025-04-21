@@ -49,8 +49,6 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     private var symbolPair: String { symbolInfo.pairSymbol }
     private var hasAppeared = false
     private let orderbookRowCount: Int = 15
-    private let bidStore: OrderbookStore = .init()
-    private let askStore: OrderbookStore = .init()
     private let tradeContainer: TradeContainer = .init(maxCount: 15)
     
     
@@ -184,60 +182,21 @@ private extension CoinDetailPageViewModel {
 // MARK: Orderbook table
 private extension CoinDetailPageViewModel {
     func listenToOrderbookStream() {
-        let updateTracker = PassthroughSubject<OrderbookUpdateVO, Never>()
         streamUpdateObserverStore[.orderbookTable]?.cancel()
-        streamUpdateObserverStore[.orderbookTable] = updateTracker
+        streamUpdateObserverStore[.orderbookTable] = useCase
+            .getOrderbookTable(symbolPair: symbolPair, rowCount: UInt(orderbookRowCount))
             .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
-            .unretained(self)
-            .asyncTransform { vm, update in
-                // - 테이블 업데이트
-                await vm.apply(bids: update.bids)
-                await vm.apply(asks: update.asks)
-                
-                // - 리스트 추출
-                let bidList = await vm.bidStore.getDescendingList(count: vm.orderbookRowCount).map(Orderbook.init)
-                let askList = await vm.askStore.getAscendingList(count: vm.orderbookRowCount).map(Orderbook.init)
-                return Action.updateOrderbook(bids: bidList, asks: askList)
+            .catch({ error in
+                printIfDebug("[\(Self.self)]: \(error.localizedDescription)")
+                return Just(OrderbookTableVO(bidOrderbooks: [], askOrderbooks: []))
+            })
+            .map { table in
+                Action.updateOrderbook(
+                    bids: table.bidOrderbooks,
+                    asks: table.askOrderbooks
+                )
             }
             .subscribe(self.action)
-        
-        streamTask[.orderbookTable]?.cancel()
-        streamTask[.orderbookTable] = Task { [updateTracker, weak self] in
-            guard let self else { return }
-            do {
-                // #1. 전체 테이블 요청
-                let wholeTable = try await useCase.getWholeOrderbookTable(symbolPair: symbolPair)
-                await clearOrderbookStore()
-                updateTracker.send(wholeTable)
-                
-                // #2. 실시간 업데이트
-                let sequence = useCase.getChangeInOrderbook(symbolPair: symbolPair).filter { entity in
-                    entity.lastUpdateId > wholeTable.lastUpdateId
-                }
-                for await update in sequence {
-                    updateTracker.send(update)
-                }
-            } catch {
-                print(error)
-            }
-        }
-    }
-    
-    func clearOrderbookStore() async {
-        await bidStore.clearStore()
-        await askStore.clearStore()
-    }
-    
-    func apply(bids: [Orderbook]) async {
-        for bidOrder in bids {
-            await bidStore.update(key: bidOrder.price, value: bidOrder.quantity)
-        }
-    }
-    
-    func apply(asks: [Orderbook]) async {
-        for askOrder in asks {
-            await askStore.update(key: askOrder.price, value: askOrder.quantity)
-        }
     }
     
     func transform(bigestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {

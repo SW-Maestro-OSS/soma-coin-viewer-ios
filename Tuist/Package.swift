@@ -20,9 +20,9 @@ let packagePath: String = "LocalPackage"
 let package = Package(
     name: "CoinViewer",
     dependencies: [
-        
         .package(url: "https://github.com/Swinject/Swinject.git", from: "2.9.1"),
         .package(url: "https://github.com/J0onYEong/SwiftStructures.git", exact: "1.0.4"),
         .package(url: "https://github.com/J0onYEong/SimpleImageProvider.git", from: "1.0.3"),
+        .package(url: "https://github.com/J0onYEong/AdvancedSwift.git", from: "1.0.1"),
     ]
 )
