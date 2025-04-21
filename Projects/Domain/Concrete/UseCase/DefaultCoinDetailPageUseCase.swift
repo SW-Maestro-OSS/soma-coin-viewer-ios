@@ -51,7 +51,7 @@ public extension DefaultCoinDetailPageUseCase {
     
     func getRecentTrade(symbolPair: String, maxRowCount: UInt) -> AnyPublisher<[CoinTradeVO], Never> {
         coinTradeRepository
-            .getCoinTradeList(symbolPair: symbolPair, tableUpdateInterval: 0.3)
+            .getCoinTradeList(symbolPair: symbolPair, tableUpdateInterval: 0.5)
             .map { entity in
                 // 최신으로 maxRowCount개수 만큼
                 let slicedList = entity

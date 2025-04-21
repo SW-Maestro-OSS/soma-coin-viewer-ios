@@ -215,7 +215,7 @@ private extension CoinDetailPageViewModel {
         streamUpdateObserverStore[.recentTrade]?.cancel()
         streamUpdateObserverStore[.recentTrade] = useCase
             .getRecentTrade(symbolPair: symbolPair, maxRowCount: UInt(recentTradeRowCount))
-            .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
+            .throttle(for: 1.0, scheduler: DispatchQueue.global(), latest: true)
             .map { list in
                 return Action.updateTrades(trades: list)
             }
