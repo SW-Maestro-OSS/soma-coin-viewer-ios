@@ -49,17 +49,16 @@ public extension DefaultCoinDetailPageUseCase {
         singleTickerRepository.request24hTickerChange(pairSymbol: symbolPair)
     }
     
-    func getRecentTrade(symbolPair: String) -> AsyncStream<CoinTradeVO> {
-        coinTradeRepository.getSingleTrade(symbolPair: symbolPair)
-    }
     func getRecentTrade(symbolPair: String, maxRowCount: UInt) -> AnyPublisher<[CoinTradeVO], Never> {
         coinTradeRepository
-            .getCoinTradeList(symbolPair: symbolPair)
+            .getCoinTradeList(symbolPair: symbolPair, tableUpdateInterval: 0.3)
             .map { entity in
                 // 최신으로 maxRowCount개수 만큼
-                entity
+                let slicedList = entity
                     .keys(order: .DESC, maxCount: maxRowCount)
                     .compactMap { key in entity[key] }
+                    .prefix(Int(maxRowCount))
+                return Array(slicedList)
             }
             .eraseToAnyPublisher()
     }

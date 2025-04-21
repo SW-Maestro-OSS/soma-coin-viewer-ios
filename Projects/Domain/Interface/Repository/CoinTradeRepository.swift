@@ -11,6 +11,5 @@ import Foundation
 import CoreUtil
 
 public protocol CoinTradeRepository {
-    func getSingleTrade(symbolPair: String) -> AsyncStream<CoinTradeVO>
-    func getCoinTradeList(symbolPair: String) -> AnyPublisher<HashMap<Date, CoinTradeVO>, Never>
+    func getCoinTradeList(symbolPair: String, tableUpdateInterval: Double?) -> AnyPublisher<HashMap<Date, CoinTradeVO>, Never>
 }

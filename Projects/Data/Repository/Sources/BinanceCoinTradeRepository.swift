@@ -19,9 +19,9 @@ public final class BinanceCoinTradeRepository: CoinTradeRepository {
     
     public init() { }
     
-    public func getCoinTradeList(symbolPair: String) -> AnyPublisher<HashMap<Date, CoinTradeVO>, Never> {
+    public func getCoinTradeList(symbolPair: String, tableUpdateInterval: Double?) -> AnyPublisher<HashMap<Date, CoinTradeVO>, Never> {
         coinTradeDataSource
-            .getTradeList(symbolPair: symbolPair)
+            .getTradeList(symbolPair: symbolPair, tableUpdateInterval: tableUpdateInterval)
             .map { dtoList in
                 var entityList = HashMap<Date, CoinTradeVO>()
                 dtoList.values.forEach { dto in
@@ -31,23 +31,5 @@ public final class BinanceCoinTradeRepository: CoinTradeRepository {
                 return entityList
             }
             .eraseToAnyPublisher()
-    }
-    
-    public func getSingleTrade(symbolPair: String) -> AsyncStream<CoinTradeVO> {
-        let publisher = webSocketService
-            .getMessageStream()
-            .filter({ (dto: BinanceCoinTradeDTO) in
-                dto.symbol.lowercased() == symbolPair.lowercased()
-            })
-            .map({ $0.toEntity() })
-            return AsyncStream { continuation in
-                let cancellable = publisher
-                    .sink(receiveValue: { entity in
-                        continuation.yield(entity)
-                    })
-                continuation.onTermination = { @Sendable _ in
-                    cancellable.cancel()
-                }
-            }
     }
 }

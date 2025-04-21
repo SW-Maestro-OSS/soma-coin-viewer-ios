@@ -11,7 +11,7 @@ import Foundation
 import CoreUtil
 
 public protocol CoinTradeDataSource {
-    func getTradeList(symbolPair: String) -> AnyPublisher<HashMap<Int64, BinanceCoinTradeDTO>, Never>
+    func getTradeList(symbolPair: String, tableUpdateInterval: Double?) -> AnyPublisher<HashMap<Int64, BinanceCoinTradeDTO>, Never>
 }
 
 public final class BinanceCoinTradeDataSource: CoinTradeDataSource {
@@ -23,12 +23,13 @@ public final class BinanceCoinTradeDataSource: CoinTradeDataSource {
     
     public init() { }
     
-    public func getTradeList(symbolPair: String) -> AnyPublisher<HashMap<Int64, BinanceCoinTradeDTO>, Never>  {
+    public func getTradeList(symbolPair: String, tableUpdateInterval: Double?) -> AnyPublisher<HashMap<Int64, BinanceCoinTradeDTO>, Never>  {
         webSocketService
             .getMessageStream()
             .filter { (dto: BinanceCoinTradeDTO) in
                 dto.symbol.lowercased() == symbolPair.lowercased()
             }
+            .throttle(for: .init(floatLiteral: tableUpdateInterval ?? 0.0), scheduler: DispatchQueue.global(qos: .default), latest: true)
             .unretained(self)
             .asyncTransform { source, dto in
                 await source.tradeList.insert(key: dto.tradeTime, value: dto)

@@ -40,6 +40,10 @@ public class DataAssembly: Assembly {
             DefaultExchangeRateService()
         }
         
+        // MARK: DataSource
+        container.register(CoinTradeDataSource.self) { _ in
+            BinanceCoinTradeDataSource()
+        }
         
         // MARK: Repository
         container.register(UserConfigurationRepository.self) { _ in
