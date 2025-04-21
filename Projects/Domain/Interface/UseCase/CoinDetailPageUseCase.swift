@@ -16,4 +16,5 @@ public protocol CoinDetailPageUseCase {
     func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO, Error>
     func get24hTickerChange(symbolPair: String) -> AsyncStream<Twenty4HourTickerForSymbolVO>
     func getRecentTrade(symbolPair: String) -> AsyncStream<CoinTradeVO>
+    func getRecentTrade(symbolPair: String, maxRowCount: UInt) -> AnyPublisher<[CoinTradeVO], Never>
 }

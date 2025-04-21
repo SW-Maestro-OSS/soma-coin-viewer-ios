@@ -15,7 +15,7 @@ final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
     // Dependency
     @Injected private var orderbookRepository: OrderbookRepository
     @Injected private var singleTickerRepository: SingleMarketTickerRepository
-    @Injected private var coinTradeRepository: TradeRepository
+    @Injected private var coinTradeRepository: CoinTradeRepository
     @Injected private var webSocketHelper: WebSocketManagementHelper
     
     public init() { }
@@ -51,6 +51,17 @@ public extension DefaultCoinDetailPageUseCase {
     
     func getRecentTrade(symbolPair: String) -> AsyncStream<CoinTradeVO> {
         coinTradeRepository.getSingleTrade(symbolPair: symbolPair)
+    }
+    func getRecentTrade(symbolPair: String, maxRowCount: UInt) -> AnyPublisher<[CoinTradeVO], Never> {
+        coinTradeRepository
+            .getCoinTradeList(symbolPair: symbolPair)
+            .map { entity in
+                // 최신으로 maxRowCount개수 만큼
+                entity
+                    .keys(order: .DESC, maxCount: maxRowCount)
+                    .compactMap { key in entity[key] }
+            }
+            .eraseToAnyPublisher()
     }
     
     func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO, Error> {
