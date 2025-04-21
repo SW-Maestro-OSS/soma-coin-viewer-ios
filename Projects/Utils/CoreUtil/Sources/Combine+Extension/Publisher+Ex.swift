@@ -46,4 +46,8 @@ public extension Publisher {
             }
             .eraseToAnyPublisher()
     }
+    
+    func mapToVoid() -> AnyPublisher<Void, Failure> {
+        self.map { _ in }.eraseToAnyPublisher()
+    }
 }

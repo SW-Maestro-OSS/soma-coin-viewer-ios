@@ -12,7 +12,7 @@ import DomainInterface
 import DataSource
 import CoreUtil
 
-final public class BinanceOrderbookRepository: OrderbookRepository {
+public final class BinanceOrderbookRepository: OrderbookRepository {
     // Dependency
     @Injected var webSocketService: WebSocketService
     private let httpService: HTTPService = .init()
@@ -22,8 +22,12 @@ final public class BinanceOrderbookRepository: OrderbookRepository {
     private let askOrderbookStore = ThreadSafeOrderbookHashMap()
     
     public init() { }
-    
-    public func getWholeTable(symbolPair: String) async throws -> OrderbookUpdateVO {
+}
+
+
+// MARK: OrderbookRepository
+public extension BinanceOrderbookRepository {
+    func getWholeTable(symbolPair: String) async throws -> OrderbookUpdateVO {
         let requestBuiler = URLRequestBuilder(
             base: .init(string: "https://api.binance.com/api/v3")!,
             httpMethod: .get
@@ -37,7 +41,7 @@ final public class BinanceOrderbookRepository: OrderbookRepository {
         return dto.body!.toEntity()
     }
     
-    public func getUpdate(symbolPair: String) -> AsyncStream<DomainInterface.OrderbookUpdateVO> {
+    func getUpdate(symbolPair: String) -> AsyncStream<DomainInterface.OrderbookUpdateVO> {
         let publisher = webSocketService
             .getMessageStream()
             .filter({ (dto: BinacneOrderbookUpdateDTO) in
@@ -55,50 +59,77 @@ final public class BinanceOrderbookRepository: OrderbookRepository {
         }
     }
     
-    public func getOrderbookTable(symbolPair: String) -> AnyPublisher<OrderbookTableVO, Never> {
-        webSocketService
-            .getMessageStream()
-            .filter { (dto: BinacneOrderbookUpdateDTO) in
-                dto.symbol.lowercased() == symbolPair.lowercased()
-            }
+    func getOrderbookTable(symbolPair: String) -> AnyPublisher<OrderbookTable, Error> {
+        let httpUpdate = getWholeOrderbookTable(symbolPair: symbolPair)
             .unretained(self)
-            .asyncTransform { repo, dto in
-                // #1. 레포지토리에 데이터 저장
-                let adaptToRepository = { (orderbooks: [[String]], store: ThreadSafeOrderbookHashMap) in
-                    for askOrderbook in dto.asks {
-                        let price = CVNumber(Decimal(string: askOrderbook[0])!)
-                        let qty = CVNumber(Decimal(string: askOrderbook[1])!)
-                        if qty.wrappedNumber == 0 {
-                            await store.removeValue(price)
-                        } else {
-                            await store.insert(key: price, value: qty)
-                        }
+            .asyncTransform { repo, dto -> Int in
+                await repo.adaptToStore(orderbooks: dto.bids, store: repo.bidOrderbookStore)
+                await repo.adaptToStore(orderbooks: dto.asks, store: repo.askOrderbookStore)
+                return dto.lastUpdateId
+            }
+        
+        let webSocketUpdate = httpUpdate
+            .unretained(self)
+            .flatMap { repo, lastUpdateId in
+                repo.webSocketService
+                    .getMessageStream()
+                    .filter { (dto: BinacneOrderbookUpdateDTO) in dto.symbol.lowercased() == symbolPair.lowercased() }
+                    .filter { dto in dto.finalUpdateId > lastUpdateId }
+                    .unretained(self)
+                    .asyncTransform { repo, dto in
+                        await repo.adaptToStore(orderbooks: dto.bids, store: repo.bidOrderbookStore)
+                        await repo.adaptToStore(orderbooks: dto.asks, store: repo.askOrderbookStore)
                     }
-                }
-                await adaptToRepository(dto.bids, repo.bidOrderbookStore)
-                await adaptToRepository(dto.asks, repo.askOrderbookStore)
-                
-                // #2. 데이터를 엔티티로 변경
-                return OrderbookTableVO(
-                    askOrderbooks: await repo.askOrderbookStore.hashMap.copy(),
-                    bidOrderbooks: await repo.bidOrderbookStore.hashMap.copy()
+            }
+        
+        return Publishers
+            .Merge(
+                httpUpdate.mapToVoid(),
+                webSocketUpdate.mapToVoid()
+            )
+            .unretainedOnly(self)
+            .asyncTransform { repo in
+                OrderbookTable(
+                    bidOrderbooks: await repo.bidOrderbookStore.hashMap.copy(),
+                    askOrderbooks: await repo.askOrderbookStore.hashMap.copy()
                 )
             }
+            .mapError { $0 }
+            .eraseToAnyPublisher()
     }
 }
 
-actor ThreadSafeOrderbookHashMap {
-    let hashMap: HashMap<CVNumber, CVNumber> = .init()
-    
-    subscript (_ key: CVNumber) -> CVNumber? {
-        get { hashMap[key] }
+
+
+// MARK: Update orderbook store
+private extension BinanceOrderbookRepository {
+    func adaptToStore(orderbooks: [[String]], store: ThreadSafeOrderbookHashMap) async {
+        for orderbook in orderbooks {
+            let price = CVNumber(Decimal(string: orderbook[0])!)
+            let qty = CVNumber(Decimal(string: orderbook[1])!)
+            if qty.wrappedNumber == 0 {
+                await store.removeValue(price)
+            } else {
+                await store.insert(key: price, value: qty)
+            }
+        }
     }
     
-    func insert(key: CVNumber, value: CVNumber) {
-        hashMap[key] = value
-    }
-    
-    func removeValue(_ forKey: CVNumber) {
-        hashMap.removeValue(forKey)
+    func getWholeOrderbookTable(symbolPair: String) -> AnyPublisher<BinanceOrderbookTableDTO, NetworkServiceError> {
+        let requestBuiler = URLRequestBuilder(
+            base: .init(string: "https://api.binance.com/api/v3")!,
+            httpMethod: .get
+        )
+        .add(path: "depth")
+        .add(queryParam: [
+            "symbol": symbolPair.uppercased(),
+            "limit": "5000"
+        ])
+        
+        return httpService
+            .request(requestBuiler, dtoType: BinanceOrderbookTableDTO.self)
+            .compactMap(\.body)
+            .eraseToAnyPublisher()
     }
 }
+

@@ -5,13 +5,11 @@
 //  Created by choijunios on 4/20/25.
 //
 
-import CoreUtil
-
-public struct OrderbookTableVO {
-    public let askOrderbooks: HashMap<CVNumber, CVNumber>
-    public let bidOrderbooks: HashMap<CVNumber, CVNumber>
+public struct OrderbookTableVO2 {
+    public let askOrderbooks: [Orderbook]
+    public let bidOrderbooks: [Orderbook]
     
-    public init(askOrderbooks: HashMap<CVNumber, CVNumber>, bidOrderbooks: HashMap<CVNumber, CVNumber>) {
+    public init(askOrderbooks: [Orderbook], bidOrderbooks: [Orderbook]) {
         self.askOrderbooks = askOrderbooks
         self.bidOrderbooks = bidOrderbooks
     }

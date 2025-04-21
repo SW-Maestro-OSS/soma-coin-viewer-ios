@@ -60,4 +60,23 @@ public extension DefaultCoinDetailPageUseCase {
     func getRecentTrade(symbolPair: String) -> AsyncStream<CoinTradeVO> {
         coinTradeRepository.getSingleTrade(symbolPair: symbolPair)
     }
+    
+    func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO2, Never> {
+        orderbookRepository
+            .getOrderbookTable(symbolPair: symbolPair)
+            .map { orderbookTable in
+                let bidOrderbookList = orderbookTable.bidOrderbooks
+                    .keys(order: .DESC, maxCount: rowCount)
+                    .map { Orderbook(price: $0, quantity: orderbookTable.bidOrderbooks[$0]!) }
+                let askOrderbookList = orderbookTable.askOrderbooks
+                    .keys(order: .ASC, maxCount: rowCount)
+                    .map { Orderbook(price: $0, quantity: orderbookTable.bidOrderbooks[$0]!) }
+                return OrderbookTableVO2(
+                    askOrderbooks: bidOrderbookList,
+                    bidOrderbooks: askOrderbookList
+                )
+            }
+            .eraseToAnyPublisher()
+            
+    }
 }

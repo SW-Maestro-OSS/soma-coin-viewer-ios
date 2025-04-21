@@ -10,5 +10,5 @@ import Combine
 public protocol OrderbookRepository {
     func getWholeTable(symbolPair: String) async throws -> OrderbookUpdateVO
     func getUpdate(symbolPair: String) -> AsyncStream<OrderbookUpdateVO>
-    func getOrderbookTable(symbolPair: String) -> AnyPublisher<OrderbookTableVO, Never>
+    func getOrderbookTable(symbolPair: String) -> AnyPublisher<OrderbookTable, Error>
 }
