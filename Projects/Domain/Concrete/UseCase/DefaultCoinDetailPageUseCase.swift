@@ -22,7 +22,7 @@ final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
 }
 
 
-// MARK: Orderbook
+// MARK: CoinDetailPageUseCase
 public extension DefaultCoinDetailPageUseCase {
     func connectToOrderbookStream(symbolPair: String) {
         webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth"], mustDeliver: true)
@@ -61,7 +61,7 @@ public extension DefaultCoinDetailPageUseCase {
         coinTradeRepository.getSingleTrade(symbolPair: symbolPair)
     }
     
-    func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO2, Never> {
+    func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO2, Error> {
         orderbookRepository
             .getOrderbookTable(symbolPair: symbolPair)
             .map { orderbookTable in
@@ -77,6 +77,5 @@ public extension DefaultCoinDetailPageUseCase {
                 )
             }
             .eraseToAnyPublisher()
-            
     }
 }
