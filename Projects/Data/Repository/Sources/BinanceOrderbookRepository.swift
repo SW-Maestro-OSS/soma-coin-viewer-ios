@@ -60,15 +60,17 @@ public extension BinanceOrderbookRepository {
     }
     
     func getOrderbookTable(symbolPair: String) -> AnyPublisher<OrderbookTable, Error> {
-        let httpUpdate = getWholeOrderbookTable(symbolPair: symbolPair)
+        let httpRequest = getWholeOrderbookTable(symbolPair: symbolPair).share()
+        let httpTableUpdate = httpRequest
             .unretained(self)
-            .asyncTransform { repo, dto -> Int in
-                await repo.adaptToStore(orderbooks: dto.bids, store: repo.bidOrderbookStore)
-                await repo.adaptToStore(orderbooks: dto.asks, store: repo.askOrderbookStore)
-                return dto.lastUpdateId
+            .asyncTransform { repo, dto -> Void in
+                // 최초저장전 저장소 초기화
+                await repo.clearStore()
+                await repo.adaptToStore(orderbooks: dto.bids, storeType: .bid)
+                await repo.adaptToStore(orderbooks: dto.asks, storeType: .ask)
             }
-        
-        let webSocketUpdate = httpUpdate
+        let webSocketTableUpdate = httpRequest
+            .map(\.lastUpdateId)
             .unretained(self)
             .flatMap { repo, lastUpdateId in
                 repo.webSocketService
@@ -76,16 +78,15 @@ public extension BinanceOrderbookRepository {
                     .filter { (dto: BinacneOrderbookUpdateDTO) in dto.symbol.lowercased() == symbolPair.lowercased() }
                     .filter { dto in dto.finalUpdateId > lastUpdateId }
                     .unretained(self)
-                    .asyncTransform { repo, dto in
-                        await repo.adaptToStore(orderbooks: dto.bids, store: repo.bidOrderbookStore)
-                        await repo.adaptToStore(orderbooks: dto.asks, store: repo.askOrderbookStore)
+                    .asyncTransform { repo, dto -> Void in
+                        await repo.adaptToStore(orderbooks: dto.bids, storeType: .bid)
+                        await repo.adaptToStore(orderbooks: dto.asks, storeType: .ask)
                     }
             }
-        
         return Publishers
             .Merge(
-                httpUpdate.mapToVoid(),
-                webSocketUpdate.mapToVoid()
+                httpTableUpdate,
+                webSocketTableUpdate
             )
             .unretainedOnly(self)
             .asyncTransform { repo in
@@ -103,11 +104,24 @@ public extension BinanceOrderbookRepository {
 
 // MARK: Update orderbook store
 private extension BinanceOrderbookRepository {
-    func adaptToStore(orderbooks: [[String]], store: ThreadSafeOrderbookHashMap) async {
+    func clearStore() async {
+        await bidOrderbookStore.removeAll()
+        await askOrderbookStore.removeAll()
+    }
+    
+    enum StoreType { case bid, ask }
+    func adaptToStore(orderbooks: [[String]], storeType: StoreType) async {
+        var store: ThreadSafeOrderbookHashMap
+        switch storeType {
+        case .bid:
+            store = bidOrderbookStore
+        case .ask:
+            store = askOrderbookStore
+        }
         for orderbook in orderbooks {
             let price = CVNumber(Decimal(string: orderbook[0])!)
             let qty = CVNumber(Decimal(string: orderbook[1])!)
-            if qty.wrappedNumber == 0 {
+            if qty.wrappedNumber <= 0 {
                 await store.removeValue(price)
             } else {
                 await store.insert(key: price, value: qty)
@@ -125,7 +139,6 @@ private extension BinanceOrderbookRepository {
             "symbol": symbolPair.uppercased(),
             "limit": "5000"
         ])
-        
         return httpService
             .request(requestBuiler, dtoType: BinanceOrderbookTableDTO.self)
             .compactMap(\.body)

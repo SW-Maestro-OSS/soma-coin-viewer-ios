@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/J0onYEong/AdvancedSwift.git",
       "state" : {
-        "revision" : "533510c60f19714b386f63a32750156b99261607",
-        "version" : "1.0.0"
+        "revision" : "16da3308d8e6924ecddcda7c5b5f5baa52bf8af1",
+        "version" : "1.0.1"
       }
     },
     {

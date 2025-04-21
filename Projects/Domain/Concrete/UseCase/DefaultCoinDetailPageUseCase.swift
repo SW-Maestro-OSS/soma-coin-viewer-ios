@@ -70,7 +70,7 @@ public extension DefaultCoinDetailPageUseCase {
                     .map { Orderbook(price: $0, quantity: orderbookTable.bidOrderbooks[$0]!) }
                 let askOrderbookList = orderbookTable.askOrderbooks
                     .keys(order: .ASC, maxCount: rowCount)
-                    .map { Orderbook(price: $0, quantity: orderbookTable.bidOrderbooks[$0]!) }
+                    .map { Orderbook(price: $0, quantity: orderbookTable.askOrderbooks[$0]!) }
                 return OrderbookTableVO2(
                     askOrderbooks: bidOrderbookList,
                     bidOrderbooks: askOrderbookList

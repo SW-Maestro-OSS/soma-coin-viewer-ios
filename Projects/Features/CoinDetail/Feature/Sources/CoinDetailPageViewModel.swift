@@ -83,7 +83,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 
                 // 스크림 구독
                 listenToChangeInTickerStream()
-                listenToOrderbookStream()
+                listenToOrderbookStream2()
                 listenToRecentTradeStream()
                 
                 // 스트림 연결
@@ -104,7 +104,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             listener?.request(.closePage)
         case .getBackToForeground:
             // 오더북 스트림만 상태 초기화 및 재구독
-            listenToOrderbookStream()
+            listenToOrderbookStream2()
             
             // 스트림 연결
             useCase.connectToTickerChangesStream(symbolPair: symbolPair)
@@ -183,6 +183,25 @@ private extension CoinDetailPageViewModel {
 
 // MARK: Orderbook table
 private extension CoinDetailPageViewModel {
+    func listenToOrderbookStream2() {
+        streamUpdateObserverStore[.orderbookTable]?.cancel()
+        streamUpdateObserverStore[.orderbookTable] = useCase
+            .getOrderbookTable(symbolPair: symbolPair, rowCount: 15)
+            .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
+            .catch({ error in
+                printIfDebug("[\(Self.self)]: \(error.localizedDescription)")
+                return Just(OrderbookTableVO2(askOrderbooks: [], bidOrderbooks: []))
+            })
+            .map { table in
+                Action.updateOrderbook(
+                    bids: table.bidOrderbooks,
+                    asks: table.askOrderbooks
+                )
+            }
+            .subscribe(self.action)
+    }
+    
+    
     func listenToOrderbookStream() {
         let updateTracker = PassthroughSubject<OrderbookUpdateVO, Never>()
         streamUpdateObserverStore[.orderbookTable]?.cancel()
@@ -197,7 +216,10 @@ private extension CoinDetailPageViewModel {
                 // - 리스트 추출
                 let bidList = await vm.bidStore.getDescendingList(count: vm.orderbookRowCount).map(Orderbook.init)
                 let askList = await vm.askStore.getAscendingList(count: vm.orderbookRowCount).map(Orderbook.init)
-                return Action.updateOrderbook(bids: bidList, asks: askList)
+                return Action.updateOrderbook(
+                    bids: bidList,
+                    asks: askList
+                )
             }
             .subscribe(self.action)
         

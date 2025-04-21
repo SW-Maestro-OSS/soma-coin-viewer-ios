@@ -21,4 +21,6 @@ actor ThreadSafeOrderbookHashMap {
     func removeValue(_ forKey: CVNumber) {
         hashMap.removeValue(forKey)
     }
+    
+    func removeAll() { hashMap.clear() }
 }
