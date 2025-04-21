@@ -63,8 +63,8 @@ public class DataAssembly: Assembly {
             BinanceSingleMarketTickerRepository()
         }
         
-        container.register(TradeRepository.self) { _ in
-            BinanceTradeRepository()
+        container.register(CoinTradeRepository.self) { _ in
+            BinanceCoinTradeRepository()
         }
     }
 }

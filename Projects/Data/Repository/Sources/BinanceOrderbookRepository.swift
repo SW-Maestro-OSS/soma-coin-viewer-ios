@@ -18,8 +18,8 @@ public final class BinanceOrderbookRepository: OrderbookRepository {
     @Injected private var httpService: HTTPService
     
     // Store
-    private let bidOrderbookStore = ThreadSafeOrderbookHashMap()
-    private let askOrderbookStore = ThreadSafeOrderbookHashMap()
+    private let bidOrderbookStore = ThreadSafeHashMap<CVNumber, CVNumber>()
+    private let askOrderbookStore = ThreadSafeHashMap<CVNumber, CVNumber>()
     
     public init() { }
 }
@@ -79,7 +79,7 @@ private extension BinanceOrderbookRepository {
     
     enum StoreType { case bid, ask }
     func adaptToStore(orderbooks: [[String]], storeType: StoreType) async {
-        var store: ThreadSafeOrderbookHashMap
+        var store: ThreadSafeHashMap<CVNumber, CVNumber>
         switch storeType {
         case .bid:
             store = bidOrderbookStore

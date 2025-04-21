@@ -48,8 +48,8 @@ public class Assemblies: Assembly {
         container.register(SingleMarketTickerRepository.self) { _ in
             BinanceSingleMarketTickerRepository()
         }
-        container.register(TradeRepository.self) { _ in
-            BinanceTradeRepository()
+        container.register(CoinTradeRepository.self) { _ in
+            BinanceCoinTradeRepository()
         }
         
         // MARK: UseCase
