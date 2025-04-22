@@ -39,6 +39,9 @@ public class DataAssembly: Assembly {
         container.register(CoinTradeDataSource.self) { _ in
             BinanceCoinTradeDataSource()
         }
+        container.register(AllMarketTickersDataSource.self) { _ in
+            BinanceAllMarketTickersDataSource()
+        }
         container.register(ExchangeRateDataSource.self) { _ in
             OpenXExchangeRateDataSource()
         }

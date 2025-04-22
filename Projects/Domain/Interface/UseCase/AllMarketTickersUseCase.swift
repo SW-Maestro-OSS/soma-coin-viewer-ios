@@ -9,8 +9,8 @@ import Combine
 
 public protocol AllMarketTickersUseCase {
     /// AllMarketTicker리스트를 획득합니다.
-    func getTickerList() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never>
-    func getTickerList() async -> [Twenty4HourTickerForSymbolVO]
+    func getTickerList(rowCount: UInt) -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never>
+    func getTickerList(rowCount: UInt) async -> [Twenty4HourTickerForSymbolVO]
     
     
     /// 환율정보를 획득합니다.

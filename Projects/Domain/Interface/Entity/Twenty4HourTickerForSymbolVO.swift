@@ -9,8 +9,7 @@ import Foundation
 
 import CoreUtil
 
-public struct Twenty4HourTickerForSymbolVO {
-    
+public struct Twenty4HourTickerForSymbolVO: Comparable {
     public let pairSymbol: String
     public var firstSymbol: String!
     public var secondSymbol: String!
@@ -42,5 +41,9 @@ public struct Twenty4HourTickerForSymbolVO {
         
         self.firstSymbol = first
         self.secondSymbol = second
+    }
+    
+    public static func < (lhs: Twenty4HourTickerForSymbolVO, rhs: Twenty4HourTickerForSymbolVO) -> Bool {
+        lhs.totalTradedQuoteAssetVolume < rhs.totalTradedQuoteAssetVolume
     }
 }

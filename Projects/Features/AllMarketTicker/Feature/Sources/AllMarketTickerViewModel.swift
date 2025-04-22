@@ -32,7 +32,7 @@ enum AllMarketTickerAction {
     case onAppear
     case onDisappear
     case sortSelectionButtonTapped(type: SortSelectionCellType)
-    case coinRowIsTapped(id: String)
+    case coinRowIsTapped(coinInfo: TickerCellRO)
     case enterBackground
     case getBackToForeground
     
@@ -62,8 +62,8 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     
     
     // State
-    @Published var state: State = .init()
-    private var tickerCellVO: [Twenty4HourTickerForSymbolVO] = []
+    @Published var state: State = .init(tickerRowCount: 0)
+    private let tickerRowCount: UInt = 30
     private var isFirstAppear: Bool = true
     
     
@@ -86,6 +86,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
         
         let initialSortSelectionROs = createInitialSortSelectonROs()
         let initialState: State = .init(
+            tickerRowCount: tickerRowCount,
             sortSelectionCellROs: initialSortSelectionROs,
             sortComparator: TickerNoneComparator()
         )
@@ -97,7 +98,6 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     
     
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
-        let currentState = self.state
         switch action {
         case .onAppear:
             if self.isFirstAppear {
@@ -118,7 +118,6 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
         case .getBackToForeground:
             webSocketHelper.requestSubscribeToStream(streams: [.allMarketTickerChangesIn24h], mustDeliver: true)
         case .tickerListFetched(let newList):
-            self.tickerCellVO = newList
             return Just(action)
                 .unretainedOnly(self)
                 .asyncTransform { vm in
@@ -129,15 +128,16 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
                         exchangeRateInfo: .init(currentType: currentType, rate: rate ?? 1.0))
                 }
                 .eraseToAnyPublisher()
-        case .coinRowIsTapped(let id):
-            if let entity = tickerCellVO.first(where: { $0.pairSymbol.lowercased() == id.lowercased() }) {
-                DispatchQueue.main.async { [weak self] in
-                    guard let self else { return }
-                    listener?.request(.presentCoinDetailPage(
-                        listener: self,
-                        symbolInfo: .init(firstSymbol: entity.firstSymbol, secondSymbol: entity.secondSymbol)
-                    ))
-                }
+        case .coinRowIsTapped(let tickerCellRO):
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                listener?.request(.presentCoinDetailPage(
+                    listener: self,
+                    symbolInfo: .init(
+                        firstSymbol: tickerCellRO.firstSymbol,
+                        secondSymbol: tickerCellRO.secondSymbol
+                    )
+                ))
             }
         default:
             break
@@ -226,7 +226,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
                 currenyType: currencyType
             ))
             action.send(.updateGridType(type: gridType))
-            let tickerList = await useCase.getTickerList()
+            let tickerList = await useCase.getTickerList(rowCount: tickerRowCount)
             let exchangeRate = await useCase.getExchangeRate(base: .dollar, to: currencyType)
             action.send(.updateTickerList(
                 list: tickerList,
@@ -257,6 +257,7 @@ extension AllMarketTickerViewModel {
         var currentSortComparator: TickerSortComparator = TickerNoneComparator()
         
         // Ticker cell
+        let tickerRowCount: UInt
         var tickerGridType: GridType = .list
         var tickerCellRO: [TickerCellRO] = []
         
@@ -265,9 +266,11 @@ extension AllMarketTickerViewModel {
         
         
         init(
+            tickerRowCount: UInt,
             sortSelectionCellROs: [SortSelectionCellType: SortSelectionCellRO] = [:],
             sortComparator: TickerSortComparator=TickerNoneComparator()
         ) {
+            self.tickerRowCount = tickerRowCount
             self.sortSelectionCellROs = sortSelectionCellROs
             self.currentSortComparator = sortComparator
         }
@@ -280,7 +283,8 @@ private extension AllMarketTickerViewModel {
     func listenToTickerDataStream() {
         // 스트림 메시지 구독
         useCase
-            .getTickerList()
+            .getTickerList(rowCount: tickerRowCount)
+            .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
             .receive(on: DispatchQueue.main)
             .map { Action.tickerListFetched(list: $0) }
             .subscribe(action)
@@ -306,7 +310,9 @@ private extension AllMarketTickerViewModel {
             displayChangePercentTextColor: changePercentColor,
             symbolPair: vo.pairSymbol,
             price: vo.price,
-            changedPercent: vo.changedPercent
+            changedPercent: vo.changedPercent,
+            firstSymbol: vo.firstSymbol,
+            secondSymbol: vo.secondSymbol
         )
     }
     

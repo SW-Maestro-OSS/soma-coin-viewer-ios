@@ -23,4 +23,6 @@ struct TickerCellRO: Identifiable {
     let symbolPair: String
     let price: CVNumber
     let changedPercent: CVNumber
+    let firstSymbol: String
+    let secondSymbol: String
 }
