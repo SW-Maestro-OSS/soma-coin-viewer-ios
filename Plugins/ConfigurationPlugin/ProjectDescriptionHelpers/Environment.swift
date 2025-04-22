@@ -9,6 +9,6 @@
 
 public extension Project {
     enum Environment {
-        public static let deploymentTarget: DeploymentTargets = .iOS("17.0")
+        public static let deploymentTarget: DeploymentTargets = .iOS("18.0")
     }
 }
