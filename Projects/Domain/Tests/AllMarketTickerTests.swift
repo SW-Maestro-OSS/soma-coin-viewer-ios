@@ -13,7 +13,6 @@ import Combine
 @testable import Domain
 @testable import DomainTesting
 
-import WebSocketManagementHelper
 import CoreUtil
 
 // MARK: AllMarketTickerUseCaseTests
@@ -47,10 +46,6 @@ struct AllMarketTickerUseCaseTests {
         DependencyInjector.shared.register(
             AllMarketTickersRepository.self,
             StubAllMarketTickersRepository(stubTickerEntities: givenTickers)
-        )
-        DependencyInjector.shared.register(
-            WebSocketManagementHelper.self,
-            StubAllwaysConnectedWebSocketHelper()
         )
         let defaultAllMarketTickersUseCase = DefaultAllMarketTickersUseCase()
 

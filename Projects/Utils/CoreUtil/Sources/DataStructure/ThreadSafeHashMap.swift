@@ -5,7 +5,9 @@
 //  Created by choijunios on 4/21/25.
 //
 
-public actor ThreadSafeHashMap<Key: Copyable & Comparable & Hashable, Value> {
+import AdvancedSwift
+
+public actor ThreadSafeHashMap<Key: Comparable & Hashable, Value> {
     public let hashMap: HashMap<Key, Value> = .init()
     
     public init() { }

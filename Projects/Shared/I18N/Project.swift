@@ -7,6 +7,7 @@
 
 import ProjectDescription
 import DependencyPlugin
+import ConfigurationPlugin
 
 let project = Project(
     name: "I18N",
@@ -42,6 +43,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.CoinViewer.I18N",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Sources/**"],
             resources: ["Resources/**"],
             dependencies: [

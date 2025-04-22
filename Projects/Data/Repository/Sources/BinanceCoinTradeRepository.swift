@@ -23,7 +23,7 @@ public final class BinanceCoinTradeRepository: CoinTradeRepository {
         coinTradeDataSource
             .getTradeList(symbolPair: symbolPair, tableUpdateInterval: tableUpdateInterval)
             .map { dtoList in
-                var entityList = HashMap<Date, CoinTradeVO>()
+                let entityList = HashMap<Date, CoinTradeVO>()
                 dtoList.values.forEach { dto in
                     let entity = dto.toEntity()
                     entityList[entity.tradeTime] = entity

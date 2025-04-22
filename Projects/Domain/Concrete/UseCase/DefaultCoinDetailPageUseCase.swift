@@ -8,7 +8,6 @@
 import Combine
 
 import DomainInterface
-import WebSocketManagementHelper
 import CoreUtil
 
 final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
@@ -16,7 +15,6 @@ final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
     @Injected private var orderbookRepository: OrderbookRepository
     @Injected private var singleTickerRepository: SingleMarketTickerRepository
     @Injected private var coinTradeRepository: CoinTradeRepository
-    @Injected private var webSocketHelper: WebSocketManagementHelper
     
     public init() { }
 }
@@ -24,27 +22,6 @@ final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
 
 // MARK: CoinDetailPageUseCase
 public extension DefaultCoinDetailPageUseCase {
-    func connectToOrderbookStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@depth"], mustDeliver: true)
-    }
-    
-    func connectToTickerChangesStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@ticker"], mustDeliver: true)
-    }
-    
-    func connectToRecentTradeStream(symbolPair: String) {
-        webSocketHelper.requestSubscribeToStream(streams: ["\(symbolPair.lowercased())@trade"], mustDeliver: true)
-    }
-    
-    func disconnectToStreams(symbolPair: String) {
-        let symbol = symbolPair.lowercased()
-        webSocketHelper.requestUnsubscribeToStream(streams: [
-            "\(symbol)@depth",
-            "\(symbol)@ticker",
-            "\(symbol)@trade",
-        ], mustDeliver: false)
-    }
-    
     func get24hTickerChange(symbolPair: String) -> AsyncStream<Twenty4HourTickerForSymbolVO> {
         singleTickerRepository.request24hTickerChange(pairSymbol: symbolPair)
     }

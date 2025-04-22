@@ -15,7 +15,7 @@ public struct BinanceStreamDecoder: StreamDecoder {
             "\(symbolPair.lowercased())@depth"
         case .tickerChangesIn24h(let symbolPair):
             "\(symbolPair.lowercased())@ticker"
-        case .recentTraße(let symbolPair):
+        case .recentTrade(let symbolPair):
             "\(symbolPair.lowercased())@trade"
         }
     }

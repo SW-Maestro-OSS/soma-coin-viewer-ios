@@ -14,8 +14,6 @@ import DataSource
 
 import CoreUtil
 
-import SwiftStructures
-
 public class DefaultExchangeRateRepository: ExchangeRateRepository {
     // Dependency
     @Injected private var priceService: ExchangeRateService

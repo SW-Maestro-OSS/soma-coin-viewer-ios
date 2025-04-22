@@ -12,5 +12,5 @@ public enum WebSocketStream {
     // CoinDetailPage
     case orderbook(symbolPair: String)
     case tickerChangesIn24h(symbolPair: String)
-    case recentTraße(symbolPair: String)
+    case recentTrade(symbolPair: String)
 }

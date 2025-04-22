@@ -20,7 +20,8 @@ struct ExampleApp: App {
         WindowGroup {
             CoinDetailPageView(viewModel: CoinDetailPageViewModel(
                 symbolInfo: .init(firstSymbol: "xrp", secondSymbol: "usdt"),
-                useCase: DependencyInjector.shared.resolve()
+                useCase: DependencyInjector.shared.resolve(),
+                webSocketManagementHelper: DependencyInjector.shared.resolve()
             ))
             .environmentObject(DependencyInjector.shared.resolve(AlertShooter.self))
         }

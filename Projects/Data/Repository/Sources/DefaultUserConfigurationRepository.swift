@@ -11,9 +11,6 @@ import DataSource
 import DomainInterface
 import CoreUtil
 
-
-import SwiftStructures
-
 public class DefaultUserConfigurationRepository: UserConfigurationRepository {
     // Dependency
     @Injected var userConfigurationService: UserConfigurationService
