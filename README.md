@@ -128,7 +128,7 @@ OPENEX_API_KEY="API Key for open exchange rates"
 - 템플릿을 사용한 모듈 생성
 - `tuist graph`를 사용한 의존성 시각화
 
-<img src="./graph.png" width=800 />
+<img src="./graph.png" width=400 />
 
 ## 클린아키텍처
 
@@ -138,8 +138,142 @@ OPENEX_API_KEY="API Key for open exchange rates"
 
 `protocol`타입의 구현체는 런타임에 의존성을 주입하여, 객체간 유연한 협력이 가능하도록 했습니다.
 
-<img src="https://github.com/user-attachments/assets/422b8e12-0d04-4f8b-87f9-1d5eaaf49b94" width=500 />
+### 클린아키텍처 / AllMarketTicker화면(메인 화면)
 
+<img src="https://github.com/user-attachments/assets/1e842b6a-692c-4e77-935c-8114688aa716" width=200 />
+
+<table>
+  <tr>
+    <td>
+      <b>레이어</b>
+    </td>
+    <td>
+      <b>책임</b>
+    </td>
+  </tr>
+    <td>
+      <b>Presentation</b>
+    </td>
+    <td>
+      <b>텍스트 가공, UI업데이트 주기 관리(throttle)</b>
+    </td>
+  </tr>
+  </tr>
+    <td>
+      <b>Domain</b>
+    </td>
+    <td>
+      <b>도메인 로직 기반 코인 리스트 가공(가장 거래량이 높은 코인 상위 30개)</b>
+    </td>
+  </tr>
+  </tr>
+    <td>
+      <b>Data - Repository</b>
+    </td>
+    <td>
+      <b>DTO를 엔티티화</b>
+    </td>
+  </tr>
+  <tr>
+      <td>
+        <b>Data - DataSource</b>
+      </td>
+      <td>
+        <b>리스트 저장 및 관리(HashMap으로 관리)</b>
+      </td>
+  </tr>
+</table>
+
+### 클린아키텍처 / 코인 디테일 화면
+
+<img src="https://github.com/user-attachments/assets/0a0cff90-b28d-4e5f-b444-029085841b2e" width=200 />
+
+- **(상단) 실시간 오더북 테이블 아키텍처**
+<table>
+  <tr>
+    <td>
+      <b>레이어</b>
+    </td>
+    <td>
+      <b>책임</b>
+    </td>
+  </tr>
+    <td>
+      <b>Presentation</b>
+    </td>
+    <td>
+      <b>텍스트 가공, UI업데이트 주기 관리(throttle), 테이블 크기 결정</b>
+    </td>
+  </tr>
+  </tr>
+    <td>
+      <b>Domain</b>
+    </td>
+    <td>
+      <b>테이블 정렬방식 결정(매수가 매도가에 따라 상이), 요청된 테이블 크기로 테이블을 가공</b>
+    </td>
+  </tr>
+  </tr>
+    <td>
+      <b>Data - Repository</b>
+    </td>
+    <td>
+      <b>DTO를 엔티티화</b>
+    </td>
+  </tr>
+  </tr>
+    <td>
+      <b>Data - DataSource</b>
+    </td>
+    <td>
+      <b>전체 테이블 저장 및 관리(HashMap으로 관리)</b>
+    </td>
+  </tr>
+</table>
+
+- **(하단) 실시간 코인 거래내역 리스트 아키텍처**
+
+<table>
+  <tr>
+    <td>
+      <b>레이어</b>
+    </td>
+    <td>
+      <b>책임</b>
+    </td>
+  </tr>
+    <td>
+      <b>Presentation</b>
+    </td>
+    <td>
+      <b>UI업데이트 주기 관리(throttle), 테이블 크기 결정</b>
+    </td>
+  </tr>
+  </tr>
+    <td>
+      <b>Domain</b>
+    </td>
+    <td>
+      <b>데이터 업데이트 주기 결정(정보의 최신성 포기), 테이블 정렬방식 결정, 요청받은 테이블 개수로 데이터 가공</b>
+    </td>
+  </tr>
+  </tr>
+    <td>
+      <b>Data - Repository</b>
+    </td>
+    <td>
+      <b>DTO를 엔티티화</b>
+    </td>
+  </tr>
+  </tr>
+    <td>
+      <b>Data - DataSource</b>
+    </td>
+    <td>
+      <b>전체 개래내역 테이블을 관리(DTO형태), 전달받은 도메인 로직에 따라 테이블 업데이트 주기를 조절</b>
+    </td>
+  </tr>
+</table>
 
 ## 웹소켓과 클린아키텍처
 
@@ -159,7 +293,7 @@ soma-coin-viewer앱은 현재 `Binance API`를 사용합니다. 하지만 WebSoc
 
 `WebSocketManagementHelper`객체와 협력하는 객체들은 아래 그림처럼 협력하게 됩니다.
 
-<img src="https://github.com/user-attachments/assets/d45a0ad7-db02-422c-a69c-146ff4a562a8" width=500 />
+<img src="https://github.com/user-attachments/assets/c601dba7-93e9-45fd-995d-167dbdc05097" width=500 />
 
 ※ Presentation --> WebSocketManagementHelper 메세지중 **데이터 스트림**이란 웹소켓 API에게 구독을 요청하는 스트림을 의미합니다. (Ex, all market tickers, orderbook)
 
@@ -179,11 +313,3 @@ soma-coin-viewer앱은 현재 `Binance API`를 사용합니다. 하지만 WebSoc
 `strings파일`을 사용해서 시스템 언어를 기반으로 텍스트를 가져올 수 있습니다. 하지만 해당 기능의 경우 동적으로 언어를 변경할 수 없어 지역 및 시스템 언어와 무관한 언어 설정이 까다롭습니다.
 
 시스템 언어와 무관하게 유저가 언어를 선택하게 함으로써 한층 높아진 국제화 대응을 구현했습니다.
-
-## 에러처리
-
-기본적으로 `AlertShooter`를 통해 Alert관련 정보(`AlertModel`)를 전달할 수 있습니다.
-
-해당 정보는 `AlertShooter`를 구독하고 있는 `RootViewModel`에 의해 관찰되어 화면상에 Alert로 노출되게 됩니다.
-
-<img src="https://github.com/user-attachments/assets/cc2d355c-14a9-4d3f-8152-ff4222ffb512" width=500 />
