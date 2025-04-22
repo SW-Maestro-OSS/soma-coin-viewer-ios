@@ -12,10 +12,15 @@ import I18N
 import AlertShooter
 import CoreUtil
 
+public protocol StreamDecoder {
+    func decode(_ stream: WebSocketStream) -> String
+}
+
 public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSocketServiceListener {
     
     // Dependency
     private let webSocketService: WebSocketService
+    private let streamDecoder: StreamDecoder
     private let alertShootable: AlertShootable
     
     
@@ -31,8 +36,9 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
     private let subscribedStreamManageQueue: DispatchQueue = .init(label: "com.WebSocketManagementHelper")
     private var store: Set<AnyCancellable> = .init()
     
-    public init(webSocketService: WebSocketService, alertShootable: AlertShootable) {
+    public init(webSocketService: WebSocketService, streamDecoder: StreamDecoder, alertShootable: AlertShootable) {
         self.webSocketService = webSocketService
+        self.streamDecoder = streamDecoder
         self.alertShootable = alertShootable
         
         webSocketService.listener = self
@@ -71,10 +77,43 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
     }
     
     
-    public func requestUnsubscribeToStream(streams willRemoveStreams: [Stream], mustDeliver: Bool) {
-        
+    public func requestSubscribeToStream(streams: [WebSocketStream], mustDeliver: Bool) {
+        let decodedStreams = streams.map(streamDecoder.decode)
+        subscribedStreamManageQueue.async { [weak self] in
+            guard let self else { return }
+            // 스트림 구독 메세지 전송
+            webSocketService.subscribeTo(message: decodedStreams, mustDeliver: mustDeliver) { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success:
+                    streams.forEach { stream in
+                        printIfDebug("\(Self.self): ✅\(stream)구독 성공")
+                    }
+                    // 구독에 성공한 스트림들을 기록합니다.
+                    add(streams: decodedStreams)
+                case .failure(let webSocketError):
+                    switch webSocketError {
+                    case .messageTransferFailed(_):
+                        streams.forEach { stream in
+                            printIfDebug("\(Self.self): ❌\(stream)구독 실패")
+                        }
+                        // 재요청
+                        printIfDebug("\(Self.self): 🔄스트림 구독 재요청...")
+                        requestSubscribeToStream(streams: streams, mustDeliver: mustDeliver)
+                        return
+                    default:
+                        return
+                    }
+                }
+            }
+        }
+    }
+    
+    
+    public func requestUnsubscribeToStream(streams: [WebSocketStream], mustDeliver: Bool) {
+        let decodedStreams = streams.map(streamDecoder.decode)
         // 특정스트림에 대해 구독을 해제 메세지 전송
-        webSocketService.unsubscribeTo(message: willRemoveStreams, mustDeliver: mustDeliver) { [weak self] result in
+        webSocketService.unsubscribeTo(message: decodedStreams, mustDeliver: mustDeliver) { [weak self] result in
                        
             guard let self else { return }
             
@@ -83,24 +122,23 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
                 guard let self else { return }
                 // 현재 구독중인 스트림에서 구독취소한 스트림 제거
                 currentSubscribtions = currentSubscribtions.filter { stream in
-                    !willRemoveStreams.contains(stream)
+                    !decodedStreams.contains(stream)
                 }
             }
             
             switch result {
             case .success:
-                willRemoveStreams.forEach { stream in
+                decodedStreams.forEach { stream in
                     printIfDebug("\(Self.self): ☑️\(stream)구독 해제 성공")
                 }
             case .failure(let error):
                 printIfDebug("\(Self.self): 스트림 구독 해제 메세지 전송 실패 \(error.localizedDescription)")
                 // 재요청
                 printIfDebug("\(Self.self): 🔄스트림 구독 해제 재요청...")
-                requestUnsubscribeToStream(streams: willRemoveStreams, mustDeliver: mustDeliver)
+                requestUnsubscribeToStream(streams: streams, mustDeliver: mustDeliver)
             }
         }
     }
-    
     
     public func requestDisconnection() {
         webSocketService.disconnect()
