@@ -11,14 +11,13 @@ import DependencyPlugin
 let project = Project(
     name: "RootModule",
     targets: [
-        
-
         // Example
         .target(
             name: "RootFeatureExample",
             destinations: .iOS,
             product: .app,
             bundleId: "com.choijunios.feature.Root.example",
+            deploymentTargets: Project.Environment.deploymentTarget,
             infoPlist: .example_app,
             sources: ["Example/Sources/**"],
             resources: ["Example/Resources/**"],
@@ -49,6 +48,7 @@ let project = Project(
             destinations: .iOS,
             product: .staticLibrary,
             bundleId: "com.choijunios.feature.Root.testing",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Testing/**"],
             dependencies: [
                 .target(name: "RootFeature"),
@@ -62,6 +62,7 @@ let project = Project(
             destinations: .iOS,
             product: .staticFramework,
             bundleId: "com.choijunios.feature.Root",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
             dependencies: [

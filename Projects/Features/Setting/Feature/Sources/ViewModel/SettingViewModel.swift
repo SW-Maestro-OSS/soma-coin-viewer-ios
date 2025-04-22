@@ -19,12 +19,10 @@ public protocol SettingPageRouting: AnyObject { }
 
 public protocol SettingPageListener: AnyObject { }
 
-class SettingViewModel : UDFObservableObject, SettingViewModelable {
-    
-    // Service locator
-    @Injected private var i18NManager: I18NManager
-    @Injected private var userConfigurationRepository: UserConfigurationRepository
-    @Injected private var repository: LanguageLocalizationRepository
+class SettingViewModel: UDFObservableObject, SettingViewModelable {
+    // Dependency
+    private let i18NManager: I18NManager
+    private let userConfigurationRepository: UserConfigurationRepository
     
     
     // Listener
@@ -42,11 +40,12 @@ class SettingViewModel : UDFObservableObject, SettingViewModelable {
         gridType: .list
     )
     
-    
     var action : PassthroughSubject<Action, Never> = .init()
     var store : Set<AnyCancellable> = []
     
-    init() {
+    init(i18NManager: I18NManager, userConfigurationRepository: UserConfigurationRepository) {
+        self.i18NManager = i18NManager
+        self.userConfigurationRepository = userConfigurationRepository
         
         let initialCurrencyType = i18NManager.getCurrencyType()
         let initialLanType = i18NManager.getLanguageType()
@@ -146,22 +145,22 @@ extension SettingViewModel {
             SettingCellRO(
                 cellKey: "Setting_price",
                 cellType: CellType.currencyType(currentState.currencyType),
-                title: repository.getString(key: "Setting_price_title", lanCode: lanCode),
-                option: repository.getString(key: "Setting_price_option", lanCode: lanCode),
+                title: LocalizedStringProvider.instance().getString(key: "Setting_price_title", lanCode: lanCode),
+                option: LocalizedStringProvider.instance().getString(key: "Setting_price_option", lanCode: lanCode),
                 isSelected: currentState.currencyType == .won
             ),
             SettingCellRO(
                 cellKey: "Setting_language",
                 cellType: CellType.languageType(currentState.languageType),
-                title: repository.getString(key: "Setting_language_title", lanCode: lanCode),
-                option: repository.getString(key: "Setting_language_option", lanCode: lanCode),
+                title: LocalizedStringProvider.instance().getString(key: "Setting_language_title", lanCode: lanCode),
+                option: LocalizedStringProvider.instance().getString(key: "Setting_language_option", lanCode: lanCode),
                 isSelected: currentState.languageType == .korean
             ),
             SettingCellRO(
                 cellKey: "Setting_grid",
                 cellType: CellType.gridType(currentState.gridType),
-                title: repository.getString(key: "Setting_grid_title", lanCode: lanCode),
-                option: repository.getString(key: "Setting_grid_option", lanCode: lanCode),
+                title: LocalizedStringProvider.instance().getString(key: "Setting_grid_title", lanCode: lanCode),
+                option: LocalizedStringProvider.instance().getString(key: "Setting_grid_option", lanCode: lanCode),
                 isSelected: currentState.gridType == .list
             )
         ]

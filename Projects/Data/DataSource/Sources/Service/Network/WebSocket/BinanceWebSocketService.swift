@@ -10,8 +10,6 @@ import Combine
 
 import CoreUtil
 
-import SwiftStructures
-
 public class BinanceWebSocketService: NSObject, WebSocketService, URLSessionWebSocketDelegate {
     
     // WebSocket service url

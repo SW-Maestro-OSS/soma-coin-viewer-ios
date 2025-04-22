@@ -14,43 +14,22 @@ import DataSource
 
 import CoreUtil
 
-import SwiftStructures
-
-public class DefaultExchangeRateRepository: ExchangeRateRepository {
+public final class DefaultExchangeRateRepository: ExchangeRateRepository {
     // Dependency
-    @Injected private var priceService: ExchangeRateService
-    
-    // Cache (base: [to: rate])
-    private let exchangeRateCache: LockedDictionary<String, [String: Double]> = .init()
+    @Injected private var exchangeRateDataSource: ExchangeRateDataSource
     
     public init() { }
-    
-    public func prepare(baseCurrencyCode: String, toCurrencyCodes: [String]) -> AnyPublisher<Void, Error> {
-        
-        priceService
-            .getLatestExchangeRate(baseCurrencyCode: baseCurrencyCode, toCurrencyCodes: toCurrencyCodes)
-            .map { [weak self] exchangeRateDTO in
-                
-                guard let self else { return () }
-                
-                exchangeRateCache[baseCurrencyCode] = [:]
-                
-                exchangeRateDTO.rates.forEach { symbol, rate in
-                    
-                    self.exchangeRateCache[baseCurrencyCode]?[symbol] = rate
-                }
-                
-                return ()
-            }
-            .mapError({ error in
-                printIfDebug("DefaultExchangeRateRepository, 환율정보 가져오기 실패, \(error.localizedDescription)")
-                return ExchangeRateRepositoryError.fetchExhangeRateErrorError
-            })
-            .eraseToAnyPublisher()
+}
+
+
+// MARK: ExchangeRateRepository
+public extension DefaultExchangeRateRepository {
+    func prepareRates(base: CurrencyType, to: [CurrencyType]) async throws {
+        try await exchangeRateDataSource.prepareRates(base: base.currencyCode, to: to.map(\.currencyCode))
     }
     
-    public func getExchangeRate(baseCurrencyCode: String, toCurrencyCode: String) -> Double? {
-        
-        exchangeRateCache[baseCurrencyCode]?[toCurrencyCode]
+    func getRate(base: CurrencyType, to: CurrencyType) async -> Double? {
+        let dto = await exchangeRateDataSource.getExchangeRate(base: base.currencyCode)
+        return dto?.rates[to.currencyCode]
     }
 }

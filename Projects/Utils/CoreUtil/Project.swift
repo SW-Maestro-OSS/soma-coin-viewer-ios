@@ -1,5 +1,6 @@
 import ProjectDescription
 import DependencyPlugin
+import ConfigurationPlugin
 
 let project = Project(
     name: "CoreUtil",
@@ -9,6 +10,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.CoinViewer.Utils.CoreUtil",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Sources/**"],
             dependencies: [
                 // Third Party

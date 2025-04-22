@@ -8,13 +8,15 @@
 import Combine
 
 public protocol AllMarketTickersUseCase {
-    
-    /// AllMarketTicker스트림을 구독합니다.
-    func connectToAllMarketTickerStream()
-    
-    /// 스트림 연결을 해제합니다.
-    func disConnectToAllMarketTickerStream()
-    
     /// AllMarketTicker리스트를 획득합니다.
-    func requestTickers() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never>
+    func getTickerList(rowCount: UInt) -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never>
+    func getTickerList(rowCount: UInt) async -> [Twenty4HourTickerForSymbolVO]
+    
+    
+    /// 환율정보를 획득합니다.
+    func getExchangeRate(base: CurrencyType, to: CurrencyType) async -> Double?
+    
+    
+    /// GridType에 대한 유저설정을 획득합니다.
+    func getGridType() -> GridType
 }

@@ -18,16 +18,13 @@ import Swinject
 public class Assemblies : Assembly {
     public func assemble(container: Container) {
         //MARK: DataSource
-        container.register(ExchangeRateService.self) { _ in
-            DefaultExchangeRateService()
+        container.register(ExchangeRateDataSource.self) { _ in
+            OpenXExchangeRateDataSource()
         }
+        .inObjectScope(.container)
         
         container.register(ExchangeRateRepository.self) { _ in
             DefaultExchangeRateRepository()
-        }
-        
-        container.register(ExchangeRateUseCase.self) { _ in
-            DefaultExchangeRateUseCase()
         }
         
         container.register(UserConfigurationService.self) { _ in
@@ -41,11 +38,6 @@ public class Assemblies : Assembly {
         //MARK: I18N
         container.register(I18NManager.self) { _ in
             DefaultI18NManager()
-        }
-        
-        //MARK: LanguageLocalizationRepository
-        container.register(LanguageLocalizationRepository.self) { _ in
-            DefaultLanguageLocalizationRepository()
         }
     }
 }

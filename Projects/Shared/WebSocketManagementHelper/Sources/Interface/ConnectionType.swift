@@ -6,7 +6,6 @@
 //
 
 public enum ConnectionType {
-    
     case freshStart
     case recoverPreviousStreams
 }

@@ -37,8 +37,6 @@ struct CoinDetailPageView: View {
         .onChange(of: scenePhase) { oldValue, newValue in
             if oldValue == .background && (newValue == .active || newValue == .inactive) {
                 viewModel.action.send(.getBackToForeground)
-            } else if newValue == .background {
-                viewModel.action.send(.enterBackground)
             }
         }
         .alertShootable()

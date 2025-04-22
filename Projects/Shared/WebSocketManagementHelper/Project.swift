@@ -5,7 +5,6 @@
 //
 
 import ProjectDescription
-
 import ConfigurationPlugin
 import DependencyPlugin
 
@@ -42,6 +41,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.choijunios.shared.WebSocketManagementHelper",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Sources/**"],
             dependencies: [
                 
@@ -51,8 +51,6 @@ let project = Project(
                 D.Shared.AlertShooter,
                 
                 D.Util.CoreUtil,
-                
-                D.ThirdParty.SwiftStructures,
             ]
         ),
     ]

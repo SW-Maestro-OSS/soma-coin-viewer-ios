@@ -6,11 +6,6 @@
 //
 
 struct TickerNoneComparator: TickerSortComparator {
-    
     let id: String = .init(describing: TickerNoneComparator.self)
-    
-    func compare(lhs: TickerVO, rhs: TickerVO) -> Bool {
-        true
-    }
-    
+    func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool { true }
 }

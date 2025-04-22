@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+import AlertShooter
 import BaseFeature
 
 struct RootView: View {
@@ -26,6 +27,7 @@ struct RootView: View {
             viewModel.router.view(destination: destination)
         }
         .onAppear { viewModel.action(.onAppear) }
+        .alertShootable()
     }
 }
 

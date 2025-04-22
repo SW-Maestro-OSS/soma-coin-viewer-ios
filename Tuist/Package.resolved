@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/J0onYEong/AdvancedSwift.git",
       "state" : {
-        "revision" : "16da3308d8e6924ecddcda7c5b5f5baa52bf8af1",
-        "version" : "1.0.1"
+        "revision" : "5809431df8352de220cb73533e8b506804ea7620",
+        "version" : "1.0.3"
       }
     },
     {
@@ -16,15 +16,6 @@
       "state" : {
         "revision" : "ed82281c436c9dd069dbfa7b2a9ee4d2b3656066",
         "version" : "1.0.3"
-      }
-    },
-    {
-      "identity" : "swiftstructures",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/J0onYEong/SwiftStructures.git",
-      "state" : {
-        "revision" : "6ecad4c566b84b609545af015028ac31305224db",
-        "version" : "1.0.4"
       }
     },
     {

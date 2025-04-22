@@ -36,7 +36,6 @@ enum TabBarViewAction {
 class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     // Dependency
     private let i18NManager: I18NManager
-    private let languageRepository: LanguageLocalizationRepository
     
     
     // State
@@ -56,10 +55,8 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     // Router
     weak var router: TabBarRouting?
     
-    init(i18NManager: I18NManager, languageRepository: LanguageLocalizationRepository) {
-        
+    init(i18NManager: I18NManager) {
         self.i18NManager = i18NManager
-        self.languageRepository = languageRepository
         
         // Initial state
         let languageType = i18NManager.getLanguageType()
@@ -119,7 +116,7 @@ private extension TabBarViewModel {
     func createTabBarItemROs(languageType: LanguageType) -> [TabBarItemRO] {
         let orderedPage: [TabBarPage] = [.allMarketTicker, .setting]
         return orderedPage.map { page in
-            let displayText = languageRepository.getString(
+            let displayText = LocalizedStringProvider.instance().getString(
                 key: page.titleTextLocalizationKey,
                 lanCode: languageType.lanCode
             )

@@ -11,15 +11,13 @@ import DependencyPlugin
 let project = Project(
     name: "CoinDetailModule",
     targets: [
-        
-
         // Example
         .target(
             name: "CoinDetailFeatureExample",
             destinations: .iOS,
             product: .app,
             bundleId: "com.choijunios.feature.CoinDetail.example",
-            infoPlist: .example_app,
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Example/Sources/**"],
             resources: ["Example/Resources/**"],
             dependencies: [
@@ -53,8 +51,9 @@ let project = Project(
         .target(
             name: "CoinDetailFeatureTesting",
             destinations: .iOS,
-            product: .framework,
+            product: .staticLibrary,
             bundleId: "com.choijunios.feature.CoinDetail.testing",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Testing/**"],
             dependencies: [
                 .target(name: "CoinDetailFeature"),
@@ -66,13 +65,15 @@ let project = Project(
         .target(
             name: "CoinDetailFeature",
             destinations: .iOS,
-            product: .framework,
+            product: .staticFramework,
             bundleId: "com.choijunios.feature.CoinDetail",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
             dependencies: [
                 D.Feature.BaseFeature,
                 D.Shared.AlertShooter,
+                D.Shared.WebSocketManagementHelper,
             ]
         ),
     ]

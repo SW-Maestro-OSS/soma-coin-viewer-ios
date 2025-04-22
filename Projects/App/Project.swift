@@ -1,4 +1,4 @@
-import ProjectDescription
+@preconcurrency import ProjectDescription
 import DependencyPlugin
 import ConfigurationPlugin
 
@@ -18,6 +18,7 @@ let project = Project(
             destinations: .iOS,
             product: .app,
             bundleId: "io.tuist.CoinViewer",
+            deploymentTargets: Project.Environment.deploymentTarget,
             infoPlist: .main_app,
             sources: ["Sources/**"],
             resources: ["Resources/**"],

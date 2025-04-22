@@ -11,14 +11,13 @@ import DependencyPlugin
 let project = Project(
     name: "AllMarketTickerModule",
     targets: [
-        
-
         // Example
         .target(
             name: "AllMarketTickerFeatureExample",
             destinations: .iOS,
             product: .app,
             bundleId: "com.choijunios.feature.AllMarketTicker.example",
+            deploymentTargets: Project.Environment.deploymentTarget,
             infoPlist: .example_app,
             sources: ["Example/Sources/**"],
             resources: ["Example/Resources/**"],
@@ -49,6 +48,7 @@ let project = Project(
             destinations: .iOS,
             product: .staticLibrary,
             bundleId: "com.choijunios.feature.AllMarketTicker.testing",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Testing/**"],
             dependencies: [
                 .target(name: "AllMarketTickerFeature"),
@@ -62,6 +62,7 @@ let project = Project(
             destinations: .iOS,
             product: .staticFramework,
             bundleId: "com.choijunios.feature.AllMarketTicker",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Feature/Sources/**"],
             resources: ["Feature/Resources/**"],
             dependencies: [
@@ -71,6 +72,7 @@ let project = Project(
                 
                 D.Shared.I18N,
                 D.Shared.AlertShooter,
+                D.Shared.WebSocketManagementHelper,
                 
                 D.ThirdParty.SimpleImageProvider,
             ]

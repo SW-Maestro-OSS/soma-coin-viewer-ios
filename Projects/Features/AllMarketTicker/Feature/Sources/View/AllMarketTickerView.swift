@@ -77,7 +77,7 @@ struct AllMarketTickerView: View {
                                 TickerListCellView(renderObject: item)
                                     .frame(height: 50)
                                     .onTapGesture {
-                                        viewModel.action(.coinRowIsTapped(id: item.id))
+                                        viewModel.action(.coinRowIsTapped(coinInfo: item))
                                     }
                                 Rectangle()
                                     .foregroundStyle(.gray)
@@ -91,7 +91,7 @@ struct AllMarketTickerView: View {
                         ForEach(viewModel.state.tickerCellRO) { item in
                             TickerGridCell(renderObject: item)
                                 .onTapGesture {
-                                    viewModel.action(.coinRowIsTapped(id: item.id))
+                                    viewModel.action(.coinRowIsTapped(coinInfo: item))
                                 }
                         }
                     }

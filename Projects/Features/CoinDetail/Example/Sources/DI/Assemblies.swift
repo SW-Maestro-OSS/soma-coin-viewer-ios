@@ -41,6 +41,7 @@ public class Assemblies: Assembly {
         container.register(WebSocketManagementHelper.self) { resolver in
             DefaultWebSocketManagementHelper(
                 webSocketService: resolver.resolve(WebSocketService.self)!,
+                streamDecoder: BinanceStreamDecoder(),
                 alertShootable: resolver.resolve(AlertShooter.self)!
             )
         }

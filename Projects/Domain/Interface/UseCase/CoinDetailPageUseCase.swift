@@ -8,11 +8,6 @@
 import Combine
 
 public protocol CoinDetailPageUseCase {
-    func connectToOrderbookStream(symbolPair: String)
-    func connectToTickerChangesStream(symbolPair: String)
-    func connectToRecentTradeStream(symbolPair: String)
-    func disconnectToStreams(symbolPair: String)
-    
     func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO, Error>
     func getRecentTrade(symbolPair: String, maxRowCount: UInt) -> AnyPublisher<[CoinTradeVO], Never>
     func get24hTickerChange(symbolPair: String) -> AsyncStream<Twenty4HourTickerForSymbolVO>

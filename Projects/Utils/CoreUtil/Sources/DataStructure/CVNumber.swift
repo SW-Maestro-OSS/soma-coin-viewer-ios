@@ -7,7 +7,9 @@
 
 import Foundation
 
-public struct CVNumber: Sendable, Hashable, Comparable, CustomStringConvertible, ExpressibleByFloatLiteral, Copyable {
+import AdvancedSwift
+
+public struct CVNumber: Sendable, Hashable, Comparable, CustomStringConvertible, ExpressibleByFloatLiteral {
     
     public typealias FloatLiteralType = Double
     
@@ -70,10 +72,4 @@ public extension CVNumber {
     static func / (lhs: CVNumber, rhs: CVNumber) -> CVNumber {
         CVNumber(lhs.wrappedNumber / rhs.wrappedNumber)
     }
-}
-
-
-// MARK: Copyable
-public extension CVNumber {
-    func copy() -> Any { self }
 }

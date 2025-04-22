@@ -11,6 +11,7 @@ import SwiftUI
 import DomainInterface
 import BaseFeature
 import CoreUtil
+import WebSocketManagementHelper
 
 public enum CoinDetailPageListenerRequest {
     case closePage
@@ -26,7 +27,6 @@ enum CoinDetailPageAction {
     case onAppear
     case onDisappear
     case exitButtonTapped
-    case enterBackground
     case getBackToForeground
     
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
@@ -37,6 +37,7 @@ enum CoinDetailPageAction {
 final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewModelable {
     // Dependency
     private let useCase: CoinDetailPageUseCase
+    private let webSocketManagementHelper: WebSocketManagementHelper
     
     
     // Listener
@@ -61,9 +62,10 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     private var streamTask: [CoinInfoStream: Task<Void, Never>] = [:]
     var store: Set<AnyCancellable> = .init()
     
-    init(symbolInfo: CoinSymbolInfo, useCase: CoinDetailPageUseCase) {
+    init(symbolInfo: CoinSymbolInfo, useCase: CoinDetailPageUseCase, webSocketManagementHelper: WebSocketManagementHelper) {
         self.symbolInfo = symbolInfo
         self.useCase = useCase
+        self.webSocketManagementHelper = webSocketManagementHelper
         self.state = .init(
             symbolText: symbolInfo.pairSymbol.uppercased(),
             fixedOrderbookRowCount: orderbookRowCount
@@ -84,14 +86,20 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 listenToRecentTradeStream()
                 
                 // 스트림 연결
-                useCase.connectToTickerChangesStream(symbolPair: symbolPair)
-                useCase.connectToOrderbookStream(symbolPair: symbolPair)
-                useCase.connectToRecentTradeStream(symbolPair: symbolPair)
+                webSocketManagementHelper.requestSubscribeToStream(streams: [
+                    .tickerChangesIn24h(symbolPair: symbolPair),
+                    .orderbook(symbolPair: symbolPair),
+                    .recentTrade(symbolPair: symbolPair)
+                ], mustDeliver: true)
             }
             return Just(action).eraseToAnyPublisher()
         case .onDisappear:
             // 연결 스트림 종료
-            useCase.disconnectToStreams(symbolPair: symbolPair)
+            webSocketManagementHelper.requestUnsubscribeToStream(streams: [
+                .tickerChangesIn24h(symbolPair: symbolPair),
+                .orderbook(symbolPair: symbolPair),
+                .recentTrade(symbolPair: symbolPair)
+            ], mustDeliver: true)
             
             // AsyncStream종료
             streamTask.values.forEach({ $0.cancel() })
@@ -104,11 +112,11 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             listenToOrderbookStream()
             
             // 스트림 연결
-            useCase.connectToTickerChangesStream(symbolPair: symbolPair)
-            useCase.connectToOrderbookStream(symbolPair: symbolPair)
-            useCase.connectToRecentTradeStream(symbolPair: symbolPair)
-        case .enterBackground:
-            useCase.disconnectToStreams(symbolPair: symbolPair)
+            webSocketManagementHelper.requestSubscribeToStream(streams: [
+                .tickerChangesIn24h(symbolPair: symbolPair),
+                .orderbook(symbolPair: symbolPair),
+                .recentTrade(symbolPair: symbolPair)
+            ], mustDeliver: true)
         default:
             break
         }
@@ -216,9 +224,7 @@ private extension CoinDetailPageViewModel {
         streamUpdateObserverStore[.recentTrade] = useCase
             .getRecentTrade(symbolPair: symbolPair, maxRowCount: UInt(recentTradeRowCount))
             .throttle(for: 1.0, scheduler: DispatchQueue.global(), latest: true)
-            .map { list in
-                return Action.updateTrades(trades: list)
-            }
+            .map { Action.updateTrades(trades: $0) }
             .subscribe(self.action)
     }
     

@@ -1,15 +1,16 @@
 import ProjectDescription
+import ConfigurationPlugin
 import DependencyPlugin
 
 let project = Project(
     name: "Data",
     targets: [
-        
         .target(
             name: "Repository",
             destinations: .iOS,
             product: .staticFramework,
             bundleId: "com.CoinViewer.Data.Repository",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Repository/Sources/**"],
             resources: ["Repository/Resources/**"],
             dependencies: [
@@ -24,13 +25,11 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.CoinViewer.Data.DataSource",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["DataSource/Sources/**"],
             resources: ["DataSource/Resources/**"],
             dependencies: [
                 D.Util.CoreUtil,
-                
-                // external
-                ModuleDependency.ThirdParty.SwiftStructures,
             ]
         ),
         

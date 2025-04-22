@@ -7,8 +7,9 @@
 
 import SwiftUI
 
+import CoreUtil
+
 struct TickerCellRO: Identifiable {
-    
     var id: String { self.symbolText }
     
     let symbolText: String
@@ -17,4 +18,11 @@ struct TickerCellRO: Identifiable {
     var displayPriceText: String
     var displayChangePercentText: String
     var displayChangePercentTextColor: Color
+    
+    // For sort
+    let symbolPair: String
+    let price: CVNumber
+    let changedPercent: CVNumber
+    let firstSymbol: String
+    let secondSymbol: String
 }

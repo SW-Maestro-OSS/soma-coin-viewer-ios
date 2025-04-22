@@ -7,7 +7,9 @@
 
 import Combine
 
+import CoreUtil
+
 public protocol AllMarketTickersRepository {
-    
-    func request24hTickerForAllSymbols() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never>
+    func getAllMarketTicker() -> AnyPublisher<AVLTree<Twenty4HourTickerForSymbolVO>, Never>
+    func getAllMarketTicker() async -> AVLTree<Twenty4HourTickerForSymbolVO>
 }

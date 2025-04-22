@@ -15,6 +15,10 @@ class DomainAssembly: Assembly {
     
     func assemble(container: Swinject.Container) {
         // UseCase
+        container.register(RootPageUseCase.self) { _ in
+            DefaultRootPageUseCase()
+        }
+        
         container.register(AllMarketTickersUseCase.self) { _ in
             DefaultAllMarketTickersUseCase()
         }
@@ -22,10 +26,5 @@ class DomainAssembly: Assembly {
         container.register(CoinDetailPageUseCase.self) { _ in
             DefaultCoinDetailPageUseCase()
         }
-        
-        container.register(ExchangeRateUseCase.self) { _ in
-            DefaultExchangeRateUseCase()
-        }
-        .inObjectScope(.container)
     }
 }

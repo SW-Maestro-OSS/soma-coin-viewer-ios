@@ -14,9 +14,7 @@ enum SortSelectionCellState {
 }
 
 struct SortSelectionCellRO: Identifiable {
-    
     var id: SortSelectionCellType { type }
-    
     let type: SortSelectionCellType
     var sortState: SortSelectionCellState
     

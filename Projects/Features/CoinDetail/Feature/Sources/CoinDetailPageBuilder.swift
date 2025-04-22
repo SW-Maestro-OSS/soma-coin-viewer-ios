@@ -7,17 +7,20 @@
 
 import DomainInterface
 import CoreUtil
+import WebSocketManagementHelper
 
 public final class CoinDetailPageBuilder {
     // Dependency
     @Injected private var coinDetailPageUseCase: CoinDetailPageUseCase
+    @Injected private var webSocketManagementHelper: WebSocketManagementHelper
     
     public init() { }
     
     public func build(listener: CoinDetailPageListener, symbolInfo: CoinSymbolInfo) -> CoinDetailPageRoutable {
         let viewModel = CoinDetailPageViewModel(
             symbolInfo: symbolInfo,
-            useCase: coinDetailPageUseCase
+            useCase: coinDetailPageUseCase,
+            webSocketManagementHelper: webSocketManagementHelper
         )
         viewModel.listener = listener
         let view = CoinDetailPageView(viewModel: viewModel)

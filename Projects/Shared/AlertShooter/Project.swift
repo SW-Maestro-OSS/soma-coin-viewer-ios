@@ -5,14 +5,12 @@
 //
 
 import ProjectDescription
-
 import ConfigurationPlugin
 import DependencyPlugin
 
 let project = Project(
     name: "AlertShooter",
     targets: [
-        
         .target(
             name: "AlertShooterTests",
             destinations: .iOS,
@@ -42,6 +40,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.choijunios.shared.AlertShooter",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Sources/**"],
             dependencies: [
                 D.Shared.I18N,

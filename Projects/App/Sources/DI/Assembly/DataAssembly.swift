@@ -18,9 +18,7 @@ import I18N
 import Swinject
 
 public class DataAssembly: Assembly {
-    
     public func assemble(container: Swinject.Container) {
-        
         // MARK: Servcie
         container.register(UserConfigurationService.self) { _ in
             DefaultUserConfigurationService()
@@ -36,14 +34,19 @@ public class DataAssembly: Assembly {
         }
         .inObjectScope(.container)
         
-        container.register(ExchangeRateService.self) { _ in
-            DefaultExchangeRateService()
-        }
         
         // MARK: DataSource
         container.register(CoinTradeDataSource.self) { _ in
             BinanceCoinTradeDataSource()
         }
+        container.register(AllMarketTickersDataSource.self) { _ in
+            BinanceAllMarketTickersDataSource()
+        }
+        container.register(ExchangeRateDataSource.self) { _ in
+            OpenXExchangeRateDataSource()
+        }
+        .inObjectScope(.container)
+        
         
         // MARK: Repository
         container.register(UserConfigurationRepository.self) { _ in

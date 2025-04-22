@@ -12,20 +12,30 @@ import DataSource
 import DomainInterface
 import CoreUtil
 
-public class BinanceAllMarketTickersRepository: AllMarketTickersRepository {
+public final class BinanceAllMarketTickersRepository: AllMarketTickersRepository {
     // Dependency
-    @Injected var webSocketService: WebSocketService
+    @Injected private var dataSource: AllMarketTickersDataSource
     
     public init() { }
     
-    public func request24hTickerForAllSymbols() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> {
-                
-        webSocketService
-            .getMessageStream()
-            .map { (dto: [BinanceTickerForSymbolDTO]) in
-                let entities = dto.map { $0.toEntity() }
-                return entities
-            }
+    private func convertToEntity(dto: [BinanceTickerForSymbolDTO]) -> AVLTree<Twenty4HourTickerForSymbolVO> {
+        let treeEntity: AVLTree<Twenty4HourTickerForSymbolVO> = .init()
+        for tickerDTO in dto {
+            treeEntity.insert(tickerDTO.toEntity())
+        }
+        return treeEntity
+    }
+    
+    public func getAllMarketTicker() -> AnyPublisher<AVLTree<Twenty4HourTickerForSymbolVO>, Never> {
+        dataSource
+            .getAllMarketTickerList()
+            .unretained(self)
+            .map { repo, dto in repo.convertToEntity(dto: dto) }
             .eraseToAnyPublisher()
+    }
+    
+    public func getAllMarketTicker() async -> AVLTree<Twenty4HourTickerForSymbolVO> {
+        let dto = await dataSource.getAllMarketTickerList()
+        return convertToEntity(dto: dto)
     }
 }

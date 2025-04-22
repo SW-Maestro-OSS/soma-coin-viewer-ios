@@ -29,12 +29,10 @@ struct CoinViewerApp: App {
           
             AllMarketTickerView(
                 viewModel: .init(
-                    i18NManager: DependencyInjector.shared.resolve(I18NManager.self),
-                    languageLocalizationRepository: DependencyInjector.shared.resolve(LanguageLocalizationRepository.self),
-                    allMarketTickersUseCase: DependencyInjector.shared.resolve(AllMarketTickersUseCase.self),
-                    exchangeUseCase: DependencyInjector.shared.resolve(ExchangeRateUseCase.self),
-                    userConfigurationRepository: DependencyInjector.shared.resolve(UserConfigurationRepository.self),
-                    alertShooter: DependencyInjector.shared.resolve(AlertShooter.self)
+                    useCase: DependencyInjector.shared.resolve(),
+                    i18NManager: DependencyInjector.shared.resolve(),
+                    alertShooter: DependencyInjector.shared.resolve(),
+                    webSocketHelper: DependencyInjector.shared.resolve()
                 )
             )
 

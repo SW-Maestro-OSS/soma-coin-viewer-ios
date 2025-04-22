@@ -1,10 +1,10 @@
 import ProjectDescription
 import DependencyPlugin
+import ConfigurationPlugin
 
 let project = Project(
     name: "Domain",
     targets: [
-        
         .target(
             name: "DomainTests",
             destinations: .iOS,
@@ -24,15 +24,10 @@ let project = Project(
             destinations: .iOS,
             product: .staticLibrary,
             bundleId: "com.CoinViewer.Domain",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Concrete/**"],
             dependencies: [
                 .target(name: "DomainInterface"),
-                
-                D.Util.CoreUtil,
-                
-                D.Shared.WebSocketManagementHelper,
-                D.Shared.AlertShooter,
-                D.Shared.I18N,
             ]
         ),
         
@@ -42,6 +37,7 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.CoinViewer.Domain.interface",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Interface/**"],
             dependencies: [
                 D.Util.CoreUtil,
@@ -59,8 +55,7 @@ let project = Project(
                 .target(name: "Domain"),
                 .target(name: "DomainInterface"),
             ]
-        ),
-        
+        ),   
     ]
 )
 

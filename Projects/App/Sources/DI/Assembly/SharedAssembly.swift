@@ -21,14 +21,9 @@ public class SharedAssembly: Assembly {
         container.register(WebSocketManagementHelper.self) { resolver in
             DefaultWebSocketManagementHelper(
                 webSocketService: resolver.resolve(WebSocketService.self)!,
+                streamDecoder: BinanceStreamDecoder(),
                 alertShootable: resolver.resolve(AlertShooter.self)!
             )
-        }
-        .inObjectScope(.container)
-        
-        // MARK: LanguageLocalizationRepository
-        container.register(LanguageLocalizationRepository.self) { _ in
-            DefaultLanguageLocalizationRepository()
         }
         .inObjectScope(.container)
         
@@ -41,8 +36,7 @@ public class SharedAssembly: Assembly {
         // MARK: AlertShooter
         container.register(AlertShooter.self) { resolver in
             DefaultAlertShooter(
-                i18NManager: resolver.resolve(I18NManager.self)!,
-                languageRepository: resolver.resolve(LanguageLocalizationRepository.self)!
+                i18NManager: resolver.resolve(I18NManager.self)!
             )
         }
         .inObjectScope(.container)

@@ -11,8 +11,6 @@ import DependencyPlugin
 let project = Project(
     name: "BaseModule",
     targets: [
-        
-
         // Example
         .target(
             name: "BaseFeatureExample",
@@ -62,11 +60,12 @@ let project = Project(
             destinations: .iOS,
             product: .framework,
             bundleId: "com.choijunios.feature.Base",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Feature/Sources/**"],
             dependencies: [
-                D.Shared.CommonUI,
-                
                 D.Domain.interface,
+                D.Shared.CommonUI,
+                D.Util.CoreUtil,
             ]
         ),
     ]
