@@ -53,6 +53,7 @@ let project = Project(
             destinations: .iOS,
             product: .staticLibrary,
             bundleId: "com.choijunios.feature.CoinDetail.testing",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Testing/**"],
             dependencies: [
                 .target(name: "CoinDetailFeature"),

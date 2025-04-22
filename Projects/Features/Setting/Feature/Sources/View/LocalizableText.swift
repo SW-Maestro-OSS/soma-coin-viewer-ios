@@ -15,7 +15,7 @@ import I18N
 struct LocalizableText: View {
     
     // Service locator
-    @Injected private var repository: LanguageLocalizationRepository
+    @Injected private var repository: LocalizedStringProvider
     
     private let key: String
     @Binding var languageType: LanguageType

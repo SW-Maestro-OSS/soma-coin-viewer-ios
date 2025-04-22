@@ -5,12 +5,10 @@ import Testing
 import DomainInterface
 
 struct LocalizableTextRepositoryTest {
-    
     @Test
     func checkAllKeysValid() {
-        
         // Given
-        let repository = DefaultLanguageLocalizationRepository()
+        let repository = LocalizedStringProvider.instance()
         var keys: [String] = []
         keys.append(contentsOf: TextKey.Alert.Title.allCases.map({$0.rawValue}))
         keys.append(contentsOf: TextKey.Alert.Message.allCases.map({$0.rawValue}))

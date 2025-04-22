@@ -13,27 +13,24 @@ import CoinDetailFeature
 import CoreUtil
 import AlertShooter
 import I18N
+import WebSocketManagementHelper
 
 public final class AllMarketTickerBuilder {
     
     // Service locator
     @Injected private var allMarketTickersUseCase: AllMarketTickersUseCase
-    @Injected private var exchangeRateUseCase: ExchangeRateUseCase
-    @Injected private var userConfigurationRepository: UserConfigurationRepository
     @Injected private var i18NManager: I18NManager
-    @Injected private var languageLocalizationRepository: LanguageLocalizationRepository
     @Injected private var alertShooter: AlertShooter
+    @Injected private var webSocketManagementHelper: WebSocketManagementHelper
     
     public init() { }
     
     public func build(listener: AllMarketTickerPageListener) -> AllMarketTickerRoutable {
         let viewModel = AllMarketTickerViewModel(
+            useCase: allMarketTickersUseCase,
             i18NManager: i18NManager,
-            languageLocalizationRepository: languageLocalizationRepository,
-            allMarketTickersUseCase: allMarketTickersUseCase,
-            exchangeUseCase: exchangeRateUseCase,
-            userConfigurationRepository: userConfigurationRepository,
-            alertShooter: alertShooter
+            alertShooter: alertShooter,
+            webSocketHelper: webSocketManagementHelper
         )
         viewModel.listener = listener
         let view = AllMarketTickerView(viewModel: viewModel)

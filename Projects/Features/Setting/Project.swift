@@ -53,6 +53,7 @@ let project = Project(
             destinations: .iOS,
             product: .staticLibrary,
             bundleId: "com.choijunios.feature.Setting.testing",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Testing/**"],
             dependencies: [
                 .target(name: "SettingFeature"),

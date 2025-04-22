@@ -13,7 +13,7 @@ import DomainInterface
 import CoreUtil
 
 public class DefaultI18NManager: I18NManager {
-    
+    // Dependency
     @Injected private var repository : UserConfigurationRepository
     
     private let changePublisher: PassthroughSubject<I18NConfigMutation, Never> = .init()

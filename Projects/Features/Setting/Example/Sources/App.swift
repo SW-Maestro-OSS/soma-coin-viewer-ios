@@ -18,7 +18,10 @@ struct CoinViewerApp : App {
     
     var body: some Scene {
         WindowGroup {
-            SettingView(viewModel: .init())
+            SettingView(viewModel: .init(
+                i18NManager: DependencyInjector.shared.resolve(),
+                userConfigurationRepository: DependencyInjector.shared.resolve()
+            ))
         }
     }
 }

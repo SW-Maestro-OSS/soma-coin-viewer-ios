@@ -6,7 +6,6 @@
 //
 
 public struct ExchangeRateDTO: Decodable {
-    
     public let base: String
     public let rates: [String: Double]
 }

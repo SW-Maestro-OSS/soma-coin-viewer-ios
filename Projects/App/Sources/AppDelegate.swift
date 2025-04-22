@@ -53,17 +53,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 // MARK: Initial tasks
 extension AppDelegate {
-    
     func executeInitialTask() {
-        
         // Service locator
         let webSocketManagementHelper: WebSocketManagementHelper = DependencyInjector.shared.resolve()
-        let exchangeRateUseCase: ExchangeRateUseCase = DependencyInjector.shared.resolve()
         
         // 웹소켓 최초연결 시도
         webSocketManagementHelper.requestConnection(connectionType: .freshStart)
-        
-        // 환율정보 Fetch 시도
-        exchangeRateUseCase.prepare()
     }
 }

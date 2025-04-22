@@ -18,17 +18,18 @@ import AlertShooter
 import CoreUtil
 
 public final class RootBuilder {
-    
-    // Service locator
+    // Dependency
+    @Injected private var rootPageUseCase: RootPageUseCase
+    @Injected private var alertShooter: AlertShooter
     @Injected private var i18NManager: I18NManager
-    @Injected private var languageLocalizationRepository: LanguageLocalizationRepository
 
     public init() { }
     
     public func build() -> RootRoutable {
         let viewModel = RootViewModel(
-            i18NManager: i18NManager,
-            languageRepository: languageLocalizationRepository
+            useCase: rootPageUseCase,
+            alertShooter: alertShooter,
+            i18NManager: i18NManager
         )
         let view = RootView(viewModel: viewModel)
         let tabBarBuilder = TabBarBuilder()

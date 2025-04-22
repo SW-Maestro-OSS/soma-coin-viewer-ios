@@ -23,11 +23,20 @@ public protocol RootRouting: AnyObject {
     func view(destination: RootDestination) -> AnyView
 }
 
-final class RootViewModel: UDFObservableObject, RootViewModelable {
+enum RootPageAction {
+    // Events
+    case onAppear
+    case appIsLoaded
     
+    // Internal envent
+    case updateDestination(RootDestination)
+}
+
+final class RootViewModel: UDFObservableObject, RootViewModelable {
     // Dependency
+    private let useCase: RootPageUseCase
+    private let alertShooter: AlertShooter
     private let i18NManager: I18NManager
-    private let languageRepository: LanguageLocalizationRepository
     
 
     // Router
@@ -36,7 +45,6 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     
     // State
     @Published var state: State = .init()
-    private var alertQueue: [AlertRO] = []
     private var isFirstAppear: Bool = true
     
     
@@ -44,13 +52,12 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     let action: PassthroughSubject<Action, Never> = .init()
     var store: Set<AnyCancellable> = .init()
     
+    typealias Action = RootPageAction
     
-    init(
-        i18NManager: I18NManager,
-        languageRepository: LanguageLocalizationRepository
-    ) {
+    init(useCase: RootPageUseCase, alertShooter: AlertShooter, i18NManager: I18NManager) {
+        self.useCase = useCase
+        self.alertShooter = alertShooter
         self.i18NManager = i18NManager
-        self.languageRepository = languageRepository
         
         // Splash
         let languageType = i18NManager.getLanguageType()
@@ -69,15 +76,16 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
             if isFirstAppear {
                 isFirstAppear = false
                 
-                // 화면 최초 등장시 2초간의 지연 발생
-                return Just(.appIsLoaded)
-                    .delay(for: 2, scheduler: RunLoop.main)
+                // 화면 최초 등장시 1초간의 지연 발생
+                return Just(Action.appIsLoaded)
+                    .unretained(self)
+                    .asyncTransform { vm, action in
+                        await vm.prepareExchangeRate()
+                        return action
+                    }
+                    .delay(for: 1, scheduler: RunLoop.main)
                     .eraseToAnyPublisher()
             }
-        case .presentAlert, .alertIsDismissed:
-            return Just(action)
-                .delay(for: 0.35, scheduler: RunLoop.main)
-                .eraseToAnyPublisher()
         default:
             break
         }
@@ -90,22 +98,6 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
         switch action {
         case .appIsLoaded:
             router?.request(.presentTabBarPage)
-        case .alertIsDismissed:
-            if !alertQueue.isEmpty {
-                let nextAlertRO = alertQueue.removeFirst()
-                newState.presentingAlertRO = nextAlertRO
-                newState.isAlertPresenting = true
-            } else {
-                newState.isAlertPresenting = false
-                newState.presentingAlertRO = nil
-            }
-        case .presentAlert(let alertRO):
-            if state.isAlertPresenting {
-                alertQueue.append(alertRO)
-            } else {
-                newState.presentingAlertRO = alertRO
-                newState.isAlertPresenting = true
-            }
         case .updateDestination(let destination):
             newState.rootDestination = destination
         default:
@@ -117,18 +109,36 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
 }
 
 
+// MARK: Exchange rate
+private extension RootViewModel {
+    func prepareExchangeRate() async {
+        do {
+            try await useCase.prepareExchangeRate()
+        } catch {
+            var alertModel = AlertModel(
+                titleKey: TextKey.Alert.Title.exchangeRateError.rawValue,
+                messageKey: TextKey.Alert.Message.failedToGetExchangerate.rawValue
+            )
+            alertModel.add(action: .init(
+                titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+            ) {
+                Task { [weak self] in
+                    guard let self else { return }
+                    await prepareExchangeRate()
+                }
+            })
+            alertModel.add(action: .init(
+                titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
+                role: .cancel
+            ))
+            alertShooter.shoot(alertModel)
+        }
+    }
+}
+
+
 // MARK: Action & State
 extension RootViewModel {
-    enum Action {
-        // Events
-        case onAppear
-        case appIsLoaded
-        case presentAlert(ro: AlertRO)
-        
-        case alertIsDismissed
-        case updateDestination(RootDestination)
-    }
-    
     struct State {
         var splashRO: SplashRO?
         var rootDestination: RootDestination?
@@ -151,7 +161,7 @@ extension RootViewModel {
 private extension RootViewModel {
     func createSplashRO(languageType: LanguageType) -> SplashRO {
         let titleTextKey = "LaunchScreen_title"
-        let titleText = languageRepository.getString(key: titleTextKey, lanCode: languageType.lanCode)
+        let titleText = LocalizedStringProvider.instance().getString(key: titleTextKey, lanCode: languageType.lanCode)
         return .init(displayTitleText: titleText)
     }
 }

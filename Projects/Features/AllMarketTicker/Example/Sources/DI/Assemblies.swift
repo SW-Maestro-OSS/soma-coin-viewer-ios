@@ -36,18 +36,5 @@ public class Assemblies: Assembly {
             FakeUserConfigurationRepository()
         }
         .inObjectScope(.container)
-        
-        container.register(LanguageLocalizationRepository.self) { _ in
-            StubLanguageLocalizationRepository()
-        }
-        
-        
-        // MARK: UseCase
-        container.register(AllMarketTickersUseCase.self) { _ in
-            FakeAllMarketTickersUseCase()
-        }
-        container.register(ExchangeRateUseCase.self) { _ in
-            FakeExchangeRateUseCase()
-        }
     }
 }

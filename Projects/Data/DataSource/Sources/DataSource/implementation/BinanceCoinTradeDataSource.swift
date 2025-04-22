@@ -1,5 +1,5 @@
 //
-//  CoinTradeDataSource.swift
+//  BinanceCoinTradeDataSource.swift
 //  Data
 //
 //  Created by choijunios on 4/21/25.
@@ -9,10 +9,6 @@ import Combine
 
 import Foundation
 import CoreUtil
-
-public protocol CoinTradeDataSource {
-    func getTradeList(symbolPair: String, tableUpdateInterval: Double?) -> AnyPublisher<HashMap<Int64, BinanceCoinTradeDTO>, Never>
-}
 
 public final class BinanceCoinTradeDataSource: CoinTradeDataSource {
     // Dependency

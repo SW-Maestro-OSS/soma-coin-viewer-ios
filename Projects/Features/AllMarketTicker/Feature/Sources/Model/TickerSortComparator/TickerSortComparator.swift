@@ -7,11 +7,7 @@
 
 import DomainInterface
 
-public protocol TickerSortComparator {
-    
-    typealias TickerVO = Twenty4HourTickerForSymbolVO
-    
+protocol TickerSortComparator {
     var id: String { get }
-    
-    func compare(lhs: TickerVO, rhs: TickerVO) -> Bool
+    func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool
 }

@@ -19,13 +19,9 @@ import CoreUtil
 class TabBarBuilder {
     // Dependency
     @Injected private var i18NManager: I18NManager
-    @Injected private var languageLocalizationRepository: LanguageLocalizationRepository
     
     func build() -> TabBarRouter {
-        let viewModel = TabBarViewModel(
-            i18NManager: i18NManager,
-            languageRepository: languageLocalizationRepository
-        )
+        let viewModel = TabBarViewModel(i18NManager: i18NManager)
         let view = TabBarView(viewModel: viewModel)
         let allMarketTickerBuilder = AllMarketTickerBuilder()
         let settingBuilder = SettingBuilder()

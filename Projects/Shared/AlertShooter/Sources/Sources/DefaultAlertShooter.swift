@@ -11,12 +11,10 @@ import I18N
 
 public class DefaultAlertShooter: AlertShooter {
     private var i18NManager: I18NManager
-    private var languageRepository: LanguageLocalizationRepository
     private let shootQueue: DispatchQueue = .init(label: "shootQueue")
     
-    public init(i18NManager: I18NManager, languageRepository: LanguageLocalizationRepository) {
+    public init(i18NManager: I18NManager) {
         self.i18NManager = i18NManager
-        self.languageRepository = languageRepository
         super.init()
     }
     
@@ -33,7 +31,7 @@ public class DefaultAlertShooter: AlertShooter {
     public override func createRO(model: AlertModel) -> AlertRO {
         let currentLan = i18NManager.getLanguageType()
         let alertActionROs = model.actions.map { actionModel in
-            let titleText = languageRepository.getString(
+            let titleText = LocalizedStringProvider.instance().getString(
                 key: actionModel.titleKey,
                 lanCode: currentLan.lanCode
             )
@@ -54,13 +52,13 @@ public class DefaultAlertShooter: AlertShooter {
         // Alert RO
         var messageText: String = ""
         if let messageKey = model.messageKey {
-            messageText = languageRepository.getString(
+            messageText = LocalizedStringProvider.instance().getString(
                 key: messageKey,
                 lanCode: currentLan.lanCode
             )
         }
         let alertRO = AlertRO(
-            titleText: languageRepository.getString(
+            titleText: LocalizedStringProvider.instance().getString(
                 key: model.titleKey,
                 lanCode: currentLan.lanCode
             ),

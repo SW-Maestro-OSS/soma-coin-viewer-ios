@@ -48,6 +48,7 @@ let project = Project(
             destinations: .iOS,
             product: .staticLibrary,
             bundleId: "com.choijunios.feature.Root.testing",
+            deploymentTargets: Project.Environment.deploymentTarget,
             sources: ["Testing/**"],
             dependencies: [
                 .target(name: "RootFeature"),

@@ -14,21 +14,27 @@ import CoreUtil
 public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     // Dependency
     @Injected private var allMarketTickersRepository: AllMarketTickersRepository
-    
-    private let throttleTimerQueue: DispatchQueue = .init(
-        label: "com.AllMarketTickersUseCase",
-        attributes: .concurrent
-    )
+    @Injected private var exchangeRateRepository: ExchangeRateRepository
+    @Injected private var userConfigurationRepository: UserConfigurationRepository
     
     private let standardSymbol = "USDT"
     
     public init() { }
+}
+
+
+// MARK: AllMarketTickersUseCase, Stream
+public extension DefaultAllMarketTickersUseCase {
+    func getGridType() -> GridType { userConfigurationRepository.getGridType() }
     
-    public func requestTickers() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> {
-        
+    func getTickerList() async -> [Twenty4HourTickerForSymbolVO] {
+        return []
+    }
+    
+    func getTickerList() -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> {
         allMarketTickersRepository
             .request24hTickerForAllSymbols()
-            .throttle(for: 0.3, scheduler: throttleTimerQueue, latest: true)
+            .throttle(for: 0.3, scheduler: DispatchQueue.global(qos: .default), latest: true)
             .map { [standardSymbol] fetchedTickers in
                 
                 // MARK: #1. Filter symbols that dont cotain Standard symbol as suffix
@@ -85,5 +91,13 @@ public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
                 return Array(sortedTickers[0..<30])
             }
             .eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: AllMarketTickersUseCase, exchange rate
+public extension DefaultAllMarketTickersUseCase {
+    func getExchangeRate(base: CurrencyType, to: CurrencyType) async -> Double? {
+        await exchangeRateRepository.getRate(base: base, to: to)
     }
 }
