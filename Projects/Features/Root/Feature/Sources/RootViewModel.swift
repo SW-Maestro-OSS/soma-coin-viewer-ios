@@ -76,16 +76,13 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
             if isFirstAppear {
                 isFirstAppear = false
                 
-                // 화면 최초 등장시 1초간의 지연 발생
-                return Just(Action.appIsLoaded)
-                    .unretained(self)
-                    .asyncTransform { vm, action in
-                        await vm.prepareExchangeRate()
-                        return action
-                    }
-                    .delay(for: 1, scheduler: RunLoop.main)
-                    .eraseToAnyPublisher()
+                // 환율 정보 가져오기
+                prepareExchangeRate()
             }
+        case .appIsLoaded:
+            return Just(action)
+                .delay(for: 1, scheduler: DispatchQueue.main)
+                .eraseToAnyPublisher()
         default:
             break
         }
@@ -111,27 +108,28 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
 
 // MARK: Exchange rate
 private extension RootViewModel {
-    func prepareExchangeRate() async {
-        do {
-            try await useCase.prepareExchangeRate()
-        } catch {
-            var alertModel = AlertModel(
-                titleKey: TextKey.Alert.Title.exchangeRateError.rawValue,
-                messageKey: TextKey.Alert.Message.failedToGetExchangerate.rawValue
-            )
-            alertModel.add(action: .init(
-                titleKey: TextKey.Alert.ActionTitle.retry.rawValue
-            ) {
-                Task { [weak self] in
+    func prepareExchangeRate() {
+        Task {
+            do {
+                try await useCase.prepareExchangeRate()
+                action.send(.appIsLoaded)
+            } catch {
+                var alertModel = AlertModel(
+                    titleKey: TextKey.Alert.Title.exchangeRateError.rawValue,
+                    messageKey: TextKey.Alert.Message.failedToGetExchangerate.rawValue
+                )
+                alertModel.add(action: .init(
+                    titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+                ) { [weak self] in
                     guard let self else { return }
-                    await prepareExchangeRate()
-                }
-            })
-            alertModel.add(action: .init(
-                titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
-                role: .cancel
-            ))
-            alertShooter.shoot(alertModel)
+                    prepareExchangeRate()
+                })
+                alertModel.add(action: .init(
+                    titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
+                    role: .cancel
+                ))
+                alertShooter.shoot(alertModel)
+            }
         }
     }
 }
