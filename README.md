@@ -275,41 +275,44 @@ OPENEX_API_KEY="API Key for open exchange rates"
   </tr>
 </table>
 
-## 웹소켓과 클린아키텍처
+## 웹소켓 관리 시스템
 
-soma-coin-viewer앱은 현재 `Binance API`를 사용합니다. 하지만 WebSocketService 및 Repository는 클린아키텍처를 따르는 추상화된 객체로 구체타입 변경을 통해 다른 API에도 대응이 가능합니다.
+웹소켓 연결관리는 `WebSocketManagementHelper`객체를 통해서 진행됩니다.
 
-## 웹소켓 Connect & Disconnect
+애플리케이션 런칭 이후 시점의 플로우는 아래와 같습니다.
 
-웹소켓연결은 다소 시간이 걸리는 작업으로 특정화면 진입 후 연결 시도시 TTI가 오래걸리게됩니다. 따라서 `WebSocketManagementHelper`객체에게 웹소켓 연결과 스트림 관리 책임을 수행하도록 합니다.
+1. AppDelegate에서 앱을 론칭한 이후 `WebSocketManagementHelper`객체를 통해 웹소켓 연결을 시도합니다.
+2. 루트 모듈은 일정 시간 동안 의도적으로 딜레이를 발생시켜 유저를 스플래시 화면에 머무르게 합니다. 해당 기간 동안 웹소켓 연결이 대부분 완료됩니다.
+3. 각 화면마다 원하는 스트림을 `WebSocketManagementHelper`객체를 통해 구독하고 화면 이탈 시 해제합니다.
 
-웹소켓의 연결은 앱이 론칭시 곧바로 진행됩니다. (이를 위해 스플래쉬 화면을 의도적으로 2초동안 표출되도록 설정했습니다.)
-
-`WebSocketManagementHelper`객체로 해당 책음을 분리함으로써 **어플리케이션의 상태에 따른 웹소켓 연결 관리**를 효과적으로 처리했습니다.
-
-해당 객체는 최근까지 구독했던 스트림에 대한 정보를 관리함으로써 재연결 후에 연결이 해제되기 직전까지 진행중인던 작업을 완벽하게 복원합니다.
-
-<img src="https://github.com/user-attachments/assets/0436f88b-0ef2-4353-a135-1f67eb297c2d" width=500 />
-
-`WebSocketManagementHelper`객체와 협력하는 객체들은 아래 그림처럼 협력하게 됩니다.
+전체적인 객체 협력구조는 다음과 같습니다.
 
 <img src="https://github.com/user-attachments/assets/c601dba7-93e9-45fd-995d-167dbdc05097" width=500 />
 
-※ Presentation --> WebSocketManagementHelper 메세지중 **데이터 스트림**이란 웹소켓 API에게 구독을 요청하는 스트림을 의미합니다. (Ex, all market tickers, orderbook)
+### 웹소켓 백그라운드 최적화
 
-## 국제화 대응(I18N)
+애플리케이션이 백그라운드로 진입할 경우 웹소켓 연결을 의도적으로 끊습니다.
+불필요한 리소스 사용으로 인해 애플리케이션이 시스템에 의해 강제 종료되는 상황을 최대한 배제하기 위해서입니다.
+연결 및 해제는 `SceneDelegate`의 생명주기 함수를 통해서 현재 관리되고 있습니다.
+웹소켓을 재연결하는 경우 `WebSocketManagementHelper`객체에 캐싱 되어 있던 이전 연결 스트림들이 자연스럽게 복원됩니다.
 
-어플리케이션 UI에 사용되는 언어 와 코인가격을 나타내는 화폐가 동적으로 변경되는 구조를 구축했습니다.
+<img src="https://github.com/user-attachments/assets/0436f88b-0ef2-4353-a135-1f67eb297c2d" width=500 />
 
-해당 **Configuration**들은 세팅 화면을 통해서 설정이 가능하며 `I18NManager`타입을 통해 관리됩니다.
+### 웹소켓 에러 처리(AlertShooter)
 
-변경사항을 UI에 반영하기 위해 아래 사진과 같은 시스템을 구축했습니다.
+웹소켓이 의도치 않게 끊어지거나 스트림 구독 메시지 전송에 실패한 경우 유저에게 적절한 에러 상황을 표현해야 한다고 판단했습니다.
+`WebSocketManagementHelper`객체는 웹소켓 연결 상태 및 메시지 전송 성공 여부에 대한 결과를 수신하고 에러를 발생시킵니다.
+하지만 해당 객체는 특정 `ViewModel`에 속한 객체가 아니라 UI를 표시하기 어려운 구조를 지녔습니다.
+따라서 `AlertShooter`객체를 통해 View와 `WebsocketHeleper`를 매개하는 방식을 선택했습니다.
+`AlertShooter`의 경우 SwiftUI `EnvironmentalObject`로 지정되어 Alert 표시를 희망하는 뷰에서 오류 모델을 수신하여 화면상에 표시합니다.
 
-<img src="https://github.com/user-attachments/assets/5a742bf2-0775-4369-b361-e8c62cf4d4c8" width=500 />
+<img src="https://github.com/user-attachments/assets/1c6dfadb-62e0-46f6-9cdc-1e92bfbc56d5" width=500 />
 
 
-### strings파일을 사용하지 않은 이유
+## 국제화(I18N)
 
-`strings파일`을 사용해서 시스템 언어를 기반으로 텍스트를 가져올 수 있습니다. 하지만 해당 기능의 경우 동적으로 언어를 변경할 수 없어 지역 및 시스템 언어와 무관한 언어 설정이 까다롭습니다.
+화폐와 언어에 대한 정보는 `I18NManager`객체를 통해서 접근할 수 있습니다.
+ViewModel은 `i18NManager`객체를 의존하여 해당 정보를 획득한 후 UI에 적절한 변화를 발생시킵니다.
+※ 언어별 텍스트 제공자의 경우 단일체 패턴을 활용하여 접근성을 높이는 선택을 했습니다.
 
-시스템 언어와 무관하게 유저가 언어를 선택하게 함으로써 한층 높아진 국제화 대응을 구현했습니다.
+<img src="https://github.com/user-attachments/assets/bd1ecd0a-b120-4e4b-a12f-60c9276b2660" width=500 />
