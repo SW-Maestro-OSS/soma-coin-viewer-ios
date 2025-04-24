@@ -53,12 +53,12 @@ struct AllMarketTickerView: View {
     @ViewBuilder
     private func sortSelectionTabContent() -> some View {
         LazyVGrid(columns: sortSelectionViewColumn, spacing: 0) {
-            ForEach(viewModel.state.displayingSortSelectionCellROs) { ro in
+            ForEach(viewModel.state.sortSelectionCells, id: \.sortType) { ro in
                 TickerSortSelectorView(renderObject: ro)
-                    .onTapGesture {
-                        viewModel.action(.sortSelectionButtonTapped(type: ro.type))
-                    }
                     .frame(height: 45)
+                    .onTapGesture {
+                        viewModel.action(.sortSelectionButtonTapped(type: ro.sortType))
+                    }
                     .skeleton(presentOrigin: viewModel.state.isLoaded)
             }
         }
@@ -102,7 +102,7 @@ struct AllMarketTickerView: View {
                 case .list:
                     GeometryReader { geo in
                         VStack(spacing: 3) {
-                            ForEach(0..<20) { _ in
+                            ForEach(Array(0..<viewModel.state.tickerRowCount), id: \.self) { _ in
                                 SkeletonUI()
                                     .frame(width: geo.size.width, height: 45)
                             }
@@ -110,7 +110,7 @@ struct AllMarketTickerView: View {
                     }
                 case .twoByTwo:
                     LazyVGrid(columns: tickerGridColumns, spacing: 10) {
-                        ForEach(0..<20) { _ in
+                        ForEach(Array(0..<viewModel.state.tickerRowCount), id: \.self) { _ in
                             SkeletonUI()
                                 .frame(height: 160)
                         }

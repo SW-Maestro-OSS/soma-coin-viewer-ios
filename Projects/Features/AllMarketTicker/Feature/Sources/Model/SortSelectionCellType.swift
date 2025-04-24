@@ -6,43 +6,39 @@
 //
 
 enum SortSelectionCellType: String, Identifiable {
-    
     var id: String { self.rawValue }
-    
     case symbol
     case price
     case changeIn24h
     
-    enum ComparatorType {
-        case ascending, descending
+    static var orderedList: [Self] {
+        [.symbol, .price, .changeIn24h]
     }
     
-    func getSortComparator(type: ComparatorType) -> TickerSortComparator {
-        switch self {
-        case .symbol:
-            switch type {
-            case .ascending:
+    func getComparator(direction: TickerSortingDirection) -> TickerComparator {
+        switch direction {
+        case .neutral:
+            TickerNoneComparator()
+        case .ascending:
+            switch self {
+            case .symbol:
                 TickerSymbolAscendingComparator()
-            case .descending:
-                TickerSymbolDescendingComparator()
-            }
-        case .price:
-            switch type {
-            case .ascending:
+            case .price:
                 TickerPriceAscendingComparator()
-            case .descending:
-                TickerPriceDescendingComparator()
-            }
-        case .changeIn24h:
-            switch type {
-            case .ascending:
+            case .changeIn24h:
                 Ticker24hChangeAscendingComparator()
-            case .descending:
+            }
+        case .descending:
+            switch self {
+            case .symbol:
+                TickerSymbolDescendingComparator()
+            case .price:
+                TickerPriceDescendingComparator()
+            case .changeIn24h:
                 Ticker24hChangeDescendingComparator()
             }
         }
     }
-    
     
     var displayTextKey: String {
         switch self {

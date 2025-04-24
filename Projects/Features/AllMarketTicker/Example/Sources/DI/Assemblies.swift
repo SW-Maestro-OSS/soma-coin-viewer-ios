@@ -7,12 +7,13 @@
 
 import Foundation
 
-@testable import AllMarketTickerFeatureTesting
+import AllMarketTickerFeatureTesting
 
 import DomainInterface
 
 import I18N
 import AlertShooter
+import WebSocketManagementHelper
 
 import Swinject
 
@@ -29,12 +30,14 @@ public class Assemblies: Assembly {
             MockAlertShooter()
         }
         .inObjectScope(.container)
-        
-        
-        // MARK: Repository
-        container.register(UserConfigurationRepository.self) { _ in
-            FakeUserConfigurationRepository()
+        container.register(WebSocketManagementHelper.self) { _ in
+            MockWebSocketManagementHelper()
         }
         .inObjectScope(.container)
+        
+        // MARK: Domain
+        container.register(AllMarketTickersUseCase.self) { _ in
+            FakeAllMarketTickerUseCase()
+        }
     }
 }

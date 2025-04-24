@@ -9,14 +9,14 @@ import DomainInterface
 
 // MARK: Symbol
 
-struct TickerSymbolAscendingComparator: TickerSortComparator {
+struct TickerSymbolAscendingComparator: TickerComparator {
     let id: String = String(describing: TickerSymbolAscendingComparator.self)
     func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
         lhs.symbolPair < rhs.symbolPair
     }
 }
 
-struct TickerSymbolDescendingComparator: TickerSortComparator {
+struct TickerSymbolDescendingComparator: TickerComparator {
     let id: String = String(describing: TickerSymbolDescendingComparator.self)
     func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
         lhs.symbolPair > rhs.symbolPair
@@ -25,14 +25,14 @@ struct TickerSymbolDescendingComparator: TickerSortComparator {
 
 // MARK: Price
 
-struct TickerPriceAscendingComparator: TickerSortComparator {
+struct TickerPriceAscendingComparator: TickerComparator {
     let id: String = String(describing: TickerPriceAscendingComparator.self)
     func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
         lhs.price < rhs.price
     }
 }
 
-struct TickerPriceDescendingComparator: TickerSortComparator {
+struct TickerPriceDescendingComparator: TickerComparator {
     let id: String = String(describing: TickerPriceDescendingComparator.self)
     func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
         lhs.price > rhs.price
@@ -41,14 +41,14 @@ struct TickerPriceDescendingComparator: TickerSortComparator {
 
 // MARK: 24hChangePercent
 
-struct Ticker24hChangeAscendingComparator: TickerSortComparator {
+struct Ticker24hChangeAscendingComparator: TickerComparator {
     let id: String = String(describing: Ticker24hChangeAscendingComparator.self)
     func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
         lhs.changedPercent < rhs.changedPercent
     }
 }
 
-struct Ticker24hChangeDescendingComparator: TickerSortComparator {
+struct Ticker24hChangeDescendingComparator: TickerComparator {
     let id: String = String(describing: Ticker24hChangeDescendingComparator.self)
     func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
         
