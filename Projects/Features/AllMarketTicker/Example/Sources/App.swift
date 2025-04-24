@@ -8,7 +8,7 @@
 import SwiftUI
 import Combine
 
-@testable import AllMarketTickerFeature
+import AllMarketTickerFeature
 
 import DomainInterface
 import CoreUtil
@@ -26,16 +26,15 @@ struct CoinViewerApp: App {
     var body: some Scene {
         
         WindowGroup {
-          
-            AllMarketTickerView(
-                viewModel: .init(
-                    useCase: DependencyInjector.shared.resolve(),
-                    i18NManager: DependencyInjector.shared.resolve(),
-                    alertShooter: DependencyInjector.shared.resolve(),
-                    webSocketHelper: DependencyInjector.shared.resolve()
-                )
-            )
-
+            AllMarketTickerBuilder()
+                .build(listener: FakeListener())
+                .view
         }
+    }
+}
+
+class FakeListener: AllMarketTickerPageListener {
+    func request(_ request: AllMarketTickerPageListenerRequest) {
+        
     }
 }

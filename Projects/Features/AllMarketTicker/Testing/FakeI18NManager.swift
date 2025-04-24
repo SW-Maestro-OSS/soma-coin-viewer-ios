@@ -10,29 +10,31 @@ import Combine
 import I18N
 import DomainInterface
 
-class FakeI18NManager: I18NManager {
+public final class FakeI18NManager: I18NManager {
     
     let fakeUserConfigRepository = FakeUserConfigurationRepository()
     private let changePublisher: PassthroughSubject<I18NConfigMutation, Never> = .init()
+    
+    public init() { }
     
     public func getChangePublisher() -> AnyPublisher<I18NConfigMutation, Never> {
         changePublisher.eraseToAnyPublisher()
     }
     
-    func getCurrencyType() -> DomainInterface.CurrencyType {
+    public func getCurrencyType() -> DomainInterface.CurrencyType {
         fakeUserConfigRepository.getCurrencyType()
     }
     
-    func setCurrencyType(type: DomainInterface.CurrencyType) {
+    public func setCurrencyType(type: DomainInterface.CurrencyType) {
         fakeUserConfigRepository.setCurrencyType(type: type)
         changePublisher.send(.init(currencyType: type))
     }
     
-    func getLanguageType() -> DomainInterface.LanguageType {
+    public func getLanguageType() -> DomainInterface.LanguageType {
         fakeUserConfigRepository.getLanguageType()
     }
     
-    func setLanguageType(type: DomainInterface.LanguageType) {
+    public func setLanguageType(type: DomainInterface.LanguageType) {
         fakeUserConfigRepository.setLanguageType(type: type)
         changePublisher.send(.init(languageType: type))
     }

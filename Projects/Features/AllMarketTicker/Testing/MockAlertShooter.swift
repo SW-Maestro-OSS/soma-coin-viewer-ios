@@ -7,6 +7,9 @@
 
 import AlertShooter
 
-class MockAlertShooter: AlertShooter {
-    override func shoot(_ model: AlertModel) { }
+public final class MockAlertShooter: AlertShooter {
+    
+    public override init() { }
+    
+    public override func shoot(_ model: AlertModel) { }
 }

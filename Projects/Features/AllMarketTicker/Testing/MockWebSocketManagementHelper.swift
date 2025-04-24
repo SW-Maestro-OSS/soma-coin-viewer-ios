@@ -9,9 +9,12 @@ import Combine
 
 import WebSocketManagementHelper
 
-class MockWebSocketManagementHelper: WebSocketManagementHelper {
-    func requestSubscribeToStream(streams: [WebSocketStream], mustDeliver: Bool) { }
-    func requestUnsubscribeToStream(streams: [WebSocketStream], mustDeliver: Bool) { }
-    func requestDisconnection() { }
-    func requestConnection(connectionType: ConnectionType) { }
+public final class MockWebSocketManagementHelper: WebSocketManagementHelper {
+    
+    public init() { }
+    
+    public func requestSubscribeToStream(streams: [WebSocketStream], mustDeliver: Bool) { }
+    public func requestUnsubscribeToStream(streams: [WebSocketStream], mustDeliver: Bool) { }
+    public func requestDisconnection() { }
+    public func requestConnection(connectionType: ConnectionType) { }
 }
