@@ -7,7 +7,7 @@
 
 import DomainInterface
 
-protocol TickerSortComparator {
+protocol TickerComparator {
     var id: String { get }
     func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool
 }

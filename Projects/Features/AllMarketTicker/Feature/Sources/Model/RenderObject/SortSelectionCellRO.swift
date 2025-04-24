@@ -7,21 +7,14 @@
 
 import Foundation
 
-enum SortSelectionCellState {
-    case neutral
-    case ascending
-    case descending
-}
-
-struct SortSelectionCellRO: Identifiable {
-    var id: SortSelectionCellType { type }
-    let type: SortSelectionCellType
-    var sortState: SortSelectionCellState
+struct SortSelectionCellRO {
+    let sortType: SortSelectionCellType
+    var sortDirection: TickerSortingDirection
     
     // View state
     var displayText: String = "Test"
     var displayImageName: String {
-        switch sortState {
+        switch sortDirection {
         case .neutral:
             "chevron.up.chevron.down"
         case .ascending:
@@ -33,8 +26,8 @@ struct SortSelectionCellRO: Identifiable {
     var isLoad: Bool { !displayText.isEmpty }
     
     
-    init(type: SortSelectionCellType, sortState: SortSelectionCellState) {
-        self.type = type
-        self.sortState = sortState
+    init(sortType: SortSelectionCellType, sortDirection: TickerSortingDirection) {
+        self.sortType = sortType
+        self.sortDirection = sortDirection
     }
 }
