@@ -10,7 +10,7 @@ import Combine
 import DomainInterface
 import CoreUtil
 
-public struct StubAllMaketTickerRepository: AllMarketTickersRepository {
+public struct StubAllMarketTickerRepository: AllMarketTickersRepository {
     
     public let maxTickerCount: Int
     public let usdtSuffixCount: Int

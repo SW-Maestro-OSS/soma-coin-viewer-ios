@@ -20,7 +20,7 @@ struct AllMarketTickerUseCaseTests {
     func checkSuffixSymbolIsUSDT() async {
         // Given
         let useCase = DefaultAllMarketTickersUseCase(
-            allMarketTickersRepository: StubAllMaketTickerRepository(maxTickerCount: 10000, usdtSuffixCount: 2500),
+            allMarketTickersRepository: StubAllMarketTickerRepository(maxTickerCount: 10000, usdtSuffixCount: 2500),
             exchangeRateRepository: StubExchangeRateRepository(fixedRate: 1.0),
             userConfigurationRepository: StubUserConfigurationRepository()
         )
@@ -47,7 +47,7 @@ struct AllMarketTickerUseCaseTests {
     func checkFetchingCollectList() async {
         // Given
         let useCase = DefaultAllMarketTickersUseCase(
-            allMarketTickersRepository: StubAllMaketTickerRepository(maxTickerCount: 10000, usdtSuffixCount: 2500),
+            allMarketTickersRepository: StubAllMarketTickerRepository(maxTickerCount: 10000, usdtSuffixCount: 2500),
             exchangeRateRepository: StubExchangeRateRepository(fixedRate: 1.0),
             userConfigurationRepository: StubUserConfigurationRepository()
         )
