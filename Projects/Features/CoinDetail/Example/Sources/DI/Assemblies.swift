@@ -59,8 +59,12 @@ public class Assemblies: Assembly {
         }
         
         // MARK: UseCase
-        container.register(CoinDetailPageUseCase.self) { _ in
-            DefaultCoinDetailPageUseCase()
+        container.register(CoinDetailPageUseCase.self) { resolver in
+            DefaultCoinDetailPageUseCase(
+                orderbookRepository: resolver.resolve(OrderbookRepository.self)!,
+                singleTickerRepository: resolver.resolve(SingleMarketTickerRepository.self)!,
+                coinTradeRepository: resolver.resolve(CoinTradeRepository.self)!
+            )
         }
     }
 }

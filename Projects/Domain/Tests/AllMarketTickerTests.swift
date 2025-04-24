@@ -6,15 +6,12 @@
 //
 
 import Testing
-import Foundation
 import Combine
 
 import DomainInterface
 import DomainTesting
 
 @testable import Domain
-
-import CoreUtil
 
 // MARK: AllMarketTickerUseCaseTests
 struct AllMarketTickerUseCaseTests {
