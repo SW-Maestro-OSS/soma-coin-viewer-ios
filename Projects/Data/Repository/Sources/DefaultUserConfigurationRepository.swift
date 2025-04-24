@@ -107,7 +107,7 @@ public class DefaultUserConfigurationRepository: UserConfigurationRepository {
     
     
     
-    public func setGrideType(type: GridType) {
+    public func setGridType(type: GridType) {
         let config: UserConfiguration = .gridType
         
         // 디스크 저장 

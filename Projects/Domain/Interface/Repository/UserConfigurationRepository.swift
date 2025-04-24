@@ -25,5 +25,5 @@ public protocol UserConfigurationRepository {
     func getGridType() -> GridType
     
     /// 그리드 타입을 설정합니다.
-    func setGrideType(type: GridType)
+    func setGridType(type: GridType)
 }

@@ -95,7 +95,7 @@ class SettingViewModel: UDFObservableObject, SettingViewModelable {
                 newState.languageType = i18NManager.getLanguageType()
             case .gridType(let value):
                 let updatedValue: GridType = (value == .list) ? .twoByTwo : .list
-                userConfigurationRepository.setGrideType(type: updatedValue)
+                userConfigurationRepository.setGridType(type: updatedValue)
                 newState.gridType = updatedValue
             }
             newState.settingCellROs = createSettingCellROS(with: newState)

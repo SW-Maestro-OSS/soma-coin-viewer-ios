@@ -40,7 +40,7 @@ public final class FakeUserConfigurationRepository: UserConfigurationRepository 
         return .init(rawValue: value)!
     }
     
-    public func setGrideType(type: DomainInterface.GridType) {
+    public func setGridType(type: DomainInterface.GridType) {
         fakeDB[UserConfiguration.gridType.savingKey] = type.savingValue
     }
 }
