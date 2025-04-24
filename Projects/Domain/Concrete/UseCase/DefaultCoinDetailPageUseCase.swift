@@ -12,11 +12,18 @@ import CoreUtil
 
 final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
     // Dependency
-    @Injected private var orderbookRepository: OrderbookRepository
-    @Injected private var singleTickerRepository: SingleMarketTickerRepository
-    @Injected private var coinTradeRepository: CoinTradeRepository
+    private var orderbookRepository: OrderbookRepository
+    private var singleTickerRepository: SingleMarketTickerRepository
+    private var coinTradeRepository: CoinTradeRepository
     
-    public init() { }
+    public init(
+        orderbookRepository: OrderbookRepository,
+        singleTickerRepository: SingleMarketTickerRepository,
+        coinTradeRepository: CoinTradeRepository) {
+        self.orderbookRepository = orderbookRepository
+        self.singleTickerRepository = singleTickerRepository
+        self.coinTradeRepository = coinTradeRepository
+    }
 }
 
 

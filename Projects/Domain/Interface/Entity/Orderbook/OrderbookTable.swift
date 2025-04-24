@@ -8,10 +8,13 @@
 import CoreUtil
 
 public struct OrderbookTable {
-    public let bidOrderbooks: HashMap<CVNumber, CVNumber>
-    public let askOrderbooks: HashMap<CVNumber, CVNumber>
+    public typealias Price = CVNumber
+    public typealias Quantity = CVNumber
     
-    public init(bidOrderbooks: HashMap<CVNumber, CVNumber>, askOrderbooks: HashMap<CVNumber, CVNumber>) {
+    public let bidOrderbooks: HashMap<Price, Quantity>
+    public let askOrderbooks: HashMap<Price, Quantity>
+    
+    public init(bidOrderbooks: HashMap<Price, Quantity>, askOrderbooks: HashMap<Price, Quantity>) {
         self.bidOrderbooks = bidOrderbooks
         self.askOrderbooks = askOrderbooks
     }
