@@ -19,8 +19,12 @@ class DomainAssembly: Assembly {
             DefaultRootPageUseCase()
         }
         
-        container.register(AllMarketTickersUseCase.self) { _ in
-            DefaultAllMarketTickersUseCase()
+        container.register(AllMarketTickersUseCase.self) { resolver in
+            DefaultAllMarketTickersUseCase(
+                allMarketTickersRepository: resolver.resolve(AllMarketTickersRepository.self)!,
+                exchangeRateRepository: resolver.resolve(ExchangeRateRepository.self)!,
+                userConfigurationRepository: resolver.resolve(UserConfigurationRepository.self)!
+            )
         }
         
         container.register(CoinDetailPageUseCase.self) { _ in

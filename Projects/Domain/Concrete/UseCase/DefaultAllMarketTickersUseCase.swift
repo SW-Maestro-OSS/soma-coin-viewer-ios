@@ -13,13 +13,21 @@ import CoreUtil
 
 public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     // Dependency
-    @Injected private var allMarketTickersRepository: AllMarketTickersRepository
-    @Injected private var exchangeRateRepository: ExchangeRateRepository
-    @Injected private var userConfigurationRepository: UserConfigurationRepository
+    private var allMarketTickersRepository: AllMarketTickersRepository
+    private var exchangeRateRepository: ExchangeRateRepository
+    private var userConfigurationRepository: UserConfigurationRepository
     
     private let standardSymbol = "USDT"
     
-    public init() { }
+    public init(
+        allMarketTickersRepository: AllMarketTickersRepository,
+        exchangeRateRepository: ExchangeRateRepository,
+        userConfigurationRepository: UserConfigurationRepository
+    ) {
+        self.allMarketTickersRepository = allMarketTickersRepository
+        self.exchangeRateRepository = exchangeRateRepository
+        self.userConfigurationRepository = userConfigurationRepository
+    }
     
     // 도메인 로직
     private func fetchGreatestQuantity(entity: AVLTree<Twenty4HourTickerForSymbolVO>, maxCount: UInt) -> [Twenty4HourTickerForSymbolVO] {
