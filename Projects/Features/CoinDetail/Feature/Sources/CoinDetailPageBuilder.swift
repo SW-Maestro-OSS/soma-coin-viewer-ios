@@ -10,17 +10,14 @@ import CoreUtil
 import WebSocketManagementHelper
 
 public final class CoinDetailPageBuilder {
-    // Dependency
-    @Injected private var coinDetailPageUseCase: CoinDetailPageUseCase
-    @Injected private var webSocketManagementHelper: WebSocketManagementHelper
     
     public init() { }
     
     public func build(listener: CoinDetailPageListener, symbolInfo: CoinSymbolInfo) -> CoinDetailPageRoutable {
         let viewModel = CoinDetailPageViewModel(
             symbolInfo: symbolInfo,
-            useCase: coinDetailPageUseCase,
-            webSocketManagementHelper: webSocketManagementHelper
+            useCase: DependencyInjector.shared.resolve(),
+            webSocketManagementHelper: DependencyInjector.shared.resolve()
         )
         viewModel.listener = listener
         let view = CoinDetailPageView(viewModel: viewModel)
