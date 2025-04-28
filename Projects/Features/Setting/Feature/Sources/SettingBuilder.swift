@@ -10,16 +10,13 @@ import DomainInterface
 import CoreUtil
 
 public class SettingBuilder {
-    // Dependency
-    @Injected private var i18NManager: I18NManager
-    @Injected private var userConfigurationRepository: UserConfigurationRepository
     
     public init() { }
     
     public func build(listener: SettingPageListener) -> SettingRoutable {
         let viewModel = SettingViewModel(
-            i18NManager: i18NManager,
-            userConfigurationRepository: userConfigurationRepository
+            i18NManager: DependencyInjector.shared.resolve(),
+            userConfigurationRepository: DependencyInjector.shared.resolve()
         )
         viewModel.listener = listener
         let view = SettingView(viewModel: viewModel)

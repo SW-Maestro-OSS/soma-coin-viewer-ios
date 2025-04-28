@@ -16,21 +16,15 @@ import I18N
 import WebSocketManagementHelper
 
 public final class AllMarketTickerBuilder {
-    
-    // Service locator
-    @Injected private var allMarketTickersUseCase: AllMarketTickersUseCase
-    @Injected private var i18NManager: I18NManager
-    @Injected private var alertShooter: AlertShooter
-    @Injected private var webSocketManagementHelper: WebSocketManagementHelper
-    
+
     public init() { }
     
     public func build(listener: AllMarketTickerPageListener) -> AllMarketTickerRoutable {
         let viewModel = AllMarketTickerViewModel(
-            useCase: allMarketTickersUseCase,
-            i18NManager: i18NManager,
-            alertShooter: alertShooter,
-            webSocketHelper: webSocketManagementHelper
+            useCase: DependencyInjector.shared.resolve(),
+            i18NManager: DependencyInjector.shared.resolve(),
+            alertShooter: DependencyInjector.shared.resolve(),
+            webSocketHelper: DependencyInjector.shared.resolve()
         )
         viewModel.listener = listener
         let view = AllMarketTickerView(viewModel: viewModel)
