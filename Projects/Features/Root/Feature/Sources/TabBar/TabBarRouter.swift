@@ -74,28 +74,44 @@ extension TabBarRouter {
     func tabBarPage(_ page: TabBarPage) -> AnyView {
         switch page {
         case .allMarketTicker:
-            let router = allMarketTickerBuilder.build(listener: viewModel)
-            if let allMarketTickerRouter { dettach(allMarketTickerRouter) }
-            allMarketTickerRouter = router
-            attach(router)
-            return router.view
+            getAllMarketTickerPageRouter().view
         case .setting:
-            let router = settingBuilder.build(listener: viewModel)
-            if let settingRouter { dettach(settingRouter) }
-            settingRouter = router
-            attach(router)
-            return router.view
+            getSettingPageRouter().view
         }
     }
     
     func view(_ destination: TabBarPageDestination) -> AnyView {
         switch destination {
         case .coinDetailPage(let listener, let symbolInfo):
-            let router = coinDetailPageBuilder.build(listener: listener, symbolInfo: symbolInfo)
-            if let coinDetailPageRouter { dettach(coinDetailPageRouter) }
-            coinDetailPageRouter = router
-            attach(router)
-            return router.view
+            getCoinDetailPageRouter(listener: listener, symbolInfo: symbolInfo).view
         }
+    }
+}
+
+
+// MARK: Create routers
+private extension TabBarRouter {
+    func getAllMarketTickerPageRouter() -> AllMarketTickerRoutable {
+        if let allMarketTickerRouter { return allMarketTickerRouter }
+        let router = allMarketTickerBuilder.build(listener: viewModel)
+        allMarketTickerRouter = router
+        attach(router)
+        return router
+    }
+    
+    func getSettingPageRouter() -> SettingRoutable {
+        if let settingRouter { return settingRouter }
+        let router = settingBuilder.build(listener: viewModel)
+        settingRouter = router
+        attach(router)
+        return router
+    }
+    
+    func getCoinDetailPageRouter(listener: CoinDetailPageListener, symbolInfo: CoinSymbolInfo) -> CoinDetailPageRoutable {
+        if let coinDetailPageRouter { return coinDetailPageRouter }
+        let router = coinDetailPageBuilder.build(listener: listener, symbolInfo: symbolInfo)
+        coinDetailPageRouter = router
+        attach(router)
+        return router
     }
 }
