@@ -34,6 +34,8 @@ extension InfoPlist {
         ],
         "UIUserInterfaceStyle": "Light",
         
+        "CFBundleShortVersionString": "\(Project.Environment.appVersion)",
+        
         // API keys
         "OPENEX_API_KEY": "$(OPENEX_API_KEY)"
     ]

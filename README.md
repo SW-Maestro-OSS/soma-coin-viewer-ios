@@ -2,6 +2,11 @@
 
 소프트웨어 마에스트로 15기에서, Best Practice 용도로 만든 코인뷰어 어플리케이션 입니다.
 
+
+
+[링크로 실행하기(Testflight 베타 테스트)↗️](https://testflight.apple.com/join/A66DdpDn)
+
+
 ## 기능 소개
 
 ### 웹소켓 스트림
@@ -101,7 +106,13 @@
 
 # How to use
 
-해당 프로젝트는 다운로드 후 실행할 수 있습니다.
+### 방법1: 바로 실행하기
+
+해당 애플리케이션은 테스트 플라이트에 배포되어 있습니다. 아래 링크를 통해 실행가능합니다.
+
+[링크로 실행하기(Testflight 베타 테스트)↗️](https://testflight.apple.com/join/A66DdpDn)
+
+### 방법2: 직접 빌드하기
 
 1. 레포지토리를 다운로드 합니다.
 2. `tuist install`을 통해 외부의존성을 install합니다. (Tuist버전: 4.12.1)
