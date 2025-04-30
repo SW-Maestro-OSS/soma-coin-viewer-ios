@@ -17,11 +17,10 @@ import I18N
 import CoreUtil
 
 class TabBarBuilder {
-    // Dependency
-    @Injected private var i18NManager: I18NManager
-    
     func build() -> TabBarRouter {
-        let viewModel = TabBarViewModel(i18NManager: i18NManager)
+        let viewModel = TabBarViewModel(
+            i18NManager: DependencyInjector.shared.resolve()
+        )
         let view = TabBarView(viewModel: viewModel)
         let allMarketTickerBuilder = AllMarketTickerBuilder()
         let settingBuilder = SettingBuilder()
