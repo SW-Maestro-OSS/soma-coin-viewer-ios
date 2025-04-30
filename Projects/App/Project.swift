@@ -17,7 +17,7 @@ let project = Project(
             name: "CoinViewer",
             destinations: .iOS,
             product: .app,
-            bundleId: "io.tuist.CoinViewer",
+            bundleId: Project.Environment.bundleId,
             deploymentTargets: Project.Environment.deploymentTarget,
             infoPlist: .main_app,
             sources: ["Sources/**"],
