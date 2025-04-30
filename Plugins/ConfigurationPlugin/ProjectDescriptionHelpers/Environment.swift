@@ -10,6 +10,7 @@
 public extension Project {
     enum Environment {
         public static let deploymentTarget: DeploymentTargets = .iOS("18.0")
+        public static let appVersion: String = "1.0.0"
         public static let bundleId: String = "com.soma.coinviewer"
     }
 }
