@@ -11,8 +11,7 @@ let project = Project(
             product: .staticFramework,
             bundleId: "com.CoinViewer.Data.Repository",
             deploymentTargets: Project.Environment.deploymentTarget,
-            sources: ["Repository/Sources/**"],
-            resources: ["Repository/Resources/**"],
+            sources: ["Repository/**"],
             dependencies: [
                 // internal
                 .target(name: "DataSource"),
