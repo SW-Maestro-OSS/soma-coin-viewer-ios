@@ -26,8 +26,7 @@ let project = Project(
             product: .framework,
             bundleId: "com.CoinViewer.Data.DataSource",
             deploymentTargets: Project.Environment.deploymentTarget,
-            sources: ["DataSource/Sources/**"],
-            resources: ["DataSource/Resources/**"],
+            sources: ["DataSource/**"],
             dependencies: [
                 D.Util.CoreUtil,
             ]
