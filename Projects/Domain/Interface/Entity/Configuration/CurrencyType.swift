@@ -10,10 +10,6 @@ public enum CurrencyType: String, CaseIterable {
     case won="WON"
     case dollar="DOLLAR"
     
-    public var savingValue: String {
-        self.rawValue
-    }
-    
     public var currencyCode: String {
         switch self {
         case .won:

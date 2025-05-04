@@ -54,7 +54,9 @@ public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
 
 // MARK: AllMarketTickersUseCase, Stream
 public extension DefaultAllMarketTickersUseCase {
-    func getGridType() -> GridType { userConfigurationRepository.getGridType() }
+    func getGridType() -> GridType {
+        userConfigurationRepository.getGridType() ?? .list
+    }
     
     func getTickerList(rowCount: UInt) async -> [Twenty4HourTickerForSymbolVO] {
         let entity = await allMarketTickersRepository.getAllMarketTicker()

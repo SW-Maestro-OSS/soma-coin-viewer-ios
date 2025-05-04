@@ -10,10 +10,6 @@ public enum LanguageType: String {
     case korean="KOR"
     case english="ENG"
     
-    public var savingValue: String {
-        self.rawValue
-    }
-    
     public var lanCode: String {
         switch self {
         case .korean:

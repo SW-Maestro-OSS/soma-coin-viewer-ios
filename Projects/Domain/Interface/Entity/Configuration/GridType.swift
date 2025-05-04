@@ -8,8 +8,4 @@
 public enum GridType: String {
     case list="LIST"
     case twoByTwo="2X2"
-
-    public var savingValue: String {
-        self.rawValue
-    }
 }
