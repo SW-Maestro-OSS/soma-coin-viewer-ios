@@ -8,8 +8,8 @@
 import Foundation
 
 public protocol KeyValueStoreService {
-    func fetchString(key: String) -> String?
-    func saveString(key: String, value: String)
+    func fetch(key: String) -> Any?
+    func save(key: String, value: Any)
 }
 
 
@@ -23,10 +23,6 @@ public class DefaultKeyValueStoreService: KeyValueStoreService {
 
 // MARK: KeyValueStoreService
 public extension DefaultKeyValueStoreService {
-    func fetchString(key: String) -> String? {
-        source.string(forKey: key)
-    }
-    func saveString(key: String, value: String) {
-        source.set(value, forKey: key)
-    }
+    func fetch(key: String) -> Any? { source.object(forKey: key) }
+    func save(key: String, value: Any) { source.set(value, forKey: key) }
 }
