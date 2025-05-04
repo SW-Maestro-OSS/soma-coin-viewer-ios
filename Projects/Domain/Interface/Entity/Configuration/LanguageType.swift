@@ -10,6 +10,9 @@ public enum LanguageType: String {
     case korean="KOR"
     case english="ENG"
     
+    /// 도메인 기본값
+    public static var defaultValue: Self { .english }
+    
     public var lanCode: String {
         switch self {
         case .korean:

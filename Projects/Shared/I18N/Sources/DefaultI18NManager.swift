@@ -27,7 +27,7 @@ public class DefaultI18NManager: I18NManager {
     
     
     public func getCurrencyType() -> CurrencyType {
-        return repository.getCurrencyType()
+        return repository.getCurrencyType() ?? .defaultValue
     }
     
     
@@ -38,7 +38,7 @@ public class DefaultI18NManager: I18NManager {
     
     
     public func getLanguageType() -> LanguageType {
-        return repository.getLanguageType()
+        return repository.getLanguageType() ?? .defaultValue
     }
     
     
