@@ -11,7 +11,7 @@ public struct StubUserConfigurationRepository: UserConfigurationRepository {
     
     public init() { }
     
-    public func getCurrencyType() -> DomainInterface.CurrencyType {
+    public func getCurrencyType() -> DomainInterface.CurrencyType? {
         return .dollar
     }
     
@@ -19,7 +19,7 @@ public struct StubUserConfigurationRepository: UserConfigurationRepository {
         
     }
     
-    public func getLanguageType() -> DomainInterface.LanguageType {
+    public func getLanguageType() -> DomainInterface.LanguageType? {
         return .english
     }
     
@@ -27,7 +27,7 @@ public struct StubUserConfigurationRepository: UserConfigurationRepository {
         
     }
     
-    public func getGridType() -> DomainInterface.GridType {
+    public func getGridType() -> DomainInterface.GridType? {
         return .list
     }
     

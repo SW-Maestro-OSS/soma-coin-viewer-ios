@@ -13,121 +13,35 @@ import CoreUtil
 
 public class DefaultUserConfigurationRepository: UserConfigurationRepository {
     // Dependency
-    @Injected var userConfigurationService: UserConfigurationService
-    
-    // Cache configuration
-    private let cachedConfiguration: LockedDictionary<String, Any> = .init()
+    @Injected private var dataSource: UserConfigurationDataSource
     
     public init() { }
-    
-    public func getCurrencyType() -> CurrencyType {
-        let config: UserConfiguration = .currency
-        
-        if let memoryCached: String = checkMemoryCache(key: config.savingKey) {
-            // 캐싱된 정보를 먼저 확인합니다.
-            return .init(rawValue: memoryCached)!
-        }
-        
-        if let diskCached = userConfigurationService.getStringValue(key: config.savingKey) {
-            // 로컬에 저장된 정보를 확인합니다.
-            
-            // 정보를 메모리에 캐싱
-            caching(key: config.savingKey, value: diskCached)
-            
-            return .init(rawValue: diskCached)!
-        }
-        
-        return .init(rawValue: config.defaultSavingValue)!
+}
+
+
+// MARK: UserConfigurationRepository
+public extension DefaultUserConfigurationRepository {
+    func getCurrencyType() -> CurrencyType? {
+        guard let value = dataSource.getCurrency() else { return nil }
+        return CurrencyType(rawValue: value)
+    }
+    func setCurrencyType(type: CurrencyType) {
+        dataSource.setCurrency(type: type.rawValue)
     }
     
-    
-    
-    public func setCurrencyType(type: CurrencyType) {
-        let config: UserConfiguration = .currency
-        
-        // 디스크 저장
-        userConfigurationService.setConfiguration(key: config.savingKey, value: type.savingValue)
-        
-        // 정보를 메모리에 캐싱
-        caching(key: config.savingKey, value: type.savingValue)
+    func getLanguageType() -> LanguageType? {
+        guard let value = dataSource.getLanguageType() else { return nil }
+        return LanguageType(rawValue: value)
+    }
+    func setLanguageType(type: LanguageType) {
+        dataSource.setLanguageType(type: type.rawValue)
     }
     
-    
-    public func getLanguageType() -> LanguageType {
-        let config: UserConfiguration = .language
-        
-        if let memoryCached: String = checkMemoryCache(key: config.savingKey) {
-            // 캐싱된 정보를 먼저 확인합니다.
-            return .init(rawValue: memoryCached)!
-        }
-        
-        if let diskCached = userConfigurationService.getStringValue(key: config.savingKey) {
-            // 로컬에 저장된 정보를 확인합니다.
-            
-            // 정보를 메모리에 캐싱
-            caching(key: config.savingKey, value: diskCached)
-            
-            return .init(rawValue: diskCached)!
-        }
-        
-        return .init(rawValue: config.defaultSavingValue)!
+    func getGridType() -> GridType? {
+        guard let value = dataSource.getGridType() else { return nil }
+        return GridType(rawValue: value)
     }
-    
-    
-    public func setLanguageType(type: LanguageType) {
-        let config: UserConfiguration = .language
-        
-        // 디스크 저장
-        userConfigurationService.setConfiguration(key: config.savingKey, value: type.savingValue)
-        
-        // 메모리 저장
-        cachedConfiguration[config.savingKey] = type.savingValue
-    }
-    
-    
-    public func getGridType() -> GridType {
-        let config: UserConfiguration = .gridType
-        
-        if let memoryCached: String = checkMemoryCache(key: config.savingKey) {
-            // 캐싱된 정보를 먼저 확인합니다.
-            return .init(rawValue: memoryCached)!
-        }
-        
-        if let diskCached = userConfigurationService.getStringValue(key: config.savingKey) {
-            // 로컬에 저장된 정보를 확인합니다.
-            
-            // 정보를 메모리에 캐싱
-            caching(key: config.savingKey, value: diskCached)
-            
-            return .init(rawValue: diskCached)!
-        }
-        
-        return .init(rawValue: config.defaultSavingValue)!
-    }
-    
-    
-    
-    public func setGridType(type: GridType) {
-        let config: UserConfiguration = .gridType
-        
-        // 디스크 저장 
-        userConfigurationService.setConfiguration(key: config.savingKey, value: type.savingValue)
-        
-        // 메모리 저장
-        cachedConfiguration[config.savingKey] = type.savingValue
-    }
-    
-    
-    // MARK: check cache
-    private func checkMemoryCache<T>(key: String) -> T? {
-        cachedConfiguration[key] as? T
-    }
-    
-    private func caching(key: String, value: Any) {
-        
-        DispatchQueue.global().async { [weak self] in
-            // 정보를 메모리에 캐싱
-            self?.cachedConfiguration[key] = value
-        }
+    func setGridType(type: GridType) {
+        dataSource.setLanguageType(type: type.rawValue)
     }
 }
