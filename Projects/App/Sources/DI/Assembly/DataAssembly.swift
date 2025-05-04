@@ -37,8 +37,10 @@ public class DataAssembly: Assembly {
         
         
         // MARK: DataSource
-        container.register(UserConfigurationDataSource.self) { _ in
-            DefaultUserConfigurationDataSource()
+        container.register(UserConfigurationDataSource.self) { resolver in
+            DefaultUserConfigurationDataSource(
+                service: resolver.resolve(KeyValueStoreService.self)!
+            )
         }
         .inObjectScope(.container)
         container.register(CoinTradeDataSource.self) { _ in

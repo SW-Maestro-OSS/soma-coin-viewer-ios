@@ -22,7 +22,7 @@ public final class FakeI18NManager: I18NManager {
     }
     
     public func getCurrencyType() -> DomainInterface.CurrencyType {
-        fakeUserConfigRepository.getCurrencyType()
+        fakeUserConfigRepository.getCurrencyType() ?? .defaultValue
     }
     
     public func setCurrencyType(type: DomainInterface.CurrencyType) {
@@ -31,7 +31,7 @@ public final class FakeI18NManager: I18NManager {
     }
     
     public func getLanguageType() -> DomainInterface.LanguageType {
-        fakeUserConfigRepository.getLanguageType()
+        fakeUserConfigRepository.getLanguageType() ?? .defaultValue
     }
     
     public func setLanguageType(type: DomainInterface.LanguageType) {

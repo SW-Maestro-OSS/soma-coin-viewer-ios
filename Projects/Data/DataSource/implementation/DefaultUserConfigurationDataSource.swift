@@ -9,7 +9,7 @@ import CoreUtil
 
 final public class DefaultUserConfigurationDataSource: UserConfigurationDataSource {
     // Dependency
-    @Injected private var service: KeyValueStoreService
+    private var service: KeyValueStoreService
     
     // State
     private let memoryCache: LockedDictionary<String, Any> = .init()
@@ -20,7 +20,9 @@ final public class DefaultUserConfigurationDataSource: UserConfigurationDataSour
     private let gridTypeSavingKey = "configuration_gridType"
     
     
-    public init() { }
+    public init(service: KeyValueStoreService) {
+        self.service = service
+    }
     
 
     private func checkMemCache<T>(key: String) -> T? { memoryCache[key] as? T }

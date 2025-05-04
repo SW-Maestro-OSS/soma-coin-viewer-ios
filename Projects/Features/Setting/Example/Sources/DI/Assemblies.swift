@@ -29,7 +29,9 @@ public class Assemblies : Assembly {
         }
         .inObjectScope(.container)
         container.register(UserConfigurationDataSource.self) { resolver in
-            DefaultUserConfigurationDataSource()
+            DefaultUserConfigurationDataSource(
+                service: resolver.resolve(KeyValueStoreService.self)!
+            )
         }
         .inObjectScope(.container)
         
