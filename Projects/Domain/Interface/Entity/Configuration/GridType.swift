@@ -8,8 +8,7 @@
 public enum GridType: String {
     case list="LIST"
     case twoByTwo="2X2"
-
-    public var savingValue: String {
-        self.rawValue
-    }
+    
+    /// 도메인 기본값
+    public static var defaultValue: Self { .list }
 }

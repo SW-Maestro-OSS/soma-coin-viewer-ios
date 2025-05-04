@@ -14,11 +14,15 @@ import CoreUtil
 
 public class DefaultI18NManager: I18NManager {
     // Dependency
-    @Injected private var repository : UserConfigurationRepository
+    private let repository : UserConfigurationRepository
+    
     
     private let changePublisher: PassthroughSubject<I18NConfigMutation, Never> = .init()
     
-    public init() { }
+    
+    public init(repository: UserConfigurationRepository) {
+        self.repository = repository
+    }
     
     
     public func getChangePublisher() -> AnyPublisher<I18NConfigMutation, Never> {
@@ -27,7 +31,7 @@ public class DefaultI18NManager: I18NManager {
     
     
     public func getCurrencyType() -> CurrencyType {
-        return repository.getCurrencyType()
+        return repository.getCurrencyType() ?? .defaultValue
     }
     
     
@@ -38,7 +42,7 @@ public class DefaultI18NManager: I18NManager {
     
     
     public func getLanguageType() -> LanguageType {
-        return repository.getLanguageType()
+        return repository.getLanguageType() ?? .defaultValue
     }
     
     

@@ -10,9 +10,8 @@ public enum CurrencyType: String, CaseIterable {
     case won="WON"
     case dollar="DOLLAR"
     
-    public var savingValue: String {
-        self.rawValue
-    }
+    /// 도메인 기본값
+    public static var defaultValue: Self { .dollar }
     
     public var currencyCode: String {
         switch self {

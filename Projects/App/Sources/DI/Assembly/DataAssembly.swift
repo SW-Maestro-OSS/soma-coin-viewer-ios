@@ -20,9 +20,10 @@ import Swinject
 public class DataAssembly: Assembly {
     public func assemble(container: Swinject.Container) {
         // MARK: Servcie
-        container.register(UserConfigurationService.self) { _ in
-            DefaultUserConfigurationService()
+        container.register(KeyValueStoreService.self) { _ in
+            DefaultKeyValueStoreService()
         }
+        .inObjectScope(.container)
         
         container.register(WebSocketService.self) { _ in
             BinanceWebSocketService()
@@ -36,6 +37,12 @@ public class DataAssembly: Assembly {
         
         
         // MARK: DataSource
+        container.register(UserConfigurationDataSource.self) { resolver in
+            DefaultUserConfigurationDataSource(
+                service: resolver.resolve(KeyValueStoreService.self)!
+            )
+        }
+        .inObjectScope(.container)
         container.register(CoinTradeDataSource.self) { _ in
             BinanceCoinTradeDataSource()
         }
@@ -52,7 +59,6 @@ public class DataAssembly: Assembly {
         container.register(UserConfigurationRepository.self) { _ in
             DefaultUserConfigurationRepository()
         }
-        .inObjectScope(.container)
         
         container.register(AllMarketTickersRepository.self) { _ in
             BinanceAllMarketTickersRepository()

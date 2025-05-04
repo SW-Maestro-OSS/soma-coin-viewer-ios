@@ -17,27 +17,47 @@ import Swinject
 
 public class Assemblies : Assembly {
     public func assemble(container: Container) {
+        // MARK: Service
+        container.register(KeyValueStoreService.self) { _ in
+            DefaultKeyValueStoreService()
+        }
+        .inObjectScope(.container)
+        
         //MARK: DataSource
         container.register(ExchangeRateDataSource.self) { _ in
             OpenXExchangeRateDataSource()
         }
         .inObjectScope(.container)
+        container.register(UserConfigurationDataSource.self) { resolver in
+            DefaultUserConfigurationDataSource(
+                service: resolver.resolve(KeyValueStoreService.self)!
+            )
+        }
+        .inObjectScope(.container)
         
+        
+        // MARK: Repository
         container.register(ExchangeRateRepository.self) { _ in
             DefaultExchangeRateRepository()
         }
-        
-        container.register(UserConfigurationService.self) { _ in
-            DefaultUserConfigurationService()
-        }
-        
         container.register(UserConfigurationRepository.self) { _ in
             DefaultUserConfigurationRepository()
         }
         
+        
+        // MARK: UseCase
+        container.register(SettingPageUseCase.self) { resolver in
+            DefaultSettingPageUseCase(
+                repository: resolver.resolve(UserConfigurationRepository.self)!
+            )
+        }
+        
+        
         //MARK: I18N
-        container.register(I18NManager.self) { _ in
-            DefaultI18NManager()
+        container.register(I18NManager.self) { resolver in
+            DefaultI18NManager(
+                repository: resolver.resolve(UserConfigurationRepository.self)!
+            )
         }
     }
 }

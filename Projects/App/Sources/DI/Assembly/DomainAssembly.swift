@@ -15,6 +15,12 @@ class DomainAssembly: Assembly {
     
     func assemble(container: Swinject.Container) {
         // UseCase
+        container.register(SettingPageUseCase.self) { resolver in
+            DefaultSettingPageUseCase(
+                repository: resolver.resolve(UserConfigurationRepository.self)!
+            )
+        }
+        
         container.register(RootPageUseCase.self) { _ in
             DefaultRootPageUseCase()
         }

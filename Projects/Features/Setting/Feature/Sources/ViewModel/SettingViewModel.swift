@@ -22,7 +22,7 @@ public protocol SettingPageListener: AnyObject { }
 class SettingViewModel: UDFObservableObject, SettingViewModelable {
     // Dependency
     private let i18NManager: I18NManager
-    private let userConfigurationRepository: UserConfigurationRepository
+    private let useCase: SettingPageUseCase
     
     
     // Listener
@@ -43,13 +43,13 @@ class SettingViewModel: UDFObservableObject, SettingViewModelable {
     var action : PassthroughSubject<Action, Never> = .init()
     var store : Set<AnyCancellable> = []
     
-    init(i18NManager: I18NManager, userConfigurationRepository: UserConfigurationRepository) {
+    init(i18NManager: I18NManager, useCase: SettingPageUseCase) {
         self.i18NManager = i18NManager
-        self.userConfigurationRepository = userConfigurationRepository
+        self.useCase = useCase
         
         let initialCurrencyType = i18NManager.getCurrencyType()
         let initialLanType = i18NManager.getLanguageType()
-        let initialGridType = userConfigurationRepository.getGridType()
+        let initialGridType = useCase.getGridType()
         let initialState: State = .init(
             currencyType: initialCurrencyType,
             languageType: initialLanType,
@@ -92,10 +92,10 @@ class SettingViewModel: UDFObservableObject, SettingViewModelable {
             case .languageType(let value):
                 let updatedValue: LanguageType = (value == .english) ? .korean : .english
                 i18NManager.setLanguageType(type: updatedValue)
-                newState.languageType = i18NManager.getLanguageType()
+                newState.languageType = updatedValue
             case .gridType(let value):
                 let updatedValue: GridType = (value == .list) ? .twoByTwo : .list
-                userConfigurationRepository.setGridType(type: updatedValue)
+                useCase.setGridType(type: updatedValue)
                 newState.gridType = updatedValue
             }
             newState.settingCellROs = createSettingCellROS(with: newState)
