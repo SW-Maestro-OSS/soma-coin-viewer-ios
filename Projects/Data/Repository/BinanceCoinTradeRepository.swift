@@ -14,7 +14,6 @@ import CoreUtil
 
 public final class BinanceCoinTradeRepository: CoinTradeRepository {
     // Dependency
-    @Injected private var webSocketService: WebSocketService
     @Injected private var coinTradeDataSource: CoinTradeDataSource
     
     public init() { }
