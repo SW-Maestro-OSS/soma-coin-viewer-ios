@@ -16,7 +16,7 @@ public class SettingBuilder {
     public func build(listener: SettingPageListener) -> SettingRoutable {
         let viewModel = SettingViewModel(
             i18NManager: DependencyInjector.shared.resolve(),
-            userConfigurationRepository: DependencyInjector.shared.resolve()
+            useCase: DependencyInjector.shared.resolve()
         )
         viewModel.listener = listener
         let view = SettingView(viewModel: viewModel)

@@ -14,11 +14,15 @@ import CoreUtil
 
 public class DefaultI18NManager: I18NManager {
     // Dependency
-    @Injected private var repository : UserConfigurationRepository
+    private let repository : UserConfigurationRepository
+    
     
     private let changePublisher: PassthroughSubject<I18NConfigMutation, Never> = .init()
     
-    public init() { }
+    
+    public init(repository: UserConfigurationRepository) {
+        self.repository = repository
+    }
     
     
     public func getChangePublisher() -> AnyPublisher<I18NConfigMutation, Never> {

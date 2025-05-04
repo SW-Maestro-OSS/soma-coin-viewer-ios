@@ -42,6 +42,6 @@ public extension DefaultUserConfigurationRepository {
         return GridType(rawValue: value)
     }
     func setGridType(type: GridType) {
-        dataSource.setLanguageType(type: type.rawValue)
+        dataSource.setGridType(type: type.rawValue)
     }
 }

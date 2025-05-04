@@ -5,6 +5,7 @@
 //  Created by choijunios on 12/4/24.
 //
 
+import DomainInterface
 import DataSource
 
 import WebSocketManagementHelper
@@ -28,8 +29,8 @@ public class SharedAssembly: Assembly {
         .inObjectScope(.container)
         
         //MARK: I18NManager
-        container.register(I18NManager.self) { _ in
-            DefaultI18NManager()
+        container.register(I18NManager.self) { resolver in
+            DefaultI18NManager(repository: resolver.resolve(UserConfigurationRepository.self)!)
         }
         .inObjectScope(.container)
         

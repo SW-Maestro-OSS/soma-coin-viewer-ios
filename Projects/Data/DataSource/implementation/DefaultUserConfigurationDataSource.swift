@@ -38,8 +38,8 @@ final public class DefaultUserConfigurationDataSource: UserConfigurationDataSour
         return nil
     }
     private func save(key: String, value: Any) {
-        defer { cacheToMemory(key: currencySavingKey, value: value) }
-        service.save(key: currencySavingKey, value: value)
+        service.save(key: key, value: value)
+        cacheToMemory(key: key, value: value)
     }
 }
 
