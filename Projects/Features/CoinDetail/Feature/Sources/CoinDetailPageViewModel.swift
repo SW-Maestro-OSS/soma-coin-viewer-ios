@@ -127,12 +127,12 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
         var newState = state
         switch action {
         case .updateOrderbook(let bids, let asks):
-            guard let bigestQuantity = (bids + asks).map(\.quantity).max() else { break }
+            guard let biggestQuantity = (bids + asks).map(\.quantity).max() else { break }
             newState.bidOrderbooks = bids.map {
-                transform(bigestQuantity: bigestQuantity, orderbook: $0, type: .bid)
+                transform(biggestQuantity: biggestQuantity, orderbook: $0, type: .bid)
             }
             newState.askOrderbooks = asks.map {
-                transform(bigestQuantity: bigestQuantity, orderbook: $0, type: .ask)
+                transform(biggestQuantity: biggestQuantity, orderbook: $0, type: .ask)
             }
         case .updateTickerInfo(let entity):
             let (changePercentText, changeType) = createChangePercentTextConfig(percent: entity.changedPercent)
@@ -142,9 +142,9 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             )
             newState.tickerInfo =
                 .init(
-                    currentPriceText: entity.price.roundDecimalPlaces(exact: 4),
-                    bestBidPriceText: entity.bestBidPrice.roundDecimalPlaces(exact: 4),
-                    bestAskPriceText: entity.bestAskPrice.roundDecimalPlaces(exact: 4)
+                    currentPriceText: entity.price.description,
+                    bestBidPriceText: entity.bestBidPrice.description,
+                    bestAskPriceText: entity.bestAskPrice.description
                 )
         case .updateTrades(let trades):
             newState.trades = trades.map(convertToRO)
@@ -206,12 +206,12 @@ private extension CoinDetailPageViewModel {
             .subscribe(self.action)
     }
     
-    func transform(bigestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
+    func transform(biggestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
         return OrderbookCellRO(
             type: type,
-            priceText: orderbook.price.roundDecimalPlaces(exact: 4),
-            quantityText: orderbook.quantity.roundDecimalPlaces(exact: 4),
-            relativePercentOfQuantity: orderbook.quantity.double / bigestQuantity.double
+            priceText: orderbook.price.description,
+            quantityText: orderbook.quantity.formatCompactNumberWithSuffix(),
+            relativePercentOfQuantity: orderbook.quantity.double / biggestQuantity.double
         )
     }
 }
@@ -234,8 +234,8 @@ private extension CoinDetailPageViewModel {
         dateFormatter.dateFormat = "HH:mm:ss"
         let renderObject: CoinTradeRO = .init(
             id: entity.tradeId,
-            priceText: entity.price.roundDecimalPlaces(exact: 4),
-            quantityText: entity.quantity.roundDecimalPlaces(exact: 4),
+            priceText: entity.price.description,
+            quantityText: entity.quantity.formatCompactNumberWithSuffix(),
             timeText: dateFormatter.string(from: entity.tradeTime),
             textColor: entity.tradeType == .buy ? .green : .red,
             backgroundEffectColor: (entity.tradeType == .buy ? .green : .red)
@@ -274,4 +274,3 @@ extension CoinDetailPageViewModel {
         }
     }
 }
-

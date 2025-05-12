@@ -18,6 +18,18 @@ let project = Project(
                 D.ThirdParty.AdvancedSwift,
             ]
         ),
+        
+        // Tests
+        .target(
+            name: "CoreUtilTests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.choijunios.feature.coreutil.tests",
+            sources: ["Tests/**"],
+            dependencies: [
+                .target(name: "CoreUtil"),
+            ]
+        ),
     ]
 )
 

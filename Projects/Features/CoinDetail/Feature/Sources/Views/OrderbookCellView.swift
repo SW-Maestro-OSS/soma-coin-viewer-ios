@@ -51,6 +51,8 @@ struct OrderbookCellView: View {
             case .priceFirst:
                 Text(renderObject.priceText)
                     .foregroundStyle(renderObject.priceTextColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
                 Spacer()
                 Text(renderObject.quantityText)
                     .foregroundStyle(.black)
