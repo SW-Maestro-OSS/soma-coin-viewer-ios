@@ -109,6 +109,7 @@ public extension CVNumber {
 
         for precision in (0...4).reversed() {
             let formatter = NumberFormatter()
+            formatter.roundingMode = .down
             formatter.maximumFractionDigits = precision
             let minFraction = unit.isEmpty ? 4 : 3
             if minFraction > precision {
