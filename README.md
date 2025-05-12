@@ -2,8 +2,6 @@
 
 소프트웨어 마에스트로 15기에서, Best Practice 용도로 만든 코인뷰어 어플리케이션 입니다.
 
-
-
 [링크로 실행하기(Testflight 베타 테스트)↗️](https://testflight.apple.com/join/A66DdpDn)
 
 
@@ -25,7 +23,7 @@
       <img src="https://github.com/user-attachments/assets/1e842b6a-692c-4e77-935c-8114688aa716" width=300 />
     </td>
     <td>
-      <img src="https://github.com/user-attachments/assets/0a0cff90-b28d-4e5f-b444-029085841b2e" width=300 />
+      <img src="https://github.com/user-attachments/assets/eb3af1a4-c637-4cae-b785-2d14efa6caa2" width=300 />
     </td>
   </tr>
 </table>
