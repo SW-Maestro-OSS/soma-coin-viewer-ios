@@ -209,7 +209,7 @@ private extension CoinDetailPageViewModel {
     func transform(bigestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
         return OrderbookCellRO(
             type: type,
-            priceText: orderbook.price.roundDecimalPlaces(exact: 4),
+            priceText: orderbook.price.description,
             quantityText: orderbook.quantity.formatCompactNumberWithSuffix(),
             relativePercentOfQuantity: orderbook.quantity.double / bigestQuantity.double
         )
@@ -234,7 +234,7 @@ private extension CoinDetailPageViewModel {
         dateFormatter.dateFormat = "HH:mm:ss"
         let renderObject: CoinTradeRO = .init(
             id: entity.tradeId,
-            priceText: entity.price.roundDecimalPlaces(exact: 4),
+            priceText: entity.price.description,
             quantityText: entity.quantity.formatCompactNumberWithSuffix(),
             timeText: dateFormatter.string(from: entity.tradeTime),
             textColor: entity.tradeType == .buy ? .green : .red,
