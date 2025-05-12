@@ -142,9 +142,9 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             )
             newState.tickerInfo =
                 .init(
-                    currentPriceText: entity.price.roundDecimalPlaces(exact: 4),
-                    bestBidPriceText: entity.bestBidPrice.roundDecimalPlaces(exact: 4),
-                    bestAskPriceText: entity.bestAskPrice.roundDecimalPlaces(exact: 4)
+                    currentPriceText: entity.price.description,
+                    bestBidPriceText: entity.bestBidPrice.description,
+                    bestAskPriceText: entity.bestAskPrice.description
                 )
         case .updateTrades(let trades):
             newState.trades = trades.map(convertToRO)
