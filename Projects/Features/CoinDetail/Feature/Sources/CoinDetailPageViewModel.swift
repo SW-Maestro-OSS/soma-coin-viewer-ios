@@ -210,7 +210,7 @@ private extension CoinDetailPageViewModel {
         return OrderbookCellRO(
             type: type,
             priceText: orderbook.price.roundDecimalPlaces(exact: 4),
-            quantityText: orderbook.quantity.roundDecimalPlaces(exact: 4),
+            quantityText: orderbook.quantity.formatCompactNumberWithSuffix(),
             relativePercentOfQuantity: orderbook.quantity.double / bigestQuantity.double
         )
     }
@@ -235,7 +235,7 @@ private extension CoinDetailPageViewModel {
         let renderObject: CoinTradeRO = .init(
             id: entity.tradeId,
             priceText: entity.price.roundDecimalPlaces(exact: 4),
-            quantityText: entity.quantity.roundDecimalPlaces(exact: 4),
+            quantityText: entity.quantity.formatCompactNumberWithSuffix(),
             timeText: dateFormatter.string(from: entity.tradeTime),
             textColor: entity.tradeType == .buy ? .green : .red,
             backgroundEffectColor: (entity.tradeType == .buy ? .green : .red)
@@ -274,4 +274,3 @@ extension CoinDetailPageViewModel {
         }
     }
 }
-
