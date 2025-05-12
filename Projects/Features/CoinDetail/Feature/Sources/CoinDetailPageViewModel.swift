@@ -127,12 +127,12 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
         var newState = state
         switch action {
         case .updateOrderbook(let bids, let asks):
-            guard let bigestQuantity = (bids + asks).map(\.quantity).max() else { break }
+            guard let biggestQuantity = (bids + asks).map(\.quantity).max() else { break }
             newState.bidOrderbooks = bids.map {
-                transform(bigestQuantity: bigestQuantity, orderbook: $0, type: .bid)
+                transform(biggestQuantity: biggestQuantity, orderbook: $0, type: .bid)
             }
             newState.askOrderbooks = asks.map {
-                transform(bigestQuantity: bigestQuantity, orderbook: $0, type: .ask)
+                transform(biggestQuantity: biggestQuantity, orderbook: $0, type: .ask)
             }
         case .updateTickerInfo(let entity):
             let (changePercentText, changeType) = createChangePercentTextConfig(percent: entity.changedPercent)
@@ -206,12 +206,12 @@ private extension CoinDetailPageViewModel {
             .subscribe(self.action)
     }
     
-    func transform(bigestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
+    func transform(biggestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
         return OrderbookCellRO(
             type: type,
             priceText: orderbook.price.description,
             quantityText: orderbook.quantity.formatCompactNumberWithSuffix(),
-            relativePercentOfQuantity: orderbook.quantity.double / bigestQuantity.double
+            relativePercentOfQuantity: orderbook.quantity.double / biggestQuantity.double
         )
     }
 }
