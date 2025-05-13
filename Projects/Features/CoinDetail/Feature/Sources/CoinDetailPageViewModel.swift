@@ -58,6 +58,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     private let orderbookRowCount: Int = 15
     private let recentTradeRowCount: Int = 20
 
+    
     // Action
     typealias Action = CoinDetailPageAction
     let action: PassthroughSubject<CoinDetailPageAction, Never> = .init()
@@ -67,6 +68,16 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     private var streamUpdateObserverStore: [CoinInfoStream: AnyCancellable] = [:]
     private var streamTask: [CoinInfoStream: Task<Void, Never>] = [:]
     var store: Set<AnyCancellable> = .init()
+    
+    
+    // Util
+    private lazy var dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = .current
+        dateFormatter.dateFormat = "HH:mm:ss"
+        return dateFormatter
+    }()
+    
     
     init(
         symbolInfo: CoinSymbolInfo,
@@ -85,6 +96,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
         
         createStateStream()
     }
+    
     
     func mutate(_ action: CoinDetailPageAction) -> AnyPublisher<CoinDetailPageAction, Never> {
         switch action {
@@ -418,9 +430,6 @@ private extension CoinDetailPageViewModel {
     }
     
     func createCoinTradeRO(entity: CoinTradeVO, exchangeRateInfo: ExchangeRateInfo) -> CoinTradeRO {
-        let dateFormatter = DateFormatter()
-        dateFormatter.timeZone = .current
-        dateFormatter.dateFormat = "HH:mm:ss"
         let renderObject: CoinTradeRO = .init(
             id: entity.tradeId,
             priceText: createPriceText(
