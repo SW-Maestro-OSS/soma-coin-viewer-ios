@@ -56,6 +56,20 @@
     },
     
     
+    "CoinDetailPage_ticker_currentPrice" : {
+        "en" : "Current price",
+        "kr" : "실시간 가격",
+    },
+    "CoinDetailPage_ticker_bestBidPrice" : {
+        "en" : "Best bid price",
+        "kr" : "최고 매수 호가",
+    },
+    "CoinDetailPage_ticker_bestAskPrice" : {
+        "en" : "Best ask price",
+        "kr" : "최저 매도 호가",
+    },
+    
+    
     "alertmodel_title_websocketerror" : {
         "en" : "WebSocket error",
         "kr" : "웹소켓 오류"

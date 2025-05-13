@@ -13,6 +13,7 @@ import DataSource
 import Repository
 import WebSocketManagementHelper
 import AlertShooter
+import I18N
 
 import Swinject
 
@@ -46,6 +47,9 @@ public class Assemblies: Assembly {
             )
         }
         .inObjectScope(.container)
+        container.register(I18NManager.self) { _ in
+            DefaultI18NManager(repository: DefaultUserConfigurationRepository())
+        }
         
         // MARK: Repository
         container.register(OrderbookRepository.self) { _ in

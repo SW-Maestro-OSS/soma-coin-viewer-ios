@@ -21,6 +21,7 @@ struct ExampleApp: App {
             CoinDetailPageView(viewModel: CoinDetailPageViewModel(
                 symbolInfo: .init(firstSymbol: "xrp", secondSymbol: "usdt"),
                 useCase: DependencyInjector.shared.resolve(),
+                i18NManager: DependencyInjector.shared.resolve(),
                 webSocketManagementHelper: DependencyInjector.shared.resolve()
             ))
             .environmentObject(DependencyInjector.shared.resolve(AlertShooter.self))

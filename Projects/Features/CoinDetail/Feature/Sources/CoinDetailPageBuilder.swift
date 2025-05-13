@@ -17,6 +17,7 @@ public final class CoinDetailPageBuilder {
         let viewModel = CoinDetailPageViewModel(
             symbolInfo: symbolInfo,
             useCase: DependencyInjector.shared.resolve(),
+            i18NManager: DependencyInjector.shared.resolve(),
             webSocketManagementHelper: DependencyInjector.shared.resolve()
         )
         viewModel.listener = listener

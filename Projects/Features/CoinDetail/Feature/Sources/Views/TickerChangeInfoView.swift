@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TickerChangeInfoView: View {
     
-    @Binding var info: TickerInfo?
+    @Binding var info: TickerInfoRO?
     
     private let columns: [GridItem] = [
         GridItem(.flexible(), alignment: .leading),
@@ -19,7 +19,7 @@ struct TickerChangeInfoView: View {
     var body: some View {
         LazyVGrid(columns: columns, spacing: 4) {
             Group {
-                Text("Current price")
+                Text(info?.currentPriceTitleText ?? "")
                     .padding(.horizontal, 3)
                 Text(info?.currentPriceText ?? "-")
                     .foregroundStyle(.black)
@@ -27,7 +27,7 @@ struct TickerChangeInfoView: View {
                     .monospacedDigit()
             }
             Group {
-                Text("Best bid price")
+                Text(info?.bestBidPriceTitleText ?? "")
                     .padding(.horizontal, 3)
                 Text(info?.bestBidPriceText ?? "-")
                     .foregroundStyle(.green)
@@ -35,7 +35,7 @@ struct TickerChangeInfoView: View {
                     .monospacedDigit()
             }
             Group {
-                Text("Best ask price")
+                Text(info?.bestAskPriceTitleText ?? "")
                     .padding(.horizontal, 3)
                 Text(info?.bestAskPriceText ?? "-")
                     .foregroundStyle(.red)

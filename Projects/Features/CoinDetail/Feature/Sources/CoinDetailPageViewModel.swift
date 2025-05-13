@@ -5,12 +5,13 @@
 //  Created by choijunios on 4/12/25.
 //
 
-import Combine
 import SwiftUI
+import Combine
 
 import DomainInterface
 import BaseFeature
 import CoreUtil
+import I18N
 import WebSocketManagementHelper
 
 public enum CoinDetailPageListenerRequest {
@@ -37,6 +38,7 @@ enum CoinDetailPageAction {
 final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewModelable {
     // Dependency
     private let useCase: CoinDetailPageUseCase
+    private let i18NManager: I18NManager
     private let webSocketManagementHelper: WebSocketManagementHelper
     
     
@@ -62,9 +64,15 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     private var streamTask: [CoinInfoStream: Task<Void, Never>] = [:]
     var store: Set<AnyCancellable> = .init()
     
-    init(symbolInfo: CoinSymbolInfo, useCase: CoinDetailPageUseCase, webSocketManagementHelper: WebSocketManagementHelper) {
+    init(
+        symbolInfo: CoinSymbolInfo,
+        useCase: CoinDetailPageUseCase,
+        i18NManager: I18NManager,
+        webSocketManagementHelper: WebSocketManagementHelper
+    ) {
         self.symbolInfo = symbolInfo
         self.useCase = useCase
+        self.i18NManager = i18NManager
         self.webSocketManagementHelper = webSocketManagementHelper
         self.state = .init(
             symbolText: symbolInfo.pairSymbol.uppercased(),
@@ -134,18 +142,23 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             newState.askOrderbooks = asks.map {
                 transform(biggestQuantity: biggestQuantity, orderbook: $0, type: .ask)
             }
+            
         case .updateTickerInfo(let entity):
             let (changePercentText, changeType) = createChangePercentTextConfig(percent: entity.changedPercent)
             newState.priceChagePercentInfo = .init(
                 changeType: changeType,
                 percentText: changePercentText
             )
-            newState.tickerInfo =
-                .init(
-                    currentPriceText: entity.price.description,
-                    bestBidPriceText: entity.bestBidPrice.description,
-                    bestAskPriceText: entity.bestAskPrice.description
-                )
+            let currenyConfig = CurrencyConfig(
+                type: i18NManager.getCurrencyType(),
+                ratePerStandard: 1
+            )
+            newState.tickerInfo = createTickerInfoRO(
+                languageType: i18NManager.getLanguageType(),
+                currencyConfig: currenyConfig,
+                entity: entity
+            )
+            
         case .updateTrades(let trades):
             newState.trades = trades.map(convertToRO)
         default:
@@ -153,11 +166,62 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
         }
         return newState
     }
+    
+    enum LocalizedStrings {
+        case tickerCurrentPrice
+        case tickerBestBidPrice
+        case tickerBestAskPrice
+        
+        var key: String {
+            switch self {
+            case .tickerCurrentPrice:
+                "CoinDetailPage_ticker_currentPrice"
+            case .tickerBestBidPrice:
+                "CoinDetailPage_ticker_bestBidPrice"
+            case .tickerBestAskPrice:
+                "CoinDetailPage_ticker_bestAskPrice"
+            }
+        }
+    }
+    
+    struct CurrencyConfig {
+        let type: CurrencyType
+        let ratePerStandard: Double
+    }
 }
 
 
 // MARK: 24h ticker
 private extension CoinDetailPageViewModel {
+    func createTickerInfoRO(
+        languageType lanT: LanguageType,
+        currencyConfig cc: CurrencyConfig,
+        entity: Twenty4HourTickerForSymbolVO) -> TickerInfoRO {
+            
+        let currentPriceText = CVNumber(entity.price.double * cc.ratePerStandard).description
+        let bestBidPriceText = CVNumber(entity.bestBidPrice.double * cc.ratePerStandard).description
+        let bestAskPriceText = CVNumber(entity.bestAskPrice.double * cc.ratePerStandard).description
+        
+        let strProvider = LocalizedStringProvider.instance()
+        return .init(
+            currentPriceTitleText: strProvider.getString(
+                key: LocalizedStrings.tickerCurrentPrice.key,
+                lanCode: lanT.lanCode
+            ),
+            bestBidPriceTitleText: strProvider.getString(
+                key: LocalizedStrings.tickerBestBidPrice.key,
+                lanCode: lanT.lanCode
+            ),
+            bestAskPriceTitleText: strProvider.getString(
+                key: LocalizedStrings.tickerBestAskPrice.key,
+                lanCode: lanT.lanCode
+            ),
+            currentPriceText: currentPriceText,
+            bestBidPriceText: bestBidPriceText,
+            bestAskPriceText: bestAskPriceText
+        )
+    }
+    
     func listenToChangeInTickerStream() {
         streamTask[.changeInTicker]?.cancel()
         streamTask[.changeInTicker] = Task { [weak self] in
@@ -248,10 +312,12 @@ private extension CoinDetailPageViewModel {
 // MARK: State
 extension CoinDetailPageViewModel {
     struct State {
-        // 24h ticker
+        // Title
         let symbolText: String
+        
+        // 24h ticker
         var priceChagePercentInfo: PriceChangePercentRO?
-        var tickerInfo: TickerInfo?
+        var tickerInfo: TickerInfoRO?
         
         // Orderbook table
         let fixedOrderbookRowCount: Int
