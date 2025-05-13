@@ -20,7 +20,8 @@ struct CoinDetailPageUseCaseTests {
         let useCase = DefaultCoinDetailPageUseCase(
             orderbookRepository: StubOrderbookRepository(bidOrderbookCount: 50, askOrderbookCount: 50),
             singleTickerRepository: StubSingleMarketTickerRepository(),
-            coinTradeRepository: StubCoinTradeRepository()
+            coinTradeRepository: StubCoinTradeRepository(),
+            exchangeRateRepository: FakeExchangeRateRepository()
         )
         
         

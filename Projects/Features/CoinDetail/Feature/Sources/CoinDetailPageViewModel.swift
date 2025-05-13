@@ -30,8 +30,9 @@ enum CoinDetailPageAction {
     case exitButtonTapped
     case getBackToForeground
     
+    case tickerInfoFetched(entity: Twenty4HourTickerForSymbolVO)
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
-    case updateTickerInfo(entity: Twenty4HourTickerForSymbolVO)
+    case updateTickerInfo(entity: Twenty4HourTickerForSymbolVO, exchangeRateInfo: ExchangeRateInfo)
     case updateTrades(trades: [CoinTradeVO])
 }
 
@@ -101,6 +102,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 ], mustDeliver: true)
             }
             return Just(action).eraseToAnyPublisher()
+            
         case .onDisappear:
             // 연결 스트림 종료
             webSocketManagementHelper.requestUnsubscribeToStream(streams: [
@@ -112,9 +114,11 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             // AsyncStream종료
             streamTask.values.forEach({ $0.cancel() })
             streamTask.removeAll()
+            
         case .exitButtonTapped:
             // 페이지 닫기
             listener?.request(.closePage)
+            
         case .getBackToForeground:
             // 오더북 스트림만 상태 초기화 및 재구독
             listenToOrderbookStream()
@@ -125,6 +129,21 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 .orderbook(symbolPair: symbolPair),
                 .recentTrade(symbolPair: symbolPair)
             ], mustDeliver: true)
+            
+        case .tickerInfoFetched(let entity):
+            return Just(entity)
+                .unretained(self)
+                .asyncTransform { vm, entity in
+                    let currencyType = vm.i18NManager.getCurrencyType()
+                    let rate = await vm.useCase.getExchangeRate(to: currencyType)
+                    return Action.updateTickerInfo(
+                        entity: entity,
+                        exchangeRateInfo: .init(
+                            currentType: currencyType,
+                            rate: rate ?? 1.0
+                        )
+                    )
+                }
         default:
             break
         }
@@ -143,19 +162,15 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 transform(biggestQuantity: biggestQuantity, orderbook: $0, type: .ask)
             }
             
-        case .updateTickerInfo(let entity):
+        case .updateTickerInfo(let entity, let exchangeRateInfo):
             let (changePercentText, changeType) = createChangePercentTextConfig(percent: entity.changedPercent)
             newState.priceChagePercentInfo = .init(
                 changeType: changeType,
                 percentText: changePercentText
             )
-            let currenyConfig = CurrencyConfig(
-                type: i18NManager.getCurrencyType(),
-                ratePerStandard: 1
-            )
             newState.tickerInfo = createTickerInfoRO(
                 languageType: i18NManager.getLanguageType(),
-                currencyConfig: currenyConfig,
+                exchangeRateInfo: exchangeRateInfo,
                 entity: entity
             )
             
@@ -183,11 +198,6 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             }
         }
     }
-    
-    struct CurrencyConfig {
-        let type: CurrencyType
-        let ratePerStandard: Double
-    }
 }
 
 
@@ -195,12 +205,32 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
 private extension CoinDetailPageViewModel {
     func createTickerInfoRO(
         languageType lanT: LanguageType,
-        currencyConfig cc: CurrencyConfig,
+        exchangeRateInfo: ExchangeRateInfo,
         entity: Twenty4HourTickerForSymbolVO) -> TickerInfoRO {
             
-        let currentPriceText = CVNumber(entity.price.double * cc.ratePerStandard).description
-        let bestBidPriceText = CVNumber(entity.bestBidPrice.double * cc.ratePerStandard).description
-        let bestAskPriceText = CVNumber(entity.bestAskPrice.double * cc.ratePerStandard).description
+        let pricePrefixer: (CurrencyType, String) -> String = { type, price in
+            if type.isPrefix {
+                return "\(type.symbol) \(price)"
+            } else {
+                return "\(price) \(type.symbol)"
+            }
+        }
+            
+        let currentPriceText = pricePrefixer(
+            exchangeRateInfo.currentType,
+            CVNumber(entity.price.double * exchangeRateInfo.rate)
+                .adaptiveFractionFormat(min: 2, max: 8)
+        )
+        let bestBidPriceText = pricePrefixer(
+            exchangeRateInfo.currentType,
+            CVNumber(entity.bestBidPrice.double * exchangeRateInfo.rate)
+                .adaptiveFractionFormat(min: 2, max: 8)
+        )
+        let bestAskPriceText = pricePrefixer(
+            exchangeRateInfo.currentType,
+            CVNumber(entity.bestAskPrice.double * exchangeRateInfo.rate)
+                .adaptiveFractionFormat(min: 2, max: 8)
+        )
         
         let strProvider = LocalizedStringProvider.instance()
         return .init(
@@ -227,7 +257,7 @@ private extension CoinDetailPageViewModel {
         streamTask[.changeInTicker] = Task { [weak self] in
             guard let self else { return }
             for await tickerVO in useCase.get24hTickerChange(symbolPair: symbolPair) {
-                action.send(.updateTickerInfo(entity: tickerVO))
+                action.send(.tickerInfoFetched(entity: tickerVO))
             }
         }
     }

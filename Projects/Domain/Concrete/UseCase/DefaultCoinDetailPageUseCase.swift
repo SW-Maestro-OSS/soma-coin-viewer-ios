@@ -12,23 +12,35 @@ import CoreUtil
 
 final public class DefaultCoinDetailPageUseCase: CoinDetailPageUseCase {
     // Dependency
-    private var orderbookRepository: OrderbookRepository
-    private var singleTickerRepository: SingleMarketTickerRepository
-    private var coinTradeRepository: CoinTradeRepository
+    private let orderbookRepository: OrderbookRepository
+    private let singleTickerRepository: SingleMarketTickerRepository
+    private let coinTradeRepository: CoinTradeRepository
+    private let exchangeRateRepository: ExchangeRateRepository
+    
+    
+    // State
+    private let standardCurreny: CurrencyType = .dollar
+    
     
     public init(
         orderbookRepository: OrderbookRepository,
         singleTickerRepository: SingleMarketTickerRepository,
-        coinTradeRepository: CoinTradeRepository) {
+        coinTradeRepository: CoinTradeRepository,
+        exchangeRateRepository: ExchangeRateRepository) {
         self.orderbookRepository = orderbookRepository
         self.singleTickerRepository = singleTickerRepository
         self.coinTradeRepository = coinTradeRepository
+        self.exchangeRateRepository = exchangeRateRepository
     }
 }
 
 
 // MARK: CoinDetailPageUseCase
 public extension DefaultCoinDetailPageUseCase {
+    func getExchangeRate(to: CurrencyType) async -> Double? {
+        await exchangeRateRepository.getRate(base: standardCurreny, to: to)
+    }
+    
     func get24hTickerChange(symbolPair: String) -> AsyncStream<Twenty4HourTickerForSymbolVO> {
         singleTickerRepository.request24hTickerChange(pairSymbol: symbolPair)
     }

@@ -65,4 +65,24 @@ struct CVNumberTests {
             #expect(str == expectedResults[index])
         }
     }
+    
+    
+    @Test("적응형 소수점 표현 확인", arguments: [
+        CVNumber(0.1),
+        CVNumber(0.01),
+        CVNumber(0.001),
+        CVNumber(0.0001),
+    ])
+    func checkAdaptiveFractionFormat(number: CVNumber) {
+        // Given
+        let target = number
+        
+        
+        // When
+        let expression = target.adaptiveFractionFormat(min: 1, max: 4)
+        
+        
+        // Then
+        #expect(expression == target.description)
+    }
 }
