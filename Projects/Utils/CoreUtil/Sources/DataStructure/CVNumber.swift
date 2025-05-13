@@ -138,4 +138,23 @@ public extension CVNumber {
         let slicedStr = "\(base.description.prefix(maxSize))"
         return "\(slicedStr)\(unit)"
     }
+    
+    func adaptiveFractionFormat(min: Int, max: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.roundingMode = .down
+        formatter.minimumFractionDigits = min
+        
+        let base = double
+        
+        for fraction in min...max {
+            formatter.maximumFractionDigits = fraction
+            if let numString = formatter.string(from: base as NSNumber) {
+                if numString.last == "0" { continue }
+                else {
+                    return numString
+                }
+            }
+        }
+        return roundDecimalPlaces(exact: max)
+    }
 }

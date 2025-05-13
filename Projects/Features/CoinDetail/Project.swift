@@ -72,6 +72,7 @@ let project = Project(
             resources: ["Feature/Resources/**"],
             dependencies: [
                 D.Feature.BaseFeature,
+                D.Shared.I18N,
                 D.Shared.AlertShooter,
                 D.Shared.WebSocketManagementHelper,
             ]

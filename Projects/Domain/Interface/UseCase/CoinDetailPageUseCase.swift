@@ -8,6 +8,7 @@
 import Combine
 
 public protocol CoinDetailPageUseCase {
+    func getExchangeRate(to: CurrencyType) async -> Double?
     func getOrderbookTable(symbolPair: String, rowCount: UInt) -> AnyPublisher<OrderbookTableVO, Error>
     func getRecentTrade(symbolPair: String, maxRowCount: UInt) -> AnyPublisher<[CoinTradeVO], Never>
     func get24hTickerChange(symbolPair: String) -> AsyncStream<Twenty4HourTickerForSymbolVO>

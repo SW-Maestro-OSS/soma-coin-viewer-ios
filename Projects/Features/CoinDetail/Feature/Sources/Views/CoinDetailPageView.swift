@@ -57,7 +57,7 @@ struct CoinDetailPageView: View {
                 Text(viewModel.state.symbolText)
                     .font(.title)
                     .foregroundStyle(.black)
-                PriceChangePercentView(renderObject: $viewModel.state.priceChagePercentInfo)
+                PriceChangePercentView(renderObject: $viewModel.state.priceChangePercentInfo)
                     .padding(.bottom, 3)
             }
             Spacer()
@@ -76,11 +76,11 @@ struct CoinDetailPageView: View {
     private func orderbookTableContent() -> some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Qty")
+                Text(viewModel.state.orderbookTableColumnTitleRO?.qtyText ?? "-")
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text("Price")
+                Text(viewModel.state.orderbookTableColumnTitleRO?.priceText ?? "-")
                     .frame(maxWidth: .infinity, alignment: .center)
-                Text("Qty")
+                Text(viewModel.state.orderbookTableColumnTitleRO?.qtyText ?? "-")
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
             .font(.subheadline.bold())
@@ -111,7 +111,10 @@ struct CoinDetailPageView: View {
     
     @ViewBuilder
     private func recentTradeContent() -> some View {
-        RecentTradeTableView(trades: $viewModel.state.trades)
+        RecentTradeTableView(
+            columns: $viewModel.state.coinTradeTableColumnTitleRO,
+            trades: $viewModel.state.trades
+        )
             .frame(minHeight: 150)
             .skeleton(presentOrigin: viewModel.state.isLoaded)
     }

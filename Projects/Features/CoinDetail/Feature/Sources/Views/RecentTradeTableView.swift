@@ -9,17 +9,18 @@ import SwiftUI
 
 struct RecentTradeTableView: View {
     
+    @Binding var columns: CoinTradeTableColumnTitleRO?
     @Binding var trades: [CoinTradeRO]
     
     var body: some View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Text("Price")
+                Text(columns?.priceText ?? "-")
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text("Qty")
+                Text(columns?.qtyText ?? "-")
                     .frame(maxWidth: .infinity, alignment: .center)
-                Text("Time")
+                Text(columns?.timeText ?? "-")
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
             .font(.subheadline.bold())

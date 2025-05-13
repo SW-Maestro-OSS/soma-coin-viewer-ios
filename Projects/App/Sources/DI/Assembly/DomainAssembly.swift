@@ -37,7 +37,8 @@ class DomainAssembly: Assembly {
             DefaultCoinDetailPageUseCase(
                 orderbookRepository: resolver.resolve(OrderbookRepository.self)!,
                 singleTickerRepository: resolver.resolve(SingleMarketTickerRepository.self)!,
-                coinTradeRepository: resolver.resolve(CoinTradeRepository.self)!
+                coinTradeRepository: resolver.resolve(CoinTradeRepository.self)!,
+                exchangeRateRepository: resolver.resolve(ExchangeRateRepository.self)!
             )
         }
     }

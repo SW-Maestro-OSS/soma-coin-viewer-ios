@@ -7,12 +7,14 @@
 
 import Foundation
 
+import CoinDetailFeatureTesting
 import DomainInterface
 import Domain
 import DataSource
 import Repository
 import WebSocketManagementHelper
 import AlertShooter
+import I18N
 
 import Swinject
 
@@ -46,6 +48,9 @@ public class Assemblies: Assembly {
             )
         }
         .inObjectScope(.container)
+        container.register(I18NManager.self) { _ in
+            DefaultI18NManager(repository: DefaultUserConfigurationRepository())
+        }
         
         // MARK: Repository
         container.register(OrderbookRepository.self) { _ in
@@ -57,13 +62,17 @@ public class Assemblies: Assembly {
         container.register(CoinTradeRepository.self) { _ in
             BinanceCoinTradeRepository()
         }
+        container.register(ExchangeRateRepository.self) { _ in
+            FakeExchangeRateRepository()
+        }
         
         // MARK: UseCase
         container.register(CoinDetailPageUseCase.self) { resolver in
             DefaultCoinDetailPageUseCase(
                 orderbookRepository: resolver.resolve(OrderbookRepository.self)!,
                 singleTickerRepository: resolver.resolve(SingleMarketTickerRepository.self)!,
-                coinTradeRepository: resolver.resolve(CoinTradeRepository.self)!
+                coinTradeRepository: resolver.resolve(CoinTradeRepository.self)!,
+                exchangeRateRepository: resolver.resolve(ExchangeRateRepository.self)!
             )
         }
     }

@@ -1,6 +1,0 @@
-//
-//  Testing.swift
-//
-//
-
-import Foundation
