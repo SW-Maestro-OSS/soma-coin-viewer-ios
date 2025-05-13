@@ -33,10 +33,7 @@
 <table>
   <tr>
     <td>
-      <b>화폐 동적변경</b>
-    </td>
-    <td>
-      <b>언어 동적변경</b>
+      <b>언어 및 화폐 동적변경</b>
     </td>
     <td>
       <b>리스트 타입 동적변경</b>
@@ -44,13 +41,10 @@
   </tr>
   <tr>
     <td>
-       <img src="https://github.com/user-attachments/assets/5cd0509a-e2b2-4692-a1c2-f9bdd1475d7b" width=200 />
+       <img src="https://github.com/user-attachments/assets/63c9e82c-fcc0-4b8b-a2ed-eb270c5a4374" width=300 />
     </td>
     <td>
-      <img src="https://github.com/user-attachments/assets/30b978f1-482f-4add-ba09-182f841f67b2" width=200 />
-    </td>
-    <td>
-      <img src="https://github.com/user-attachments/assets/c15a0947-df8f-46d7-b976-1985bc607f72" width=200 />
+      <img src="https://github.com/user-attachments/assets/977015c2-e953-49ac-8ac4-c22180a55651" width=300 />
     </td>
   </tr>
 </table>
