@@ -31,9 +31,11 @@ enum CoinDetailPageAction {
     case getBackToForeground
     
     case tickerInfoFetched(entity: Twenty4HourTickerForSymbolVO)
-    case updateOrderbook(bids: [Orderbook], asks: [Orderbook])
+    case orderbookFetched(table: OrderbookTableVO)
+    case updateOrderbook(bids: [Orderbook], asks: [Orderbook], exchangeRateInfo: ExchangeRateInfo)
     case updateTickerInfo(entity: Twenty4HourTickerForSymbolVO, exchangeRateInfo: ExchangeRateInfo)
     case updateTrades(trades: [CoinTradeVO])
+    case updateStaticUI(languageType: LanguageType, currencyType: CurrencyType)
 }
 
 final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewModelable {
@@ -101,7 +103,16 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                     .recentTrade(symbolPair: symbolPair)
                 ], mustDeliver: true)
             }
-            return Just(action).eraseToAnyPublisher()
+            return Just(action)
+                .unretainedOnly(self)
+                .asyncTransform { vm in
+                    let lanType = vm.i18NManager.getLanguageType()
+                    let curType = vm.i18NManager.getCurrencyType()
+                    return Action.updateStaticUI(
+                        languageType: lanType,
+                        currencyType: curType
+                    )
+                }
             
         case .onDisappear:
             // 연결 스트림 종료
@@ -144,6 +155,21 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                         )
                     )
                 }
+        case .orderbookFetched(let table):
+            return Just(table)
+                .unretained(self)
+                .asyncTransform { vm, entity in
+                    let currencyType = vm.i18NManager.getCurrencyType()
+                    let rate = await vm.useCase.getExchangeRate(to: currencyType)
+                    return Action.updateOrderbook(
+                        bids: table.bidOrderbooks,
+                        asks: table.askOrderbooks,
+                        exchangeRateInfo: .init(
+                            currentType: currencyType,
+                            rate: rate ?? 1.0
+                        )
+                    )
+                }
         default:
             break
         }
@@ -153,13 +179,36 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     func reduce(_ action: CoinDetailPageAction, state: State) -> State {
         var newState = state
         switch action {
-        case .updateOrderbook(let bids, let asks):
+        case .updateStaticUI(let languageType, let currencyType):
+            let priceTitleText = LocalizedStringProvider.instance().getString(
+                key: LocalizedStrings.columnPriceTitle.key,
+                lanCode: languageType.lanCode
+            ) + "(\(currencyType.symbol))"
+            let qtyTitleText = LocalizedStringProvider.instance().getString(
+                key: LocalizedStrings.columnQtyTitle.key,
+                lanCode: languageType.lanCode
+            )
+            newState.orderbookTableColumnTitleRO = .init(
+                qtyText: qtyTitleText,
+                priceText: priceTitleText
+            )
+        case .updateOrderbook(let bids, let asks, let exchangeRateInfo):
             guard let biggestQuantity = (bids + asks).map(\.quantity).max() else { break }
             newState.bidOrderbooks = bids.map {
-                transform(biggestQuantity: biggestQuantity, orderbook: $0, type: .bid)
+                createOrderbookCellRO(
+                    biggestQuantity: biggestQuantity,
+                    orderbook: $0,
+                    type: .bid,
+                    exchangeRateInfo: exchangeRateInfo
+                )
             }
             newState.askOrderbooks = asks.map {
-                transform(biggestQuantity: biggestQuantity, orderbook: $0, type: .ask)
+                createOrderbookCellRO(
+                    biggestQuantity: biggestQuantity,
+                    orderbook: $0,
+                    type: .ask,
+                    exchangeRateInfo: exchangeRateInfo
+                )
             }
             
         case .updateTickerInfo(let entity, let exchangeRateInfo):
@@ -187,6 +236,10 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
         case tickerBestBidPrice
         case tickerBestAskPrice
         
+        case columnQtyTitle
+        case columnPriceTitle
+        case columnTimeTitle
+        
         var key: String {
             switch self {
             case .tickerCurrentPrice:
@@ -195,7 +248,28 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 "CoinDetailPage_ticker_bestBidPrice"
             case .tickerBestAskPrice:
                 "CoinDetailPage_ticker_bestAskPrice"
+            case .columnQtyTitle:
+                "CoinDetailPage_columnTitle_qty"
+            case .columnTimeTitle:
+                "CoinDetailPage_columnTitle_time"
+            case .columnPriceTitle:
+                "CoinDetailPage_columnTitle_price"
             }
+        }
+    }
+    
+    
+    private func createPriceText(info: ExchangeRateInfo, price: CVNumber, symbolPresentable: Bool = true) -> String {
+        let priceText = CVNumber(price.double * info.rate)
+            .adaptiveFractionFormat(min: 2, max: 8)
+        if symbolPresentable {
+            if info.currentType.isPrefix {
+                return "\(info.currentType.symbol) \(priceText)"
+            } else {
+                return "\(priceText) \(info.currentType.symbol)"
+            }
+        } else {
+            return priceText
         }
     }
 }
@@ -208,30 +282,6 @@ private extension CoinDetailPageViewModel {
         exchangeRateInfo: ExchangeRateInfo,
         entity: Twenty4HourTickerForSymbolVO) -> TickerInfoRO {
             
-        let pricePrefixer: (CurrencyType, String) -> String = { type, price in
-            if type.isPrefix {
-                return "\(type.symbol) \(price)"
-            } else {
-                return "\(price) \(type.symbol)"
-            }
-        }
-            
-        let currentPriceText = pricePrefixer(
-            exchangeRateInfo.currentType,
-            CVNumber(entity.price.double * exchangeRateInfo.rate)
-                .adaptiveFractionFormat(min: 2, max: 8)
-        )
-        let bestBidPriceText = pricePrefixer(
-            exchangeRateInfo.currentType,
-            CVNumber(entity.bestBidPrice.double * exchangeRateInfo.rate)
-                .adaptiveFractionFormat(min: 2, max: 8)
-        )
-        let bestAskPriceText = pricePrefixer(
-            exchangeRateInfo.currentType,
-            CVNumber(entity.bestAskPrice.double * exchangeRateInfo.rate)
-                .adaptiveFractionFormat(min: 2, max: 8)
-        )
-        
         let strProvider = LocalizedStringProvider.instance()
         return .init(
             currentPriceTitleText: strProvider.getString(
@@ -246,9 +296,18 @@ private extension CoinDetailPageViewModel {
                 key: LocalizedStrings.tickerBestAskPrice.key,
                 lanCode: lanT.lanCode
             ),
-            currentPriceText: currentPriceText,
-            bestBidPriceText: bestBidPriceText,
-            bestAskPriceText: bestAskPriceText
+            currentPriceText: createPriceText(
+                info: exchangeRateInfo,
+                price: entity.price
+            ),
+            bestBidPriceText: createPriceText(
+                info: exchangeRateInfo,
+                price: entity.bestBidPrice
+            ),
+            bestAskPriceText: createPriceText(
+                info: exchangeRateInfo,
+                price: entity.bestAskPrice
+            )
         )
     }
     
@@ -292,18 +351,25 @@ private extension CoinDetailPageViewModel {
                 return Just(OrderbookTableVO(bidOrderbooks: [], askOrderbooks: []))
             })
             .map { table in
-                Action.updateOrderbook(
-                    bids: table.bidOrderbooks,
-                    asks: table.askOrderbooks
-                )
+                Action.orderbookFetched(table: table)
             }
             .subscribe(self.action)
     }
     
-    func transform(biggestQuantity: CVNumber, orderbook: Orderbook, type: OrderbookType) -> OrderbookCellRO {
-        return OrderbookCellRO(
+    func createOrderbookCellRO(
+        biggestQuantity: CVNumber,
+        orderbook: Orderbook,
+        type: OrderbookType,
+        exchangeRateInfo: ExchangeRateInfo
+    ) -> OrderbookCellRO {
+        
+        OrderbookCellRO(
             type: type,
-            priceText: orderbook.price.description,
+            priceText: createPriceText(
+                info: exchangeRateInfo,
+                price: orderbook.price,
+                symbolPresentable: false
+            ),
             quantityText: orderbook.quantity.formatCompactNumberWithSuffix(),
             relativePercentOfQuantity: orderbook.quantity.double / biggestQuantity.double
         )
@@ -351,6 +417,7 @@ extension CoinDetailPageViewModel {
         
         // Orderbook table
         let fixedOrderbookRowCount: Int
+        var orderbookTableColumnTitleRO: OrderbookTableColumnTitleRO?
         var bidOrderbooks: [OrderbookCellRO] = []
         var askOrderbooks: [OrderbookCellRO] = []
         
@@ -360,6 +427,7 @@ extension CoinDetailPageViewModel {
         // View Loading
         var isLoaded: Bool {
             tickerInfo != nil &&
+            orderbookTableColumnTitleRO != nil &&
             !bidOrderbooks.isEmpty &&
             !askOrderbooks.isEmpty
         }

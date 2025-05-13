@@ -76,11 +76,11 @@ struct CoinDetailPageView: View {
     private func orderbookTableContent() -> some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Qty")
+                Text(viewModel.state.orderbookTableColumnTitleRO?.qtyText ?? "")
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text("Price")
+                Text(viewModel.state.orderbookTableColumnTitleRO?.priceText ?? "")
                     .frame(maxWidth: .infinity, alignment: .center)
-                Text("Qty")
+                Text(viewModel.state.orderbookTableColumnTitleRO?.qtyText ?? "")
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
             .font(.subheadline.bold())
