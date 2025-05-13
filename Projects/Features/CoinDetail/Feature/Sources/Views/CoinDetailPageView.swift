@@ -57,7 +57,7 @@ struct CoinDetailPageView: View {
                 Text(viewModel.state.symbolText)
                     .font(.title)
                     .foregroundStyle(.black)
-                PriceChangePercentView(renderObject: $viewModel.state.priceChagePercentInfo)
+                PriceChangePercentView(renderObject: $viewModel.state.priceChangePercentInfo)
                     .padding(.bottom, 3)
             }
             Spacer()

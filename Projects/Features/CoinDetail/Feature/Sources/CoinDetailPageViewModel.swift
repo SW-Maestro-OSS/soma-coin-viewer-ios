@@ -240,7 +240,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
             
         case .updateTickerInfo(let entity, let exchangeRateInfo):
             let (changePercentText, changeType) = createChangePercentTextConfig(percent: entity.changedPercent)
-            newState.priceChagePercentInfo = .init(
+            newState.priceChangePercentInfo = .init(
                 changeType: changeType,
                 percentText: changePercentText
             )
@@ -445,7 +445,7 @@ extension CoinDetailPageViewModel {
         let symbolText: String
         
         // 24h ticker
-        var priceChagePercentInfo: PriceChangePercentRO?
+        var priceChangePercentInfo: PriceChangePercentRO?
         var tickerInfo: TickerInfoRO?
         
         // Orderbook table
