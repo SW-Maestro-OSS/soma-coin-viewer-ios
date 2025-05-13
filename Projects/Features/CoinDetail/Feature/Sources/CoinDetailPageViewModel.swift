@@ -32,9 +32,10 @@ enum CoinDetailPageAction {
     
     case tickerInfoFetched(entity: Twenty4HourTickerForSymbolVO)
     case orderbookFetched(table: OrderbookTableVO)
+    case coinTradesFetched(trades: [CoinTradeVO])
     case updateOrderbook(bids: [Orderbook], asks: [Orderbook], exchangeRateInfo: ExchangeRateInfo)
     case updateTickerInfo(entity: Twenty4HourTickerForSymbolVO, exchangeRateInfo: ExchangeRateInfo)
-    case updateTrades(trades: [CoinTradeVO])
+    case updateCoinTrades(trades: [CoinTradeVO], exchangeRateInfo: ExchangeRateInfo)
     case updateStaticUI(languageType: LanguageType, currencyType: CurrencyType)
 }
 
@@ -155,6 +156,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                         )
                     )
                 }
+            
         case .orderbookFetched(let table):
             return Just(table)
                 .unretained(self)
@@ -164,6 +166,21 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                     return Action.updateOrderbook(
                         bids: table.bidOrderbooks,
                         asks: table.askOrderbooks,
+                        exchangeRateInfo: .init(
+                            currentType: currencyType,
+                            rate: rate ?? 1.0
+                        )
+                    )
+                }
+            
+        case .coinTradesFetched(let trades):
+            return Just(trades)
+                .unretained(self)
+                .asyncTransform { vm, entity in
+                    let currencyType = vm.i18NManager.getCurrencyType()
+                    let rate = await vm.useCase.getExchangeRate(to: currencyType)
+                    return Action.updateCoinTrades(
+                        trades: trades,
                         exchangeRateInfo: .init(
                             currentType: currencyType,
                             rate: rate ?? 1.0
@@ -192,6 +209,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 qtyText: qtyTitleText,
                 priceText: priceTitleText
             )
+            
         case .updateOrderbook(let bids, let asks, let exchangeRateInfo):
             guard let biggestQuantity = (bids + asks).map(\.quantity).max() else { break }
             newState.bidOrderbooks = bids.map {
@@ -223,8 +241,10 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 entity: entity
             )
             
-        case .updateTrades(let trades):
-            newState.trades = trades.map(convertToRO)
+        case .updateCoinTrades(let trades, let exchangeRateInfo):
+            newState.trades = trades.map { entity in
+                createCoinTradeRO(entity: entity, exchangeRateInfo: exchangeRateInfo)
+            }
         default:
             break
         }
@@ -384,17 +404,21 @@ private extension CoinDetailPageViewModel {
         streamUpdateObserverStore[.recentTrade] = useCase
             .getRecentTrade(symbolPair: symbolPair, maxRowCount: UInt(recentTradeRowCount))
             .throttle(for: 1.0, scheduler: DispatchQueue.global(), latest: true)
-            .map { Action.updateTrades(trades: $0) }
+            .map { Action.coinTradesFetched(trades: $0) }
             .subscribe(self.action)
     }
     
-    func convertToRO(_ entity: CoinTradeVO) -> CoinTradeRO {
+    func createCoinTradeRO(entity: CoinTradeVO, exchangeRateInfo: ExchangeRateInfo) -> CoinTradeRO {
         let dateFormatter = DateFormatter()
-        dateFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        dateFormatter.timeZone = .current
         dateFormatter.dateFormat = "HH:mm:ss"
         let renderObject: CoinTradeRO = .init(
             id: entity.tradeId,
-            priceText: entity.price.description,
+            priceText: createPriceText(
+                info: exchangeRateInfo,
+                price: entity.price,
+                symbolPresentable: false
+            ),
             quantityText: entity.quantity.formatCompactNumberWithSuffix(),
             timeText: dateFormatter.string(from: entity.tradeTime),
             textColor: entity.tradeType == .buy ? .green : .red,
