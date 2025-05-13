@@ -205,9 +205,18 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
                 key: LocalizedStrings.columnQtyTitle.key,
                 lanCode: languageType.lanCode
             )
+            let timeTitleText = LocalizedStringProvider.instance().getString(
+                key: LocalizedStrings.columnTimeTitle.key,
+                lanCode: languageType.lanCode
+            )
             newState.orderbookTableColumnTitleRO = .init(
                 qtyText: qtyTitleText,
                 priceText: priceTitleText
+            )
+            newState.coinTradeTableColumnTitleRO = .init(
+                priceText: priceTitleText,
+                qtyText: qtyTitleText,
+                timeText: timeTitleText
             )
             
         case .updateOrderbook(let bids, let asks, let exchangeRateInfo):
@@ -446,12 +455,14 @@ extension CoinDetailPageViewModel {
         var askOrderbooks: [OrderbookCellRO] = []
         
         // Recent trade
+        var coinTradeTableColumnTitleRO: CoinTradeTableColumnTitleRO?
         var trades: [CoinTradeRO] = []
         
         // View Loading
         var isLoaded: Bool {
             tickerInfo != nil &&
             orderbookTableColumnTitleRO != nil &&
+            coinTradeTableColumnTitleRO != nil &&
             !bidOrderbooks.isEmpty &&
             !askOrderbooks.isEmpty
         }
