@@ -5,7 +5,7 @@
 //  Created by choijunios on 5/14/25.
 //
 
-public enum SettingPageContents: String {
+public enum SettingPageContents: String, Sendable {
     case optionListCurrencyTitle
     case optionListCurrencySelectionTitle
     case optionListLanguageTitle

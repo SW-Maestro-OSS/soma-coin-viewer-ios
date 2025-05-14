@@ -5,7 +5,7 @@
 //  Created by choijunios on 5/14/25.
 //
 
-public enum CoinDetailPageContents: String {
+public enum CoinDetailPageContents: String, Sendable {
     case tickerTableCurrnetPriceColumnTitle
     case tickerTableBestBidPriceColumnTitle
     case tickerTableBestAskPriceColumnTitle

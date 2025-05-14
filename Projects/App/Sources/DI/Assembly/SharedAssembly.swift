@@ -42,7 +42,8 @@ public class SharedAssembly: Assembly {
         // MARK: AlertShooter
         container.register(AlertShooter.self) { resolver in
             DefaultAlertShooter(
-                i18NManager: resolver.resolve(I18NManager.self)!
+                i18NManager: resolver.resolve(I18NManager.self)!,
+                localizedStrProvider: resolver.resolve(LocalizedStrProvider.self)!
             )
         }
         .inObjectScope(.container)

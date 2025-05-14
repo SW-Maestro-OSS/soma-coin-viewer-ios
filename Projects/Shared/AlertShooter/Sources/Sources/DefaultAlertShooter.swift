@@ -10,11 +10,18 @@ import SwiftUI
 import I18N
 
 public class DefaultAlertShooter: AlertShooter {
+    // Dependency
     private var i18NManager: I18NManager
+    private var localizedStrProvider: LocalizedStrProvider
+    
+    
+    // Util
     private let shootQueue: DispatchQueue = .init(label: "shootQueue")
     
-    public init(i18NManager: I18NManager) {
+    
+    public init(i18NManager: I18NManager, localizedStrProvider: LocalizedStrProvider) {
         self.i18NManager = i18NManager
+        self.localizedStrProvider = localizedStrProvider
         super.init()
     }
     
@@ -29,11 +36,11 @@ public class DefaultAlertShooter: AlertShooter {
     }
     
     public override func createRO(model: AlertModel) -> AlertRO {
-        let currentLan = i18NManager.getLanguageType()
+        let languageType = i18NManager.getLanguageType()
         let alertActionROs = model.actions.map { actionModel in
-            let titleText = LocalizedStringProvider.instance().getString(
+            let titleText = localizedStrProvider.getString(
                 key: actionModel.titleKey,
-                lanCode: currentLan.lanCode
+                languageType: languageType
             )
             var titleTextColor: Color!
             switch actionModel.role {
@@ -52,15 +59,15 @@ public class DefaultAlertShooter: AlertShooter {
         // Alert RO
         var messageText: String = ""
         if let messageKey = model.messageKey {
-            messageText = LocalizedStringProvider.instance().getString(
+            messageText = localizedStrProvider.getString(
                 key: messageKey,
-                lanCode: currentLan.lanCode
+                languageType: languageType
             )
         }
         let alertRO = AlertRO(
-            titleText: LocalizedStringProvider.instance().getString(
+            titleText: localizedStrProvider.getString(
                 key: model.titleKey,
-                lanCode: currentLan.lanCode
+                languageType: languageType
             ),
             messageText: messageText,
             actions: alertActionROs

@@ -5,7 +5,7 @@
 //  Created by choijunios on 5/14/25.
 //
 
-public enum AllMarketTickerPageContents: String {
+public enum AllMarketTickerPageContents: String, Sendable {
     case tableSymbolColumnTitle
     case tablePriceColumnTitle
     case table24hchangeColumnTitle

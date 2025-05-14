@@ -5,21 +5,25 @@
 //  Created by choijunios on 5/14/25.
 //
 
-public enum LocalizedStrKey {
+public enum LocalizedStrKey: Sendable {
     case pageKey(page: Page)
+    case alertKey(contents: AlertContents)
     
     var key: String {
         switch self {
         case .pageKey(let page):
             "page_\(page.keyPart)"
+        case .alertKey(let contents):
+            "alert_\(contents.keyPart)"
         }
     }
 }
 
 
 // MARK: Native types
-extension LocalizedStrKey {
-    public enum Page {
+public extension LocalizedStrKey {
+    enum Page: Sendable {
+        case splash(contents: SplashPageContents)
         case tabBar(contents: TabBarPageContents)
         case allMarketTicker(contents: AllMarketTickerPageContents)
         case coinDetail(contents: CoinDetailPageContents)
@@ -28,6 +32,8 @@ extension LocalizedStrKey {
         
         var keyPart: String {
             switch self {
+            case .splash(let contents):
+                "splash_\(contents.keyPart)"
             case .allMarketTicker(let contents):
                 "allMarketTicker_\(contents.keyPart)"
             case .tabBar(let contents):

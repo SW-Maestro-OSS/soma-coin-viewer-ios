@@ -5,14 +5,15 @@
 //  Created by choijunios on 1/31/25.
 //
 
+import I18N
+
 public struct AlertModel: Sendable {
-    
-    // Imformation
-    public let titleKey: String
-    public let messageKey: String?
+    // State
+    public let titleKey: LocalizedStrKey
+    public let messageKey: LocalizedStrKey?
     public private(set) var actions: [AlertAction] = []
     
-    public init(titleKey: String, messageKey: String?) {
+    public init(titleKey: LocalizedStrKey, messageKey: LocalizedStrKey?) {
         self.titleKey = titleKey
         self.messageKey = messageKey
     }
