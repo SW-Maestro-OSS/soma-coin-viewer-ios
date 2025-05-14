@@ -5,15 +5,15 @@
     },
     
     
-    "AllMarketTickerPage_comparator_symbol" : {
+    "page_allMarketTicker_tableSymbolColumnTitle" : {
         "en" : "Symbol",
         "kr" : "심볼",
     },
-    "AllMarketTickerPage_comparator_price" : {
+    "page_allMarketTicker_tablePriceColumnTitle" : {
         "en" : "Price",
         "kr" : "가격",
     },
-    "AllMarketTickerPage_comparator_24hchange" : {
+    "page_allMarketTicker_table24hchangeColumnTitle" : {
         "en" : "24h change",
         "kr" : "24시간 변동",
     },
