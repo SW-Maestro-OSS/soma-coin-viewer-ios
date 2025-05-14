@@ -28,6 +28,11 @@ public class SharedAssembly: Assembly {
         }
         .inObjectScope(.container)
         
+        // MARK: DefaultLocalizedStrProvider
+        container.register(LocalizedStrProvider.self) { resolver in
+            DefaultLocalizedStrProvider(dataSource: DefaultLocalizedStringDataSource())
+        }
+        
         //MARK: I18NManager
         container.register(I18NManager.self) { resolver in
             DefaultI18NManager(repository: resolver.resolve(UserConfigurationRepository.self)!)

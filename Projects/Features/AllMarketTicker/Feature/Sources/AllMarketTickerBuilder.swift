@@ -22,9 +22,10 @@ public final class AllMarketTickerBuilder {
     public func build(listener: AllMarketTickerPageListener) -> AllMarketTickerRoutable {
         let viewModel = AllMarketTickerViewModel(
             useCase: DependencyInjector.shared.resolve(),
-            i18NManager: DependencyInjector.shared.resolve(),
             alertShooter: DependencyInjector.shared.resolve(),
-            webSocketHelper: DependencyInjector.shared.resolve()
+            webSocketHelper: DependencyInjector.shared.resolve(),
+            i18NManager: DependencyInjector.shared.resolve(),
+            localizedStrProvider: DependencyInjector.shared.resolve()
         )
         viewModel.listener = listener
         let view = AllMarketTickerView(viewModel: viewModel)
