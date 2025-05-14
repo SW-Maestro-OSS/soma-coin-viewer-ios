@@ -24,7 +24,8 @@ public final class RootBuilder {
         let viewModel = RootViewModel(
             useCase: DependencyInjector.shared.resolve(),
             alertShooter: DependencyInjector.shared.resolve(),
-            i18NManager: DependencyInjector.shared.resolve()
+            i18NManager: DependencyInjector.shared.resolve(),
+            localizedStrProvider: DependencyInjector.shared.resolve()
         )
         let view = RootView(viewModel: viewModel)
         let tabBarBuilder = TabBarBuilder()

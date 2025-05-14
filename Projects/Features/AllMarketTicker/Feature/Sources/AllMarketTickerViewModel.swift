@@ -48,9 +48,10 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     
     // Dependency
     private let useCase: AllMarketTickersUseCase
-    private let i18NManager: I18NManager
     private let alertShooter: AlertShooter
     private let webSocketHelper: WebSocketManagementHelper
+    private let i18NManager: I18NManager
+    private let localizedStrProvider: LocalizedStrProvider
     
     
     // Router
@@ -75,14 +76,16 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     
     init(
         useCase: AllMarketTickersUseCase,
-        i18NManager: I18NManager,
         alertShooter: AlertShooter,
-        webSocketHelper: WebSocketManagementHelper
+        webSocketHelper: WebSocketManagementHelper,
+        i18NManager: I18NManager,
+        localizedStrProvider: LocalizedStrProvider
     ) {
         self.useCase = useCase
-        self.i18NManager = i18NManager
         self.alertShooter = alertShooter
         self.webSocketHelper = webSocketHelper
+        self.i18NManager = i18NManager
+        self.localizedStrProvider = localizedStrProvider
         
         let sortSelectionCells = createInitialSortSelectonROs()
         let initialState: State = .init(sortSelectionCells: sortSelectionCells, tickerRowCount: Int(tickerRowCount))
@@ -346,24 +349,20 @@ private extension AllMarketTickerViewModel {
     func getSortSelectionButtonText(sortType type: SortSelectionCellType, languageType: LanguageType, currenyType: CurrencyType) -> String {
         switch type {
         case .symbol:
-            let localizedString = LocalizedStringProvider.instance().getString(
-                key: type.displayTextKey,
-                lanCode: languageType.lanCode
+            return localizedStrProvider.getString(
+                key: .pageKey(page: .allMarketTicker(contents: .tableSymbolColumnTitle)),
+                languageType: languageType
             )
-            return localizedString
         case .price:
-            var localizedString = LocalizedStringProvider.instance().getString(
-                key: type.displayTextKey,
-                lanCode: languageType.lanCode
-            )
-            localizedString = "\(localizedString)(\(currenyType.symbol))"
-            return localizedString
+            return localizedStrProvider.getString(
+                key: .pageKey(page: .allMarketTicker(contents: .tablePriceColumnTitle)),
+                languageType: languageType
+            )+"(\(currenyType.symbol))"
         case .changeIn24h:
-            let localizedString = LocalizedStringProvider.instance().getString(
-                key: type.displayTextKey,
-                lanCode: languageType.lanCode
+            return localizedStrProvider.getString(
+                key: .pageKey(page: .allMarketTicker(contents: .table24hchangeColumnTitle)),
+                languageType: languageType
             )
-            return localizedString
         }
     }
 }

@@ -7,13 +7,15 @@
 
 import Foundation
 
+import I18N
+
 public struct AlertAction: Sendable, Identifiable {
     public let id: UUID = .init()
-    public let titleKey: String
+    public let titleKey: LocalizedStrKey
     public let role: Role
     public let action: (@Sendable () -> Void)?
     
-    public init(titleKey: String, role: Role = .normal, action: (@Sendable () -> Void)? = nil) {
+    public init(titleKey: LocalizedStrKey, role: Role = .normal, action: (@Sendable () -> Void)? = nil) {
         self.titleKey = titleKey
         self.role = role
         self.action = action

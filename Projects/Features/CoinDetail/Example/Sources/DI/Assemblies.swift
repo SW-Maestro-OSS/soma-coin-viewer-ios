@@ -38,6 +38,9 @@ public class Assemblies: Assembly {
         }
         
         // MARK: Shared
+        container.register(LocalizedStrProvider.self) { resolver in
+            DefaultLocalizedStrProvider(dataSource: DefaultLocalizedStringDataSource())
+        }
         container.register(AlertShooter.self) { _ in AlertShooter() }
         .inObjectScope(.container)
         container.register(WebSocketManagementHelper.self) { resolver in

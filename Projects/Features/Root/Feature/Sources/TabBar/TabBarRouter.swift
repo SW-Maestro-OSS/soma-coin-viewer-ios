@@ -73,7 +73,7 @@ extension TabBarRouter {
     
     func tabBarPage(_ page: TabBarPage) -> AnyView {
         switch page {
-        case .allMarketTicker:
+        case .market:
             getAllMarketTickerPageRouter().view
         case .setting:
             getSettingPageRouter().view

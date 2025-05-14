@@ -29,7 +29,11 @@ public class DefaultWebSocketManagementHelper: WebSocketManagementHelper, WebSoc
     private let subscribedStreamManageQueue: DispatchQueue = .init(label: "com.WebSocketManagementHelper")
     private var store: Set<AnyCancellable> = .init()
     
-    public init(webSocketService: WebSocketService, streamDecoder: StreamDecoder, alertShootable: AlertShootable) {
+    public init(
+        webSocketService: WebSocketService,
+        streamDecoder: StreamDecoder,
+        alertShootable: AlertShootable
+    ) {
         self.webSocketService = webSocketService
         self.streamDecoder = streamDecoder
         self.alertShootable = alertShootable
@@ -67,15 +71,15 @@ public extension DefaultWebSocketManagementHelper {
             case .failure(let error):
                 printIfDebug("\(Self.self) 웹소켓 연결실패 \(error.localizedDescription)")
                 var alertModel = AlertModel(
-                    titleKey: TextKey.Alert.Title.webSocketError.rawValue,
-                    messageKey: TextKey.Alert.Message.unintendedDisconnection.rawValue
+                    titleKey: .alertKey(contents: .title(.webSocketError)),
+                    messageKey: .alertKey(contents: .message(.unintendedDisconnection))
                 )
                 alertModel.add(action: .init(
-                    titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
+                    titleKey: .alertKey(contents: .actionTitle(.cancel)),
                     role: .cancel
                 ))
                 alertModel.add(action: .init(
-                    titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+                    titleKey: .alertKey(contents: .actionTitle(.retry))
                 ) { [weak self] in
                     guard let self else { return }
                     requestConnection(connectionType: .recoverPreviousStreams)
@@ -199,15 +203,16 @@ public extension DefaultWebSocketManagementHelper {
         case .internetConnectionError(let error):
             printIfDebug("\(Self.self) 인터넷 연결오류 \(error?.localizedDescription ?? "")")
             var alertModel = AlertModel(
-                titleKey: TextKey.Alert.Title.internetConnectionError.rawValue,
-                messageKey: TextKey.Alert.Message.internetConnectionFailed.rawValue
+                titleKey: .alertKey(contents: .title(.internetConnectionError)),
+                messageKey: .alertKey(contents: .message(.internetConnectionFailed))
+                
             )
             alertModel.add(action: .init(
-                titleKey: TextKey.Alert.ActionTitle.cancel.rawValue,
+                titleKey: .alertKey(contents: .actionTitle(.cancel)),
                 role: .cancel
             ))
             alertModel.add(action: .init(
-                titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+                titleKey: .alertKey(contents: .actionTitle(.retry))
             ) { [weak self] in
                 guard let self else { return }
                 requestConnection(connectionType: .recoverPreviousStreams)
@@ -216,15 +221,15 @@ public extension DefaultWebSocketManagementHelper {
             break
         case .serverIsBusy, .tooManyRequests:
             var alertModel = AlertModel(
-                titleKey: TextKey.Alert.Title.webSocketError.rawValue,
-                messageKey: TextKey.Alert.Message.webSocketServerIsUnstable.rawValue
+                titleKey: .alertKey(contents: .title(.webSocketError)),
+                messageKey: .alertKey(contents: .message(.webSocketServerIsUnstable))
             )
             alertModel.add(action: .init(
-                titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
+                titleKey: .alertKey(contents: .actionTitle(.ignore)),
                 role: .cancel
             ))
             alertModel.add(action: .init(
-                titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+                titleKey: .alertKey(contents: .actionTitle(.retry))
             ) { [weak self] in
                 guard let self else { return }
                 requestConnection(connectionType: .recoverPreviousStreams)
@@ -234,11 +239,11 @@ public extension DefaultWebSocketManagementHelper {
         case .unknown(let error):
             printIfDebug("\(Self.self) 알 수 없는 오류 \(error?.localizedDescription ?? "")")
             var alertModel = AlertModel(
-                titleKey: TextKey.Alert.Title.webSocketError.rawValue,
-                messageKey: TextKey.Alert.Message.unknownError.rawValue
+                titleKey: .alertKey(contents: .title(.webSocketError)),
+                messageKey: .alertKey(contents: .message(.unknownError))
             )
             alertModel.add(action: .init(
-                titleKey: TextKey.Alert.ActionTitle.cancel.rawValue
+                titleKey: .alertKey(contents: .actionTitle(.cancel))
             ))
             alertShootable.shoot(alertModel)
             break

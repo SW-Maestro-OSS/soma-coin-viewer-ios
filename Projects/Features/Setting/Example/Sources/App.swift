@@ -13,15 +13,11 @@ import CoreUtil
 
 @main
 struct CoinViewerApp : App {
-    
-    @UIApplicationDelegateAdaptor var AppDelegate: AppDelegate
+    @UIApplicationDelegateAdaptor var appDelegate: AppDelegate
     
     var body: some Scene {
         WindowGroup {
-            SettingView(viewModel: .init(
-                i18NManager: DependencyInjector.shared.resolve(),
-                useCase: DependencyInjector.shared.resolve()
-            ))
+            appDelegate.router?.view
         }
     }
 }

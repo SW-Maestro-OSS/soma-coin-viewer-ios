@@ -21,8 +21,13 @@ public protocol SettingPageListener: AnyObject { }
 
 class SettingViewModel: UDFObservableObject, SettingViewModelable {
     // Dependency
-    private let i18NManager: I18NManager
     private let useCase: SettingPageUseCase
+    private let i18NManager: I18NManager
+    private let localizedStrProvider: LocalizedStrProvider
+    
+    
+    // State
+    private var isFirstAppear: Bool = true
     
     
     // Listener
@@ -43,9 +48,15 @@ class SettingViewModel: UDFObservableObject, SettingViewModelable {
     var action : PassthroughSubject<Action, Never> = .init()
     var store : Set<AnyCancellable> = []
     
-    init(i18NManager: I18NManager, useCase: SettingPageUseCase) {
-        self.i18NManager = i18NManager
+    
+    init(
+        useCase: SettingPageUseCase,
+        i18NManager: I18NManager,
+        localizedStrProvider: LocalizedStrProvider
+    ) {
         self.useCase = useCase
+        self.i18NManager = i18NManager
+        self.localizedStrProvider = localizedStrProvider
         
         let initialCurrencyType = i18NManager.getCurrencyType()
         let initialLanType = i18NManager.getLanguageType()
@@ -60,7 +71,6 @@ class SettingViewModel: UDFObservableObject, SettingViewModelable {
         createStateStream()
     }
     
-    private var isFirstAppear: Bool = true
     
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
         switch action {
@@ -112,6 +122,8 @@ class SettingViewModel: UDFObservableObject, SettingViewModelable {
     }
 }
 
+
+// MARK: Setting & Action
 extension SettingViewModel {
     struct State {
         //Store Property
@@ -136,35 +148,52 @@ extension SettingViewModel {
     }
 }
 
+
+// MARK: Cell Render objects
 extension SettingViewModel {
-    
     func createSettingCellROS(with : State) -> [SettingCellRO] {
         let currentState = with
-        let lanCode = currentState.languageType.lanCode
         let settingCellROs = [
             SettingCellRO(
-                cellKey: "Setting_price",
+                cellKey: "setting_currency",
                 cellType: CellType.currencyType(currentState.currencyType),
-                title: LocalizedStringProvider.instance().getString(key: "Setting_price_title", lanCode: lanCode),
-                option: LocalizedStringProvider.instance().getString(key: "Setting_price_option", lanCode: lanCode),
+                title: localizedStrProvider.getString(
+                    key: .pageKey(page: .setting(contents: .optionListCurrencyTitle)),
+                    languageType: currentState.languageType
+                ),
+                option: localizedStrProvider.getString(
+                    key: .pageKey(page: .setting(contents: .optionListCurrencySelectionTitle)),
+                    languageType: currentState.languageType
+                ),
                 isSelected: currentState.currencyType == .won
             ),
             SettingCellRO(
-                cellKey: "Setting_language",
+                cellKey: "setting_language",
                 cellType: CellType.languageType(currentState.languageType),
-                title: LocalizedStringProvider.instance().getString(key: "Setting_language_title", lanCode: lanCode),
-                option: LocalizedStringProvider.instance().getString(key: "Setting_language_option", lanCode: lanCode),
+                title: localizedStrProvider.getString(
+                    key: .pageKey(page: .setting(contents: .optionListLanguageTitle)),
+                    languageType: currentState.languageType
+                ),
+                option: localizedStrProvider.getString(
+                    key: .pageKey(page: .setting(contents: .optionListLanguageSelectionTitle)),
+                    languageType: currentState.languageType
+                ),
                 isSelected: currentState.languageType == .korean
             ),
             SettingCellRO(
-                cellKey: "Setting_grid",
+                cellKey: "setting_gridType",
                 cellType: CellType.gridType(currentState.gridType),
-                title: LocalizedStringProvider.instance().getString(key: "Setting_grid_title", lanCode: lanCode),
-                option: LocalizedStringProvider.instance().getString(key: "Setting_grid_option", lanCode: lanCode),
+                title: localizedStrProvider.getString(
+                    key: .pageKey(page: .setting(contents: .optionListGridTypeTitle)),
+                    languageType: currentState.languageType
+                ),
+                option: localizedStrProvider.getString(
+                    key: .pageKey(page: .setting(contents: .optionListGridTypeSelectionTitle)),
+                    languageType: currentState.languageType
+                ),
                 isSelected: currentState.gridType == .list
             )
         ]
-        
         return settingCellROs
     }
 }

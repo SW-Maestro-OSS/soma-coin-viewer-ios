@@ -42,8 +42,9 @@ enum CoinDetailPageAction {
 final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewModelable {
     // Dependency
     private let useCase: CoinDetailPageUseCase
-    private let i18NManager: I18NManager
     private let webSocketManagementHelper: WebSocketManagementHelper
+    private let i18NManager: I18NManager
+    private let localizedStrProvider: LocalizedStrProvider
     
     
     // Listener
@@ -82,13 +83,16 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     init(
         symbolInfo: CoinSymbolInfo,
         useCase: CoinDetailPageUseCase,
+        webSocketManagementHelper: WebSocketManagementHelper,
         i18NManager: I18NManager,
-        webSocketManagementHelper: WebSocketManagementHelper
+        localizedStrProvider: LocalizedStrProvider
     ) {
         self.symbolInfo = symbolInfo
         self.useCase = useCase
-        self.i18NManager = i18NManager
         self.webSocketManagementHelper = webSocketManagementHelper
+        self.i18NManager = i18NManager
+        self.localizedStrProvider = localizedStrProvider
+        
         self.state = .init(
             symbolText: symbolInfo.pairSymbol.uppercased(),
             fixedOrderbookRowCount: orderbookRowCount
@@ -209,18 +213,21 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
         var newState = state
         switch action {
         case .updateStaticUI(let languageType, let currencyType):
-            let priceTitleText = LocalizedStringProvider.instance().getString(
-                key: LocalizedStrings.columnPriceTitle.key,
-                lanCode: languageType.lanCode
+            let priceTitleText = localizedStrProvider.getString(
+                key: .pageKey(page: .coinDetail(contents: .defaultTablePriceColumnTitle)),
+                languageType: languageType
             ) + "(\(currencyType.symbol))"
-            let qtyTitleText = LocalizedStringProvider.instance().getString(
-                key: LocalizedStrings.columnQtyTitle.key,
-                lanCode: languageType.lanCode
+            
+            let qtyTitleText = localizedStrProvider.getString(
+                key: .pageKey(page: .coinDetail(contents: .defaultTableQtyColumnTitle)),
+                languageType: languageType
             )
-            let timeTitleText = LocalizedStringProvider.instance().getString(
-                key: LocalizedStrings.columnTimeTitle.key,
-                lanCode: languageType.lanCode
+            
+            let timeTitleText = localizedStrProvider.getString(
+                key: .pageKey(page: .coinDetail(contents: .defaultTableTradeTimeColumnTitle)),
+                languageType: languageType
             )
+            
             newState.orderbookTableColumnTitleRO = .init(
                 qtyText: qtyTitleText,
                 priceText: priceTitleText
@@ -272,33 +279,6 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
         return newState
     }
     
-    enum LocalizedStrings {
-        case tickerCurrentPrice
-        case tickerBestBidPrice
-        case tickerBestAskPrice
-        
-        case columnQtyTitle
-        case columnPriceTitle
-        case columnTimeTitle
-        
-        var key: String {
-            switch self {
-            case .tickerCurrentPrice:
-                "CoinDetailPage_ticker_currentPrice"
-            case .tickerBestBidPrice:
-                "CoinDetailPage_ticker_bestBidPrice"
-            case .tickerBestAskPrice:
-                "CoinDetailPage_ticker_bestAskPrice"
-            case .columnQtyTitle:
-                "CoinDetailPage_columnTitle_qty"
-            case .columnTimeTitle:
-                "CoinDetailPage_columnTitle_time"
-            case .columnPriceTitle:
-                "CoinDetailPage_columnTitle_price"
-            }
-        }
-    }
-    
     
     private func createPriceText(info: ExchangeRateInfo, price: CVNumber, symbolPresentable: Bool = true) -> String {
         let priceText = CVNumber(price.double * info.rate)
@@ -319,23 +299,22 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
 // MARK: 24h ticker
 private extension CoinDetailPageViewModel {
     func createTickerInfoRO(
-        languageType lanT: LanguageType,
+        languageType: LanguageType,
         exchangeRateInfo: ExchangeRateInfo,
         entity: Twenty4HourTickerForSymbolVO) -> TickerInfoRO {
             
-        let strProvider = LocalizedStringProvider.instance()
         return .init(
-            currentPriceTitleText: strProvider.getString(
-                key: LocalizedStrings.tickerCurrentPrice.key,
-                lanCode: lanT.lanCode
+            currentPriceTitleText: localizedStrProvider.getString(
+                key: .pageKey(page: .coinDetail(contents: .tickerTableCurrentPriceColumnTitle)),
+                languageType: languageType
             ),
-            bestBidPriceTitleText: strProvider.getString(
-                key: LocalizedStrings.tickerBestBidPrice.key,
-                lanCode: lanT.lanCode
+            bestBidPriceTitleText: localizedStrProvider.getString(
+                key: .pageKey(page: .coinDetail(contents: .tickerTableBestBidPriceColumnTitle)),
+                languageType: languageType
             ),
-            bestAskPriceTitleText: strProvider.getString(
-                key: LocalizedStrings.tickerBestAskPrice.key,
-                lanCode: lanT.lanCode
+            bestAskPriceTitleText: localizedStrProvider.getString(
+                key: .pageKey(page: .coinDetail(contents: .tickerTableBestAskPriceColumnTitle)),
+                languageType: languageType
             ),
             currentPriceText: createPriceText(
                 info: exchangeRateInfo,

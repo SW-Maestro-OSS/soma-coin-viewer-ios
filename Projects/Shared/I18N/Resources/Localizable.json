@@ -1,145 +1,144 @@
 {
-    "LaunchScreen_title" : {
+    "page_splash_title" : {
         "en" : "CoinViewer",
         "kr" : "코인뷰어",
     },
     
     
-    "AllMarketTickerPage_comparator_symbol" : {
+    "page_allMarketTicker_tableSymbolColumnTitle" : {
         "en" : "Symbol",
         "kr" : "심볼",
     },
-    "AllMarketTickerPage_comparator_price" : {
+    "page_allMarketTicker_tablePriceColumnTitle" : {
         "en" : "Price",
         "kr" : "가격",
     },
-    "AllMarketTickerPage_comparator_24hchange" : {
+    "page_allMarketTicker_table24hchangeColumnTitle" : {
         "en" : "24h change",
         "kr" : "24시간 변동",
     },
     
-    "AllMarketTickerPage_tabBar_market" : {
+    
+    "page_tabBar_tabIconMarketTitle" : {
         "en" : "Market",
         "kr" : "마켓",
     },
-    "AllMarketTickerPage_tabBar_setting" : {
+    "page_tabBar_tabIconSettingTitle" : {
         "en" : "Setting",
         "kr" : "세팅",
     },
     
     
-    "Setting_price_title" : {
+    "page_setting_optionListCurrencyTitle" : {
         "en" : "Price currency unit",
         "kr" : "가격 표시 화폐 설정",
     },
-    "Setting_price_option" : {
+    "page_setting_optionListCurrencySelectionTitle" : {
         "en" : "Dollar | Won",
         "kr" : "달러 | 원",
     },
-    
-    "Setting_language_title" : {
+    "page_setting_optionListLanguageTitle" : {
         "en" : "Language",
         "kr" : "언어",
     },
-    "Setting_language_option" : {
+    "page_setting_optionListLanguageSelectionTitle" : {
         "en" : "English | Korean",
         "kr" : "영어 | 한국어",
     },
-    
-    "Setting_grid_title" : {
+    "page_setting_optionListGridTypeTitle" : {
         "en" : "Shows symbols with 2x2 grid",
-        "kr" : "코인들이 표시되는 방식",
+        "kr" : "코인 표시 방식",
     },
-    "Setting_grid_option" : {
+    "page_setting_optionListGridTypeSelectionTitle" : {
         "en" : "2x2 | List",
         "kr" : "2x2 | 리스트",
     },
     
     
-    "CoinDetailPage_ticker_currentPrice" : {
+    "page_coinDetail_tickerTableCurrentPriceColumnTitle" : {
         "en" : "Current price",
         "kr" : "실시간 가격",
     },
-    "CoinDetailPage_ticker_bestBidPrice" : {
+    "page_coinDetail_tickerTableBestBidPriceColumnTitle" : {
         "en" : "Best bid price",
         "kr" : "최고 매수 호가",
     },
-    "CoinDetailPage_ticker_bestAskPrice" : {
+    "page_coinDetail_tickerTableBestAskPriceColumnTitle" : {
         "en" : "Best ask price",
         "kr" : "최저 매도 호가",
     },
     
-    "CoinDetailPage_columnTitle_qty" : {
+    "page_coinDetail_defaultTableQtyColumnTitle" : {
         "en" : "Qty",
         "kr" : "수량",
     },
-    "CoinDetailPage_columnTitle_time" : {
-        "en" : "Time",
-        "kr" : "거래 시간",
-    },
-    "CoinDetailPage_columnTitle_price" : {
+    "page_coinDetail_defaultTablePriceColumnTitle" : {
         "en" : "Price",
         "kr" : "가격",
     },
+    "page_coinDetail_defaultTableTradeTimeColumnTitle" : {
+        "en" : "Time",
+        "kr" : "거래 시간",
+    },
     
     
-    "alertmodel_title_websocketerror" : {
+    "alert_title_webSocketError" : {
         "en" : "WebSocket error",
         "kr" : "웹소켓 오류"
     },
-    "alertmodel_title_internetconnectionerror" : {
+    "alert_title_internetConnectionError" : {
         "en" : "Internet connection error",
         "kr" : "인터넷 연결 오류"
     },
-    "alertmodel_title_systemerror" : {
+    "alert_title_systemError" : {
         "en" : "System error",
         "kr" : "시스템 오류"
     },
-    "alertmodel_title_exchangerateerror" : {
+    "alert_title_exchangeRateError" : {
         "en" : "Failed to get exchange rate",
         "kr" : "환율정보 획득 실패"
     },
     
-    "alertmodel_message_streamsubfailure" : {
+    "alert_message_streamSubFailure" : {
         "en" : "Stream subscription failed",
         "kr" : "스트림 구독에 실패했습니다."
     },
-    "alertmodel_message_streamunsubfailure" : {
+    "alert_message_streamUnsubFailure" : {
         "en" : "Stream subscription failed",
         "kr" : "스트림 구독해제에 실패했습니다."
     },
-    "alertmodel_message_unintendeddisconnection" : {
+    "alert_message_unintendedDisconnection" : {
         "en" : "unintended websocket disconnection",
         "kr" : "의도치 않게 웹소켓 연결이 해재되었습니다."
     },
-    "alertmodel_message_serverisunstable" : {
+    "alert_message_webSocketServerIsUnstable" : {
         "en" : "Websocket server is unstable. Please try using the service later.",
         "kr" : "웹소켓 서비스가 불안정합니다. 잠시후 이용해주세요"
     },
-    "alertmodel_message_internetconnectionfailed" : {
+    "alert_message_internetConnectionFailed" : {
         "en" : "Internet connection failed",
         "kr" : "인터넷 연결에 실패했습니다."
     },
-    "alertmodel_message_unknownerror" : {
-        "en" : "unknown error occurred",
-        "kr" : "알 수 없는 오류가 발생했습니다."
-    },
-    "alertmodel_message_failedtogetexchangerate" : {
+    "alert_message_failedToGetExchangerate" : {
         "en" : "A problem occurred while obtaining exchange rate information.",
         "kr" : "환율정보를 획득하는 과정에서 문제가 발생했습니다."
     },
+    "alert_message_unknownError" : {
+        "en" : "unknown error occurred",
+        "kr" : "알 수 없는 오류가 발생했습니다."
+    },
     
-    "alertmodel_action_title_cancel" : {
+    "alert_actionTitle_cancel" : {
         "en" : "Cancel",
         "kr" : "닫기"
     },
     
-    "alertmodel_action_title_retry" : {
+    "alert_actionTitle_retry" : {
         "en" : "Retry",
         "kr" : "재시도"
     },
     
-    "alertmodel_action_title_ignore" : {
+    "alert_actionTitle_ignore" : {
         "en" : "Ignore",
         "kr" : "무시하기"
     }

@@ -28,6 +28,11 @@ public class SharedAssembly: Assembly {
         }
         .inObjectScope(.container)
         
+        // MARK: DefaultLocalizedStrProvider
+        container.register(LocalizedStrProvider.self) { resolver in
+            DefaultLocalizedStrProvider(dataSource: DefaultLocalizedStringDataSource())
+        }
+        
         //MARK: I18NManager
         container.register(I18NManager.self) { resolver in
             DefaultI18NManager(repository: resolver.resolve(UserConfigurationRepository.self)!)
@@ -37,7 +42,8 @@ public class SharedAssembly: Assembly {
         // MARK: AlertShooter
         container.register(AlertShooter.self) { resolver in
             DefaultAlertShooter(
-                i18NManager: resolver.resolve(I18NManager.self)!
+                i18NManager: resolver.resolve(I18NManager.self)!,
+                localizedStrProvider: resolver.resolve(LocalizedStrProvider.self)!
             )
         }
         .inObjectScope(.container)

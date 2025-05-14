@@ -37,6 +37,7 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     private let useCase: RootPageUseCase
     private let alertShooter: AlertShooter
     private let i18NManager: I18NManager
+    private let localizedStrProvider: LocalizedStrProvider
     
 
     // Router
@@ -54,10 +55,11 @@ final class RootViewModel: UDFObservableObject, RootViewModelable {
     
     typealias Action = RootPageAction
     
-    init(useCase: RootPageUseCase, alertShooter: AlertShooter, i18NManager: I18NManager) {
+    init(useCase: RootPageUseCase, alertShooter: AlertShooter, i18NManager: I18NManager, localizedStrProvider: LocalizedStrProvider) {
         self.useCase = useCase
         self.alertShooter = alertShooter
         self.i18NManager = i18NManager
+        self.localizedStrProvider = localizedStrProvider
         
         // Splash
         let languageType = i18NManager.getLanguageType()
@@ -115,17 +117,17 @@ private extension RootViewModel {
                 action.send(.appIsLoaded)
             } catch {
                 var alertModel = AlertModel(
-                    titleKey: TextKey.Alert.Title.exchangeRateError.rawValue,
-                    messageKey: TextKey.Alert.Message.failedToGetExchangerate.rawValue
+                    titleKey: .alertKey(contents: .title(.exchangeRateError)),
+                    messageKey: .alertKey(contents: .message(.failedToGetExchangerate))
                 )
                 alertModel.add(action: .init(
-                    titleKey: TextKey.Alert.ActionTitle.retry.rawValue
+                    titleKey: .alertKey(contents: .actionTitle(.retry))
                 ) { [weak self] in
                     guard let self else { return }
                     prepareExchangeRate()
                 })
                 alertModel.add(action: .init(
-                    titleKey: TextKey.Alert.ActionTitle.ignore.rawValue,
+                    titleKey: .alertKey(contents: .actionTitle(.ignore)),
                     role: .cancel
                 ))
                 alertShooter.shoot(alertModel)
@@ -158,8 +160,11 @@ extension RootViewModel {
 // MARK: Splash
 private extension RootViewModel {
     func createSplashRO(languageType: LanguageType) -> SplashRO {
-        let titleTextKey = "LaunchScreen_title"
-        let titleText = LocalizedStringProvider.instance().getString(key: titleTextKey, lanCode: languageType.lanCode)
-        return .init(displayTitleText: titleText)
+        .init(
+            displayTitleText: localizedStrProvider.getString(
+                key: .pageKey(page: .splash(contents: .title)),
+                languageType: languageType
+            )
+        )
     }
 }

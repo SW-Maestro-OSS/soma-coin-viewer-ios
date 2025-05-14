@@ -7,24 +7,15 @@
 
 enum TabBarPage: String, Identifiable, CaseIterable {
     var id: String { self.rawValue }
-    case allMarketTicker
+    case market
     case setting
     
     var systemIconName: String {
         switch self {
-        case .allMarketTicker:
+        case .market:
             "24.square"
         case .setting:
             "gear"
-        }
-    }
-    
-    var titleTextLocalizationKey: String {
-        switch self {
-        case .allMarketTicker:
-            "AllMarketTickerPage_tabBar_market"
-        case .setting:
-            "AllMarketTickerPage_tabBar_setting"
         }
     }
 }

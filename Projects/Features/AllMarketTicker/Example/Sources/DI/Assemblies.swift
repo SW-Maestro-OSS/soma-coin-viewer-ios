@@ -22,6 +22,12 @@ public class Assemblies: Assembly {
     public func assemble(container: Swinject.Container) {
         
         // MARK: Shared
+        container.register(LocalizedStringDataSource.self) { _ in
+            DefaultLocalizedStringDataSource()
+        }
+        container.register(LocalizedStrProvider.self) { resolver in
+            DefaultLocalizedStrProvider(dataSource: resolver.resolve(LocalizedStringDataSource.self)!)
+        }
         container.register(I18NManager.self) { _ in
             FakeI18NManager()
         }
