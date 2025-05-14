@@ -53,7 +53,10 @@ public class Assemblies : Assembly {
         }
         
         
-        //MARK: I18N
+        //MARK: Shared
+        container.register(LocalizedStrProvider.self) { resolver in
+            DefaultLocalizedStrProvider(dataSource: DefaultLocalizedStringDataSource())
+        }
         container.register(I18NManager.self) { resolver in
             DefaultI18NManager(
                 repository: resolver.resolve(UserConfigurationRepository.self)!

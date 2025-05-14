@@ -10,7 +10,9 @@ import SwiftUI
 import CoreUtil
 import SettingFeature
 
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, SettingPageListener {
+    
+    var router: SettingRoutable?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -18,6 +20,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         DependencyInjector.shared.assemble([
             Assemblies()
         ])
+        
+        self.router = SettingBuilder().build(listener: self)
         
         return true
     }

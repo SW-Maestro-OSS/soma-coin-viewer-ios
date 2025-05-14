@@ -23,6 +23,8 @@ extension LocalizedStringKey {
         case tabBar(contents: TabBarPageContents)
         case allMarketTicker(contents: AllMarketTickerPageContents)
         case coinDetail(contents: CoinDetailPageContents)
+        case setting(contents: SettingPageContents)
+        
         
         var keyPart: String {
             switch self {
@@ -32,6 +34,8 @@ extension LocalizedStringKey {
                 "tabBar_\(contents.keyPart)"
             case .coinDetail(let contents):
                 "coinDetail_\(contents.keyPart)"
+            case .setting(let contents):
+                "setting_\(contents.keyPart)"
             }
         }
     }
