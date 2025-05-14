@@ -20,7 +20,7 @@ public final class DefaultLocalizedStrProvider: LocalizedStrProvider {
 
 // MARK: LocalizedStrProvider
 public extension DefaultLocalizedStrProvider {
-    func getString(key: LocalizedStringKey, languageType: LanguageType) -> String {
+    func getString(key: LocalizedStrKey, languageType: LanguageType) -> String {
         dataSource.getString(key: key.key, lanCode: languageType.lanCode) ?? "Unknown"
     }
 }

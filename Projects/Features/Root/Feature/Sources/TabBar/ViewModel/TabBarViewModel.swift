@@ -130,7 +130,7 @@ private extension TabBarViewModel {
         }
     }
     
-    func getLocalizedKey(page: TabBarPage) -> I18N.LocalizedStringKey {
+    func getLocalizedKey(page: TabBarPage) -> I18N.LocalizedStrKey {
         switch page {
         case .market:
             .pageKey(page: .tabBar(contents: .tabIconMarketTitle))

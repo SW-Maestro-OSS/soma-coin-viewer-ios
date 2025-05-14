@@ -5,7 +5,7 @@
 //  Created by choijunios on 5/14/25.
 //
 
-public enum LocalizedStringKey {
+public enum LocalizedStrKey {
     case pageKey(page: Page)
     
     var key: String {
@@ -18,7 +18,7 @@ public enum LocalizedStringKey {
 
 
 // MARK: Native types
-extension LocalizedStringKey {
+extension LocalizedStrKey {
     public enum Page {
         case tabBar(contents: TabBarPageContents)
         case allMarketTicker(contents: AllMarketTickerPageContents)

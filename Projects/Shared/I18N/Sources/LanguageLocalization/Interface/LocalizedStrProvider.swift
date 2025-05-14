@@ -8,5 +8,5 @@
 import DomainInterface
 
 public protocol LocalizedStrProvider {
-    func getString(key: LocalizedStringKey, languageType: LanguageType) -> String
+    func getString(key: LocalizedStrKey, languageType: LanguageType) -> String
 }
