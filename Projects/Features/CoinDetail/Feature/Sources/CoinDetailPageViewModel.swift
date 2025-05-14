@@ -305,7 +305,7 @@ private extension CoinDetailPageViewModel {
             
         return .init(
             currentPriceTitleText: localizedStrProvider.getString(
-                key: .pageKey(page: .coinDetail(contents: .tickerTableCurrnetPriceColumnTitle)),
+                key: .pageKey(page: .coinDetail(contents: .tickerTableCurrentPriceColumnTitle)),
                 languageType: languageType
             ),
             bestBidPriceTitleText: localizedStrProvider.getString(

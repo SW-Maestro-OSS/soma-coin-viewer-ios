@@ -6,7 +6,7 @@
 //
 
 public enum CoinDetailPageContents: String, Sendable {
-    case tickerTableCurrnetPriceColumnTitle
+    case tickerTableCurrentPriceColumnTitle
     case tickerTableBestBidPriceColumnTitle
     case tickerTableBestAskPriceColumnTitle
     case defaultTableQtyColumnTitle

@@ -55,7 +55,7 @@
     },
     
     
-    "page_coinDetail_tickerTableCurrnetPriceColumnTitle" : {
+    "page_coinDetail_tickerTableCurrentPriceColumnTitle" : {
         "en" : "Current price",
         "kr" : "실시간 가격",
     },
