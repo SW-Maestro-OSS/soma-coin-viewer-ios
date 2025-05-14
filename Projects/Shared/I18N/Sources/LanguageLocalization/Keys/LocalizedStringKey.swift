@@ -22,6 +22,7 @@ extension LocalizedStringKey {
     public enum Page {
         case tabBar(contents: TabBarPageContents)
         case allMarketTicker(contents: AllMarketTickerPageContents)
+        case coinDetail(contents: CoinDetailPageContents)
         
         var keyPart: String {
             switch self {
@@ -29,6 +30,8 @@ extension LocalizedStringKey {
                 "allMarketTicker_\(contents.keyPart)"
             case .tabBar(let contents):
                 "tabBar_\(contents.keyPart)"
+            case .coinDetail(let contents):
+                "coinDetail_\(contents.keyPart)"
             }
         }
     }

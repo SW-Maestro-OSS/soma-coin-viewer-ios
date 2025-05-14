@@ -57,30 +57,30 @@
     },
     
     
-    "CoinDetailPage_ticker_currentPrice" : {
+    "page_coinDetail_tickerTableCurrnetPriceColumnTitle" : {
         "en" : "Current price",
         "kr" : "실시간 가격",
     },
-    "CoinDetailPage_ticker_bestBidPrice" : {
+    "page_coinDetail_tickerTableBestBidPriceColumnTitle" : {
         "en" : "Best bid price",
         "kr" : "최고 매수 호가",
     },
-    "CoinDetailPage_ticker_bestAskPrice" : {
+    "page_coinDetail_tickerTableBestAskPriceColumnTitle" : {
         "en" : "Best ask price",
         "kr" : "최저 매도 호가",
     },
     
-    "CoinDetailPage_columnTitle_qty" : {
+    "page_coinDetail_defaultTableQtyColumnTitle" : {
         "en" : "Qty",
         "kr" : "수량",
     },
-    "CoinDetailPage_columnTitle_time" : {
-        "en" : "Time",
-        "kr" : "거래 시간",
-    },
-    "CoinDetailPage_columnTitle_price" : {
+    "page_coinDetail_defaultTablePriceColumnTitle" : {
         "en" : "Price",
         "kr" : "가격",
+    },
+    "page_coinDetail_defaultTableTradeTimeColumnTitle" : {
+        "en" : "Time",
+        "kr" : "거래 시간",
     },
     
     
