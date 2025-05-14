@@ -19,7 +19,8 @@ import CoreUtil
 class TabBarBuilder {
     func build() -> TabBarRouter {
         let viewModel = TabBarViewModel(
-            i18NManager: DependencyInjector.shared.resolve()
+            i18NManager: DependencyInjector.shared.resolve(),
+            localizedStrProvider: DependencyInjector.shared.resolve()
         )
         let view = TabBarView(viewModel: viewModel)
         let allMarketTickerBuilder = AllMarketTickerBuilder()

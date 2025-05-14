@@ -36,6 +36,7 @@ enum TabBarViewAction {
 class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     // Dependency
     private let i18NManager: I18NManager
+    private let localizedStrProvider: LocalizedStrProvider
     
     
     // State
@@ -55,8 +56,9 @@ class TabBarViewModel: UDFObservableObject, TabBarViewModelable {
     // Router
     weak var router: TabBarRouting?
     
-    init(i18NManager: I18NManager) {
+    init(i18NManager: I18NManager, localizedStrProvider: LocalizedStrProvider) {
         self.i18NManager = i18NManager
+        self.localizedStrProvider = localizedStrProvider
         
         // Initial state
         let languageType = i18NManager.getLanguageType()
@@ -114,17 +116,26 @@ extension TabBarViewModel {
 // MARK: Tab bar item creation & modification
 private extension TabBarViewModel {
     func createTabBarItemROs(languageType: LanguageType) -> [TabBarItemRO] {
-        let orderedPage: [TabBarPage] = [.allMarketTicker, .setting]
+        let orderedPage: [TabBarPage] = [.market, .setting]
         return orderedPage.map { page in
-            let displayText = LocalizedStringProvider.instance().getString(
-                key: page.titleTextLocalizationKey,
-                lanCode: languageType.lanCode
+            let displayText = localizedStrProvider.getString(
+                key: getLocalizedKey(page: page),
+                languageType: languageType
             )
             return TabBarItemRO(
                 page: page,
                 displayText: displayText,
                 displayIconName: page.systemIconName
             )
+        }
+    }
+    
+    func getLocalizedKey(page: TabBarPage) -> I18N.LocalizedStringKey {
+        switch page {
+        case .market:
+            .pageKey(page: .tabBar(contents: .tabIconMarketTitle))
+        case .setting:
+            .pageKey(page: .tabBar(contents: .tabIconSettingTitle))
         }
     }
 }

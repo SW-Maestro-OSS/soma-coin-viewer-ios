@@ -20,12 +20,15 @@ public enum LocalizedStringKey {
 // MARK: Native types
 extension LocalizedStringKey {
     public enum Page {
+        case tabBar(contents: TabBarPageContents)
         case allMarketTicker(contents: AllMarketTickerPageContents)
         
         var keyPart: String {
             switch self {
             case .allMarketTicker(let contents):
                 "allMarketTicker_\(contents.keyPart)"
+            case .tabBar(let contents):
+                "tabBar_\(contents.keyPart)"
             }
         }
     }

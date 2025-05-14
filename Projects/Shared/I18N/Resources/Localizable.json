@@ -18,11 +18,12 @@
         "kr" : "24시간 변동",
     },
     
-    "AllMarketTickerPage_tabBar_market" : {
+    
+    "page_tabBar_tabIconMarketTitle" : {
         "en" : "Market",
         "kr" : "마켓",
     },
-    "AllMarketTickerPage_tabBar_setting" : {
+    "page_tabBar_tabIconSettingTitle" : {
         "en" : "Setting",
         "kr" : "세팅",
     },
