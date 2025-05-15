@@ -139,22 +139,76 @@ public extension CVNumber {
         return "\(slicedStr)\(unit)"
     }
     
-    func adaptiveFractionFormat(min: Int, max: Int) -> String {
+    
+    func adaptiveToSize(_ size: Int) -> String {
+        
+        if NSDecimalNumber(decimal: wrappedNumber).intValue.description.count > size {
+            // 정수자리가 이미 최대길이를 초과한 경우
+            let thousand = Decimal(1_000)
+            let million = Decimal(1_000_000)
+            let billion = Decimal(1_000_000_000)
+            
+            var unit = ""
+            var value = wrappedNumber
+            
+            switch value {
+            case billion...:
+                value = value / billion
+                unit = "B"
+            case million...:
+                value = value / million
+                unit = "M"
+            case thousand...:
+                value = value / thousand
+                unit = "K"
+            default:
+                unit = ""
+            }
+            
+            let formatter = NumberFormatter()
+            formatter.roundingMode = .down
+            
+            var lastValidFraction = 0
+            for fraction in 0... {
+                formatter.minimumFractionDigits = fraction
+                if let numString = formatter.string(from: value as NSNumber) {
+                    if (numString.count + unit.count) < size {
+                        if numString.last != "0" { lastValidFraction = fraction }
+                        continue
+                    }
+                    else {
+                        formatter.minimumFractionDigits = lastValidFraction
+                        formatter.maximumFractionDigits = lastValidFraction
+                        if let numString = formatter.string(from: value as NSNumber) {
+                            return numString+unit
+                        }
+                    }
+                }
+            }
+            return value.description+unit
+        }
+    
+        let base = wrappedNumber
         let formatter = NumberFormatter()
         formatter.roundingMode = .down
-        formatter.minimumFractionDigits = min
         
-        let base = double
-        
-        for fraction in min...max {
-            formatter.maximumFractionDigits = fraction
+        var lastValidFraction = 0
+        for fraction in 0... {
+            formatter.minimumFractionDigits = fraction
             if let numString = formatter.string(from: base as NSNumber) {
-                if numString.last == "0" { continue }
+                if numString.count < size {
+                    if numString.last != "0" { lastValidFraction = fraction }
+                    continue
+                }
                 else {
-                    return numString
+                    formatter.minimumFractionDigits = lastValidFraction
+                    formatter.maximumFractionDigits = lastValidFraction
+                    if let numString = formatter.string(from: base as NSNumber) {
+                        return numString
+                    }
                 }
             }
         }
-        return roundDecimalPlaces(exact: max)
+        return base.description
     }
 }
