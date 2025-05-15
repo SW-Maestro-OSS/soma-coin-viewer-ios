@@ -281,8 +281,7 @@ final class CoinDetailPageViewModel: UDFObservableObject, CoinDetailPageViewMode
     
     
     private func createPriceText(info: ExchangeRateInfo, price: CVNumber, symbolPresentable: Bool = true) -> String {
-        let priceText = CVNumber(price.double * info.rate)
-            .adaptiveFractionFormat(min: 2, max: 8)
+        let priceText = CVNumber(price.double * info.rate).adaptiveToSize(10)
         if symbolPresentable {
             if info.currentType.isPrefix {
                 return "\(info.currentType.symbol) \(priceText)"

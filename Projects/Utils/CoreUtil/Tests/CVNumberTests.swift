@@ -10,6 +10,43 @@ import Testing
 
 @Suite("CVNumber테스트")
 struct CVNumberTests {
+    @Test("길이 기반 축약표현, 최대 자리수 이하로 만들어지는지 확인", arguments: [1, 2, 3, 4, 5, 6])
+    func checkSizeCompaction(size: Int) {
+        // Given
+        let number = CVNumber(0.123456)
+        
+        
+        // When
+        let string = number.adaptiveToSize(size)
+        
+        
+        // Then
+        #expect(string.count <= size)
+    }
+    
+    @Test("길이 기반 축약표현, K/M/B간소화 표현 테스트", arguments: [
+        (CVNumber(1200.0), "1K"),
+        (CVNumber(1230.0), "1K"),
+        (CVNumber(1234.0), "1K"),
+        (CVNumber(1234000.0), "1M"),
+        (CVNumber(1234000000.0), "1B"),
+    ])
+    func checkSizeCompactionKMB(_ input: (CVNumber, String)) {
+        // Given
+        let number = input.0
+        let size = 3
+        
+        
+        // When
+        let str = number.adaptiveToSize(size)
+        
+        
+        // Then
+        let result = input.1
+        #expect(str == result)
+    }
+    
+    
     @Test("K/M/B간소화 표현 테스트")
     func checkCompactExpression() {
         // Given
@@ -64,25 +101,5 @@ struct CVNumberTests {
             print("")
             #expect(str == expectedResults[index])
         }
-    }
-    
-    
-    @Test("적응형 소수점 표현 확인", arguments: [
-        CVNumber(0.1),
-        CVNumber(0.01),
-        CVNumber(0.001),
-        CVNumber(0.0001),
-    ])
-    func checkAdaptiveFractionFormat(number: CVNumber) {
-        // Given
-        let target = number
-        
-        
-        // When
-        let expression = target.adaptiveFractionFormat(min: 1, max: 4)
-        
-        
-        // Then
-        #expect(expression == target.description)
     }
 }
