@@ -21,7 +21,6 @@ struct CVNumberTests {
         
         
         // Then
-        print(size, string)
         #expect(string.count <= size)
     }
     
