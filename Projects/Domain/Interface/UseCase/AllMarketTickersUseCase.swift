@@ -8,17 +8,9 @@
 import Combine
 
 public protocol AllMarketTickersUseCase {
-    /// AllMarketTicker리스트를 획득합니다.
-    func getTickerList(rowCount: UInt) -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never>
-    func getTickerList(rowCount: UInt) async -> [Twenty4HourTickerForSymbolVO]
-    
+    /// 가격정보가 포함된 티커리스트를 획득합니다.
     func getTickerListStream(tickerCount: Int) -> AnyPublisher<TickerList, Never>
     
-    
-    /// 환율정보를 획득합니다.
-    func getExchangeRate(base: CurrencyType, to: CurrencyType) async -> Double?
-    
-    
-    /// GridType에 대한 유저설정을 획득합니다.
+    /// 티커 표시방법에 대한 설정값을 획득합니다.
     func getGridType() -> GridType
 }
