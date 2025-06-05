@@ -16,57 +16,47 @@ import DomainTesting
 // MARK: AllMarketTickerUseCaseTests
 struct AllMarketTickerUseCaseTests {
     
-    @Test("Suffix심볼이 USDT인지 확인")
-    func checkSuffixSymbolIsUSDT() async {
-        // Given
-        let useCase = DefaultAllMarketTickersUseCase(
-            allMarketTickersRepository: StubAllMarketTickerRepository(maxTickerCount: 10000, usdtSuffixCount: 2500),
-            exchangeRateRepository: StubExchangeRateRepository(fixedRate: 1.0),
-            userConfigurationRepository: StubUserConfigurationRepository()
+    @Test("티커의 가격에 환율정보가 반영되는지 확인합니다.")
+    func exchange_rate_is_applied_to_ticker_price() async {
+        /// #1. Arrange
+        ///
+        /// - Arrange1: 환율은 달러의 2배
+        let exchangeRateRepository = StubExchangeRateRepository()
+        exchangeRateRepository.set(base: .dollar, to: .won, rate: 2.0)
+        /// - Arrange2: 단일 Ticker, 가격은 100달러
+        let tickerRepository = StubAllMarketTickerRepository(
+            tickers: [
+                .init(
+                    pairSymbol: "TESTUSDT",
+                    price: 100,
+                    totalTradedQuoteAssetVolume: 0.0,
+                    changedPercent: 0.0,
+                    bestBidPrice: 0.0,
+                    bestAskPrice: 0.0
+                )
+            ]
+        )
+        /// - Arrange3: 원화설정 적용
+        let userConfigRepository = FakeUserConfigurationRepository(
+            currencyType: .won
+        )
+        let sut = DefaultAllMarketTickersUseCase(
+            allMarketTickersRepository: tickerRepository,
+            exchangeRateRepository: exchangeRateRepository,
+            userConfigurationRepository: userConfigRepository
         )
         
         
-        // When
-        let published_tickers: AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> = useCase.getTickerList(rowCount: 2500)
-        let async_tickers = await useCase.getTickerList(rowCount: 2500)
+        /// #2. Act
+        let list = sut.getTickerListStream()
         
         
-        // Then
-        for await tickers in published_tickers.values {
-            for ticker in tickers {
-                #expect(ticker.secondSymbol.uppercased() == "USDT")
-            }
+        /// #3. Assert
+        for await tickerList in list.values {
+            /// - 가격에 환율이 반영됬는지 확인
+            #expect(tickerList.tickers.first!.price == 200)
+            
             break
         }
-        for ticker in async_tickers {
-            #expect(ticker.secondSymbol.uppercased() == "USDT")
-        }
-    }
-    
-    @Test("totalTradedQuoteAssetVolume이 큰 기준으로 정해진 개수를 추출하는지 확인")
-    func checkFetchingCollectList() async {
-        // Given
-        let useCase = DefaultAllMarketTickersUseCase(
-            allMarketTickersRepository: StubAllMarketTickerRepository(maxTickerCount: 10000, usdtSuffixCount: 2500),
-            exchangeRateRepository: StubExchangeRateRepository(fixedRate: 1.0),
-            userConfigurationRepository: StubUserConfigurationRepository()
-        )
-        
-        
-        // When
-        let published_tickers: AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> = useCase.getTickerList(rowCount: 2500)
-        let async_tickers = await useCase.getTickerList(rowCount: 2500)
-        
-        
-        // Then
-        for await tickers in published_tickers.values {
-            #expect(tickers.count == 2500)
-            let sorted = tickers.sorted(by: { $0.totalTradedQuoteAssetVolume > $1.totalTradedQuoteAssetVolume })
-            #expect(sorted == tickers)
-            break
-        }
-        #expect(async_tickers.count == 2500)
-        let sorted = async_tickers.sorted(by: { $0.totalTradedQuoteAssetVolume > $1.totalTradedQuoteAssetVolume })
-        #expect(sorted == async_tickers)
     }
 }

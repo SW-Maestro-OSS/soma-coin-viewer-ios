@@ -9,5 +9,5 @@ import DomainInterface
 
 protocol TickerComparator {
     var id: String { get }
-    func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool
+    func compare(lhs: Ticker, rhs: Ticker) -> Bool
 }

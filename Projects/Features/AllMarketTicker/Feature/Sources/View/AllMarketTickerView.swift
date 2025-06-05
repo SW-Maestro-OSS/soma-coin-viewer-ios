@@ -72,7 +72,7 @@ struct AllMarketTickerView: View {
                 switch displayType {
                 case .list:
                     LazyVStack(spacing: 0) {
-                        ForEach(viewModel.state.tickerCellRO) { item in
+                        ForEach(viewModel.state.tickerCellRenderObjects) { item in
                             VStack(spacing: 0) {
                                 TickerListCellView(renderObject: item)
                                     .frame(height: 50)
@@ -88,7 +88,7 @@ struct AllMarketTickerView: View {
                     }
                 case .twoByTwo:
                     LazyVGrid(columns: tickerGridColumns, spacing: 5) {
-                        ForEach(viewModel.state.tickerCellRO) { item in
+                        ForEach(viewModel.state.tickerCellRenderObjects) { item in
                             TickerGridCell(renderObject: item)
                                 .onTapGesture {
                                     viewModel.action(.coinRowIsTapped(coinInfo: item))

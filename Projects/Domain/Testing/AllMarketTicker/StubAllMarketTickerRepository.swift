@@ -12,35 +12,17 @@ import CoreUtil
 
 public struct StubAllMarketTickerRepository: AllMarketTickersRepository {
     
-    public let maxTickerCount: Int
-    public let usdtSuffixCount: Int
+    private var tickers: [Ticker]
     
-    public init(maxTickerCount: Int, usdtSuffixCount: Int) {
-        self.maxTickerCount = maxTickerCount
-        self.usdtSuffixCount = usdtSuffixCount
+    public init(tickers: [Ticker]) {
+        self.tickers = tickers
     }
     
-    private func createFakeData() -> AVLTree<Twenty4HourTickerForSymbolVO> {
-        let tree = AVLTree<Twenty4HourTickerForSymbolVO>()
-        for index in 0..<maxTickerCount {
-            let vo = Twenty4HourTickerForSymbolVO(
-                pairSymbol: index < usdtSuffixCount ? "BTCUSDT" : "BTCADA",
-                price: CVNumber(Double(100 * index)),
-                totalTradedQuoteAssetVolume: CVNumber(Double(100 * index)),
-                changedPercent: CVNumber(Double(100 * index)),
-                bestBidPrice: CVNumber(Double(100 * index)),
-                bestAskPrice: CVNumber(Double(100 * index))
-            )
-            tree.insert(vo)
+    public func getTickers() -> AnyPublisher<[Ticker], Never> {
+        Future<[Ticker], Never> { promise in
+            promise(.success(tickers))
         }
-        return tree
+        .eraseToAnyPublisher()
     }
     
-    public func getAllMarketTicker() -> AnyPublisher<AVLTree<Twenty4HourTickerForSymbolVO>, Never> {
-        return Just(createFakeData()).eraseToAnyPublisher()
-    }
-    
-    public func getAllMarketTicker() async -> AVLTree<Twenty4HourTickerForSymbolVO> {
-        return createFakeData()
-    }
 }

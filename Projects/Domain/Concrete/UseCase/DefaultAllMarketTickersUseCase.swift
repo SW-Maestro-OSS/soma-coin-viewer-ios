@@ -17,8 +17,6 @@ public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
     private var exchangeRateRepository: ExchangeRateRepository
     private var userConfigurationRepository: UserConfigurationRepository
     
-    private let standardSymbol = "USDT"
-    
     public init(
         allMarketTickersRepository: AllMarketTickersRepository,
         exchangeRateRepository: ExchangeRateRepository,
@@ -28,56 +26,61 @@ public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
         self.exchangeRateRepository = exchangeRateRepository
         self.userConfigurationRepository = userConfigurationRepository
     }
-    
-    // 도메인 로직
-    private func fetchGreatestQuantity(entity: AVLTree<Twenty4HourTickerForSymbolVO>, maxCount: UInt) -> [Twenty4HourTickerForSymbolVO] {
-        // 내림차순 정렬 및 기준 심볼을 포함한 심볼만 추출
-        let filteredEntity = entity.getDiscendingList(maxCount: .max)
-            .filter({ $0.pairSymbol.uppercased().hasSuffix(standardSymbol) })
-        let slicedEntity = filteredEntity.prefix(Int(maxCount))
-        
-        // 기준 심볼을 기준으로 pairSymbol을 양분화
-        let symbolSeparated = slicedEntity.map { tickerEntity in
-            var newTicker = tickerEntity
-            newTicker.setSymbols { pairSymbol in
-                let upperScaled = pairSymbol.uppercased()
-                let firstSymbol = upperScaled.replacingOccurrences(of: standardSymbol, with: "")
-                let secondSymbol = standardSymbol
-                return (firstSymbol, secondSymbol)
-            }
-            return newTicker
-        }
-        return symbolSeparated
-    }
 }
 
 
-// MARK: AllMarketTickersUseCase, Stream
+// MARK: AllMarketTickersUseCase
 public extension DefaultAllMarketTickersUseCase {
-    func getGridType() -> GridType {
-        userConfigurationRepository.getGridType() ?? .defaultValue
-    }
-    
-    func getTickerList(rowCount: UInt) async -> [Twenty4HourTickerForSymbolVO] {
-        let entity = await allMarketTickersRepository.getAllMarketTicker()
-        return fetchGreatestQuantity(entity: entity, maxCount: rowCount)
-    }
-    
-    func getTickerList(rowCount: UInt) -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never> {
-        allMarketTickersRepository
-            .getAllMarketTicker()
+    func getTickerListStream() -> AnyPublisher<TickerList, Never> {
+        // #1. SUFFIX가 USDT인 심볼만 추출
+        let only_usdt_tickers = allMarketTickersRepository
+            .getTickers()
             .unretained(self)
-            .map { useCase, entity in
-                useCase.fetchGreatestQuantity(entity: entity, maxCount: rowCount)
+            .map { uc, tickers in
+                tickers.filter { ticker in
+                    let tickerSymbol = ticker.pairSymbol.uppercased()
+                    return tickerSymbol.hasSuffix("USDT")
+                }
             }
+        
+        // #2. 가격 정보 적용
+        let final_ticker_list = only_usdt_tickers
+            .unretained(self)
+            .asyncTransform { uc, tickers in
+                // Repository dependencies
+                let user_config_repo = uc.userConfigurationRepository
+                let exchange_rate_repo = uc.exchangeRateRepository
+                
+                if let current_currency_type = user_config_repo.getCurrencyType(),
+                   let exchange_rate = await exchange_rate_repo.getRate(
+                       base: .dollar,
+                       to: current_currency_type
+                   ) {
+                    // 설정된 화폐정보가 존재하고 환율을 획득할 수 있는 경우
+                    let fitted_to_exchange_rate_tickers = tickers.map { ticker in
+                        var new_ticker = ticker
+                        new_ticker.price *= Decimal(exchange_rate)
+                        return new_ticker
+                    }
+                    return TickerList(
+                        currencyType: current_currency_type,
+                        tickers: fitted_to_exchange_rate_tickers
+                    )
+                } else {
+                    // 설정된 화폐정보가 없거나, 환율정보가 없는 경우
+                    return TickerList(
+                        currencyType: .dollar,
+                        tickers: tickers
+                    )
+                }
+            }
+            
+        return final_ticker_list
             .eraseToAnyPublisher()
     }
-}
-
-
-// MARK: AllMarketTickersUseCase, exchange rate
-public extension DefaultAllMarketTickersUseCase {
-    func getExchangeRate(base: CurrencyType, to: CurrencyType) async -> Double? {
-        await exchangeRateRepository.getRate(base: base, to: to)
+    
+    
+    func getGridType() -> GridType {
+        userConfigurationRepository.getGridType() ?? .defaultValue
     }
 }

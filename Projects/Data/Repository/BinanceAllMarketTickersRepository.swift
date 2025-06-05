@@ -25,17 +25,27 @@ public final class BinanceAllMarketTickersRepository: AllMarketTickersRepository
         }
         return treeEntity
     }
-    
-    public func getAllMarketTicker() -> AnyPublisher<AVLTree<Twenty4HourTickerForSymbolVO>, Never> {
+}
+
+
+// MARK: AllMarketTickersRepository
+public extension BinanceAllMarketTickersRepository {
+    func getTickers() -> AnyPublisher<[Ticker], Never> {
         dataSource
             .getAllMarketTickerList()
-            .unretained(self)
-            .map { repo, dto in repo.convertToEntity(dto: dto) }
+            .map { tickerDTOs in
+                tickerDTOs.map { dto in
+                    // DTO를 엔티티로 변환
+                    Ticker(
+                        pairSymbol: dto.symbol,
+                        price: Decimal(string: dto.lastPrice) ?? 0.0,
+                        totalTradedQuoteAssetVolume: Decimal(string: dto.quoteAssetVolume) ?? 0.0,
+                        changedPercent: Decimal(string: dto.priceChangePercent) ?? 0.0,
+                        bestBidPrice: Decimal(string: dto.bestBidPrice) ?? 0.0,
+                        bestAskPrice: Decimal(string: dto.bestAskPrice) ?? 0.0
+                    )
+                }
+            }
             .eraseToAnyPublisher()
-    }
-    
-    public func getAllMarketTicker() async -> AVLTree<Twenty4HourTickerForSymbolVO> {
-        let dto = await dataSource.getAllMarketTickerList()
-        return convertToEntity(dto: dto)
     }
 }

@@ -38,8 +38,7 @@ enum AllMarketTickerAction {
     
     
     // Internal action
-    case tickerListFetched(list: [Twenty4HourTickerForSymbolVO])
-    case updateTickerList(list: [Twenty4HourTickerForSymbolVO], exchangeRateInfo: ExchangeRateInfo)
+    case tickerListFetched(list: TickerList)
     case updateSortSelectionButtons(languageType: LanguageType, currenyType: CurrencyType)
     case updateGridType(type: GridType)
 }
@@ -64,7 +63,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     
     // State
     @Published var state: State = .init(sortSelectionCells: [], tickerRowCount: 0)
-    private let tickerRowCount: UInt = 30
+    private let tickerRowCount: Int = 30
     private var isFirstAppear: Bool = true
     
     
@@ -118,26 +117,14 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
         case .getBackToForeground:
             webSocketHelper.requestSubscribeToStream(streams: [.allMarketTickerChangesIn24h], mustDeliver: true)
             
-        case .tickerListFetched(let newList):
-            return Just(action)
-                .unretainedOnly(self)
-                .asyncTransform { vm in
-                    let currentType = vm.i18NManager.getCurrencyType()
-                    let rate = await vm.useCase.getExchangeRate(base: .dollar, to: currentType)
-                    return Action.updateTickerList(
-                        list: newList,
-                        exchangeRateInfo: .init(currentType: currentType, rate: rate ?? 1.0))
-                }
-                .eraseToAnyPublisher()
-            
         case .coinRowIsTapped(let tickerCellRO):
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 listener?.request(.presentCoinDetailPage(
                     listener: self,
                     symbolInfo: .init(
-                        firstSymbol: tickerCellRO.firstSymbol,
-                        secondSymbol: tickerCellRO.secondSymbol
+                        firstSymbol: "",
+                        secondSymbol: ""
                     )
                 ))
             }
@@ -152,17 +139,29 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     func reduce(_ action: Action, state: State) -> State {
         var newState = state
         switch action {
-        case .updateTickerList(let list, let exchangeRateInfo):
-            newState.tickerCellRO = list.map {
-                createRO($0, currencyConfig: .init(
-                    type: exchangeRateInfo.currentType,
-                    rate: exchangeRateInfo.rate
-                ))
+        case .tickerListFetched(let list):
+            
+            let currencyType = list.currencyType
+            
+            var tickers = list.tickers
+            if list.tickers.count > tickerRowCount {
+                // 티커의 개수가 tickerRowCount이상인 경우 코인양을 기준으로 감축한다.
+                let slicedTickers = list.tickers.sorted { ticker1, ticker2 in
+                    ticker1.totalTradedQuoteAssetVolume > ticker2.totalTradedQuoteAssetVolume
+                }
+                tickers = Array(slicedTickers.prefix(tickerRowCount))
             }
-            .sorted(by: state.currentComparator.compare)
+            
+            newState.tickerList = TickerList(currencyType: currencyType, tickers: tickers)
+            newState.tickerCellRenderObjects = tickers
+                .sorted(by: state.currentComparator.compare)
+                .map { ticker in
+                    createTickerCellRO(ticker, currencyType: currencyType)
+                }
             
         case .sortSelectionButtonTapped(let selectedSortType):
-            // 정렬 버튼 업데이트
+            
+            // #1. 리스트 정렬 버튼(라디오 버튼) 업데이트
             newState.sortSelectionCells = state.sortSelectionCells.map { model in
                 var newModel = model
                 if model.sortType == selectedSortType {
@@ -173,17 +172,37 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
                     return newModel
                 }
             }
-            // 리스트 업데이트
+            
+            // #2. 선택된 방법으로 리스트 정렬 상태 업데이트
             guard let selectedCell = state.sortSelectionCells.first(where: { $0.sortType == selectedSortType }) else { break }
             let nextDirection = selectedCell.sortDirection.nextDirectionOnTap()
             let comparator = selectedCell.sortType.getComparator(direction: nextDirection)
             newState.currentComparator = comparator
-            newState.tickerCellRO = state.tickerCellRO.sorted(by: comparator.compare)
+            
+            if let prevList = newState.tickerList {
+                let currencyType = prevList.currencyType
+                newState.tickerCellRenderObjects = prevList.tickers
+                    .sorted(by: comparator.compare)
+                    .map { createTickerCellRO($0, currencyType: currencyType) }
+            }
             
         case .updateSortSelectionButtons(let languageType, let currencyType):
-            // selection cell 변경
+            
+            // #1. 가격정보 변경에 따른 티커 리스트 업데이트
+            if let prev_currency_type = newState.tickerList?.currencyType {
+                
+                // 이전 화폐정보가 존재하는 경우
+                if prev_currency_type != currencyType {
+                    
+                    // 이전 정보와 새로운 정보가 다른 경우, 리스트를 비움
+                    newState.tickerCellRenderObjects = []
+                }
+            }
+            
+            
+            // #2. 정렬 버튼 텍스트 업데이트
             newState.sortSelectionCells = state.sortSelectionCells.map { renderObject in
-                let newText =  getSortSelectionButtonText(
+                let newText = createSortSelectionButtonText(
                     sortType: renderObject.sortType,
                     languageType: languageType,
                     currenyType: currencyType
@@ -194,6 +213,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
             }
             
         case .updateGridType(let gridType):
+            
             newState.tickerGridType = gridType
             
         default:
@@ -213,12 +233,6 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
                 currenyType: currencyType
             ))
             action.send(.updateGridType(type: gridType))
-            let tickerList = await useCase.getTickerList(rowCount: tickerRowCount)
-            let exchangeRate = await useCase.getExchangeRate(base: .dollar, to: currencyType)
-            action.send(.updateTickerList(
-                list: tickerList,
-                exchangeRateInfo: .init(currentType: currencyType, rate: exchangeRate ?? 1.0)
-            ))
         }
     }
 }
@@ -240,11 +254,12 @@ extension AllMarketTickerViewModel {
         fileprivate var currentComparator: TickerComparator = TickerNoneComparator()
         
         // Ticker cell
+        fileprivate var tickerList: TickerList?
         let tickerRowCount: Int
         var tickerGridType: GridType = .list
-        var tickerCellRO: [TickerCellRO] = []
+        var tickerCellRenderObjects: [TickerCellRO] = []
         
-        var isLoaded: Bool { !tickerCellRO.isEmpty }
+        var isLoaded: Bool { !tickerCellRenderObjects.isEmpty }
         
         init(sortSelectionCells: [SortSelectionCellRO], tickerRowCount: Int) {
             self.sortSelectionCells = sortSelectionCells
@@ -259,7 +274,7 @@ private extension AllMarketTickerViewModel {
     func listenToTickerDataStream() {
         // 스트림 메시지 구독
         useCase
-            .getTickerList(rowCount: tickerRowCount)
+            .getTickerListStream()
             .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
             .map { Action.tickerListFetched(list: $0) }
             .subscribe(action)
@@ -270,24 +285,19 @@ private extension AllMarketTickerViewModel {
 
 // MARK: Create ticker cell render object
 private extension AllMarketTickerViewModel {
-    func createRO(_ vo: Twenty4HourTickerForSymbolVO, currencyConfig: CurrencyConfig) -> TickerCellRO {
-        let symbolImageURL = createSymbolImageURL(symbol: vo.firstSymbol)
-        let (changePercentText, changePercentColor) = createChangePercentTextConfig(percent: vo.changedPercent)
-        let displayPriceText = createPriceText(
-            price: vo.price,
-            config: currencyConfig
-        )
+    func createTickerCellRO(_ ticker: Ticker, currencyType: CurrencyType) -> TickerCellRO {
+        let first_symbol = ticker.pairSymbol
+            .uppercased()
+            .replacingOccurrences(of: "USDT", with: "")
+        let symbolImageURL = createSymbolImageURL(symbol: first_symbol)
+        let priceText = createPriceText(ticker.price, currencyType: currencyType)
+        let (cpText, cpTextColor) = createChangePercentTextConfig(ticker.changedPercent)
         return TickerCellRO(
-            symbolText: vo.pairSymbol,
+            symbolText: ticker.pairSymbol.uppercased(),
             symbolImageURL: symbolImageURL,
-            displayPriceText: displayPriceText,
-            displayChangePercentText: changePercentText,
-            displayChangePercentTextColor: changePercentColor,
-            symbolPair: vo.pairSymbol,
-            price: vo.price,
-            changedPercent: vo.changedPercent,
-            firstSymbol: vo.firstSymbol,
-            secondSymbol: vo.secondSymbol
+            priceText: priceText,
+            changePercentText: cpText,
+            changePercentTextColor: cpTextColor
         )
     }
     
@@ -297,8 +307,8 @@ private extension AllMarketTickerViewModel {
         return symbolImageURL.absoluteString
     }
     
-    func createChangePercentTextConfig(percent: CVNumber) -> (String, Color) {
-        let percentText = percent.roundToTwoDecimalPlaces()+"%"
+    func createChangePercentTextConfig(_ percent: Decimal) -> (String, Color) {
+        let percentText = roundDecimal(percent, fractionLimit: 2)+"%"
         var displayText: String = percentText
         var displayColor: Color = .red
         if percent >= 0.0 {
@@ -308,28 +318,30 @@ private extension AllMarketTickerViewModel {
         return (displayText, displayColor)
     }
     
-    struct CurrencyConfig {
-        let type: CurrencyType
-        let rate: Double
-    }
-    
-    func createPriceText(price: CVNumber, config: CurrencyConfig) -> String {
+    func createPriceText(_ price: Decimal, currencyType: CurrencyType) -> String {
+        let currency_symbol = currencyType.symbol
+        let formatted_price_text = roundDecimal(price, fractionLimit: 2)
         
-        let currencyType = config.type
-        let currencySymbol = currencyType.symbol
-        let exchangeRate = config.rate
-        
-        let dollarPrice: Decimal = price.wrappedNumber
-        let formattedPrice = CVNumber(dollarPrice * Decimal(exchangeRate))
-        var priceText = formattedPrice.roundToTwoDecimalPlaces()
-        
+        var price_text: String
         if currencyType.isPrefix {
-            priceText = "\(currencySymbol) \(priceText)"
+            price_text = "\(currency_symbol) \(formatted_price_text)"
         } else {
-            priceText = "\(priceText) \(currencySymbol)"
+            price_text = "\(formatted_price_text) \(currency_symbol)"
         }
-        
-        return priceText
+        return price_text
+    }
+}
+
+
+// MARK: Decimal formatting
+private extension AllMarketTickerViewModel {
+    func roundDecimal(_ number: Decimal, fractionLimit: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.maximumFractionDigits = fractionLimit
+        formatter.minimumFractionDigits = fractionLimit
+        formatter.roundingMode = .down
+        let formattedString = formatter.string(from: number as NSDecimalNumber)
+        return formattedString ?? "-1.0"
     }
 }
 
@@ -346,7 +358,7 @@ private extension AllMarketTickerViewModel {
 
 // MARK: I18N
 private extension AllMarketTickerViewModel {
-    func getSortSelectionButtonText(sortType type: SortSelectionCellType, languageType: LanguageType, currenyType: CurrencyType) -> String {
+    func createSortSelectionButtonText(sortType type: SortSelectionCellType, languageType: LanguageType, currenyType: CurrencyType) -> String {
         switch type {
         case .symbol:
             return localizedStrProvider.getString(

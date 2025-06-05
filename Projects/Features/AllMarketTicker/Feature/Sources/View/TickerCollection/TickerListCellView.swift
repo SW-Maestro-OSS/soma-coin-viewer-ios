@@ -52,7 +52,7 @@ struct TickerListCellView: View {
                     // MARK: Price
                     HStack(spacing: 0) {
                         Spacer(minLength: 0)
-                        Text(renderObject.displayPriceText)
+                        Text(renderObject.priceText)
                             .font(.footnote)
                             .lineLimit(1)
                     }
@@ -62,9 +62,9 @@ struct TickerListCellView: View {
                     // MARK: 24h change percent
                     HStack(spacing: 0) {
                         Spacer(minLength: 0)
-                        Text(renderObject.displayChangePercentText)
+                        Text(renderObject.changePercentText)
                             .font(.body)
-                            .foregroundStyle(renderObject.displayChangePercentTextColor)
+                            .foregroundStyle(renderObject.changePercentTextColor)
                             .lineLimit(1)
                     }
                     .padding(.trailing, 10)
