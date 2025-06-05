@@ -48,7 +48,7 @@ struct AllMarketTickerUseCaseTests {
         
         
         /// #2. Act
-        let list = sut.getTickerListStream(tickerCount: 1)
+        let list = sut.getTickerListStream()
         
         
         /// #3. Assert

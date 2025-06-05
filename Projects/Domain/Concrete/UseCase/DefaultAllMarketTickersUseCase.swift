@@ -31,7 +31,7 @@ public final class DefaultAllMarketTickersUseCase: AllMarketTickersUseCase {
 
 // MARK: AllMarketTickersUseCase
 public extension DefaultAllMarketTickersUseCase {
-    func getTickerListStream(tickerCount: Int) -> AnyPublisher<TickerList, Never> {
+    func getTickerListStream() -> AnyPublisher<TickerList, Never> {
         // #1. SUFFIX가 USDT인 심볼만 추출
         let only_usdt_tickers = allMarketTickersRepository
             .getTickers()
@@ -42,26 +42,9 @@ public extension DefaultAllMarketTickersUseCase {
                     return tickerSymbol.hasSuffix("USDT")
                 }
             }
-            
-        // #2. totalTradedQuoteAssetVolume을 기반으로 정렬후 상위 tickerCount개만 추출
-        let sliced_to_tickerCount_tickers = only_usdt_tickers
-            .map { tickers in
-                // 내림차순 정렬
-                let sorted_tickers = tickers.sorted { ticker1, ticker2 in
-                    ticker1.totalTradedQuoteAssetVolume > ticker2.totalTradedQuoteAssetVolume
-                }
-                
-                if sorted_tickers.count < tickerCount {
-                    // 원하는 티거 개수보다 작은 경우 그대로 반환
-                    return sorted_tickers
-                } else {
-                    // 원하는 티커 개수보다 많은 경우 상위 추출
-                    return Array(sorted_tickers.prefix(tickerCount))
-                }
-            }
         
-        // #3. 가격 정보 적용
-        let final_ticker_list = sliced_to_tickerCount_tickers
+        // #2. 가격 정보 적용
+        let final_ticker_list = only_usdt_tickers
             .unretained(self)
             .asyncTransform { uc, tickers in
                 // Repository dependencies

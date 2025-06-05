@@ -142,8 +142,18 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
         case .tickerListFetched(let list):
             
             let currencyType = list.currencyType
-            newState.tickerList = list
-            newState.tickerCellRenderObjects = list.tickers
+            
+            var tickers = list.tickers
+            if list.tickers.count > tickerRowCount {
+                // 티커의 개수가 tickerRowCount이상인 경우 코인양을 기준으로 감축한다.
+                let slicedTickers = list.tickers.sorted { ticker1, ticker2 in
+                    ticker1.totalTradedQuoteAssetVolume > ticker2.totalTradedQuoteAssetVolume
+                }
+                tickers = Array(slicedTickers.prefix(tickerRowCount))
+            }
+            
+            newState.tickerList = TickerList(currencyType: currencyType, tickers: tickers)
+            newState.tickerCellRenderObjects = tickers
                 .sorted(by: state.currentComparator.compare)
                 .map { ticker in
                     createTickerCellRO(ticker, currencyType: currencyType)
@@ -264,7 +274,7 @@ private extension AllMarketTickerViewModel {
     func listenToTickerDataStream() {
         // 스트림 메시지 구독
         useCase
-            .getTickerListStream(tickerCount: tickerRowCount)
+            .getTickerListStream()
             .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
             .map { Action.tickerListFetched(list: $0) }
             .subscribe(action)
