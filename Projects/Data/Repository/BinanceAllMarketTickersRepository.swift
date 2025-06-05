@@ -25,19 +25,6 @@ public final class BinanceAllMarketTickersRepository: AllMarketTickersRepository
         }
         return treeEntity
     }
-    
-    public func getAllMarketTicker() -> AnyPublisher<AVLTree<Twenty4HourTickerForSymbolVO>, Never> {
-        dataSource
-            .getAllMarketTickerList()
-            .unretained(self)
-            .map { repo, dto in repo.convertToEntity(dto: dto) }
-            .eraseToAnyPublisher()
-    }
-    
-    public func getAllMarketTicker() async -> AVLTree<Twenty4HourTickerForSymbolVO> {
-        let dto = await dataSource.getAllMarketTickerList()
-        return convertToEntity(dto: dto)
-    }
 }
 
 
