@@ -11,15 +11,15 @@ import DomainInterface
 
 struct TickerSymbolAscendingComparator: TickerComparator {
     let id: String = String(describing: TickerSymbolAscendingComparator.self)
-    func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
-        lhs.symbolPair < rhs.symbolPair
+    func compare(lhs: Ticker, rhs: Ticker) -> Bool {
+        lhs.pairSymbol < rhs.pairSymbol
     }
 }
 
 struct TickerSymbolDescendingComparator: TickerComparator {
     let id: String = String(describing: TickerSymbolDescendingComparator.self)
-    func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
-        lhs.symbolPair > rhs.symbolPair
+    func compare(lhs: Ticker, rhs: Ticker) -> Bool {
+        lhs.pairSymbol > rhs.pairSymbol
     }
 }
 
@@ -27,14 +27,14 @@ struct TickerSymbolDescendingComparator: TickerComparator {
 
 struct TickerPriceAscendingComparator: TickerComparator {
     let id: String = String(describing: TickerPriceAscendingComparator.self)
-    func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
+    func compare(lhs: Ticker, rhs: Ticker) -> Bool {
         lhs.price < rhs.price
     }
 }
 
 struct TickerPriceDescendingComparator: TickerComparator {
     let id: String = String(describing: TickerPriceDescendingComparator.self)
-    func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
+    func compare(lhs: Ticker, rhs: Ticker) -> Bool {
         lhs.price > rhs.price
     }
 }
@@ -43,14 +43,14 @@ struct TickerPriceDescendingComparator: TickerComparator {
 
 struct Ticker24hChangeAscendingComparator: TickerComparator {
     let id: String = String(describing: Ticker24hChangeAscendingComparator.self)
-    func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
+    func compare(lhs: Ticker, rhs: Ticker) -> Bool {
         lhs.changedPercent < rhs.changedPercent
     }
 }
 
 struct Ticker24hChangeDescendingComparator: TickerComparator {
     let id: String = String(describing: Ticker24hChangeDescendingComparator.self)
-    func compare(lhs: TickerCellRO, rhs: TickerCellRO) -> Bool {
+    func compare(lhs: Ticker, rhs: Ticker) -> Bool {
         
         lhs.changedPercent > rhs.changedPercent
     }
