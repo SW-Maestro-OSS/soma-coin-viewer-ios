@@ -151,7 +151,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
             
         case .sortSelectionButtonTapped(let selectedSortType):
             
-            // 리스트 정렬 버튼(라디오 버튼) 업데이트
+            // #1. 리스트 정렬 버튼(라디오 버튼) 업데이트
             newState.sortSelectionCells = state.sortSelectionCells.map { model in
                 var newModel = model
                 if model.sortType == selectedSortType {
@@ -163,7 +163,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
                 }
             }
             
-            // 선택된 방법으로 리스트 정렬 상태 업데이트
+            // #2. 선택된 방법으로 리스트 정렬 상태 업데이트
             guard let selectedCell = state.sortSelectionCells.first(where: { $0.sortType == selectedSortType }) else { break }
             let nextDirection = selectedCell.sortDirection.nextDirectionOnTap()
             let comparator = selectedCell.sortType.getComparator(direction: nextDirection)
