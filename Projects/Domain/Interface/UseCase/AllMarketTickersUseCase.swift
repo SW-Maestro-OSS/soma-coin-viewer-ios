@@ -12,6 +12,8 @@ public protocol AllMarketTickersUseCase {
     func getTickerList(rowCount: UInt) -> AnyPublisher<[Twenty4HourTickerForSymbolVO], Never>
     func getTickerList(rowCount: UInt) async -> [Twenty4HourTickerForSymbolVO]
     
+    func getTickerListStream(tickerCount: Int) -> AnyPublisher<TickerList, Never>
+    
     
     /// 환율정보를 획득합니다.
     func getExchangeRate(base: CurrencyType, to: CurrencyType) async -> Double?
