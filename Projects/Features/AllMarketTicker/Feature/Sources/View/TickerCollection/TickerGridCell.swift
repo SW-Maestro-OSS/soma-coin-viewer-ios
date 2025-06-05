@@ -43,13 +43,13 @@ struct TickerGridCell: View {
                     Spacer(minLength: 0)
                     
                     VStack(alignment: .trailing) {
-                        Text(renderObject.displayPriceText)
+                        Text(renderObject.priceText)
                             .font(.title2)
                             .lineLimit(1)
                         
-                        Text(renderObject.displayChangePercentText)
+                        Text(renderObject.changePercentText)
                             .font(.title3)
-                            .foregroundStyle(renderObject.displayChangePercentTextColor)
+                            .foregroundStyle(renderObject.changePercentTextColor)
                             .lineLimit(1)
                     }
                 }
