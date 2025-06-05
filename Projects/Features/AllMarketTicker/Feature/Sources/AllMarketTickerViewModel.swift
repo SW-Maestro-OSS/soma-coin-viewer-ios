@@ -140,6 +140,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
         var newState = state
         switch action {
         case .tickerListFetched(let list):
+            
             let currencyType = list.currencyType
             newState.tickerList = list
             newState.tickerCellRenderObjects = list.tickers
@@ -147,7 +148,9 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
                 .map { ticker in
                     createTickerCellRO(ticker, currencyType: currencyType)
                 }
+            
         case .sortSelectionButtonTapped(let selectedSortType):
+            
             // 리스트 정렬 버튼(라디오 버튼) 업데이트
             newState.sortSelectionCells = state.sortSelectionCells.map { model in
                 var newModel = model
@@ -174,9 +177,22 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
             }
             
         case .updateSortSelectionButtons(let languageType, let currencyType):
-            // selection cell 변경
+            
+            // #1. 가격정보 변경에 따른 티커 리스트 업데이트
+            if let prev_currency_type = newState.tickerList?.currencyType {
+                
+                // 이전 화폐정보가 존재하는 경우
+                if prev_currency_type != currencyType {
+                    
+                    // 이전 정보와 새로운 정보가 다른 경우, 리스트를 비움
+                    newState.tickerCellRenderObjects = []
+                }
+            }
+            
+            
+            // #2. 정렬 버튼 텍스트 업데이트
             newState.sortSelectionCells = state.sortSelectionCells.map { renderObject in
-                let newText =  getSortSelectionButtonText(
+                let newText = createSortSelectionButtonText(
                     sortType: renderObject.sortType,
                     languageType: languageType,
                     currenyType: currencyType
@@ -187,6 +203,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
             }
             
         case .updateGridType(let gridType):
+            
             newState.tickerGridType = gridType
             
         default:
@@ -331,7 +348,7 @@ private extension AllMarketTickerViewModel {
 
 // MARK: I18N
 private extension AllMarketTickerViewModel {
-    func getSortSelectionButtonText(sortType type: SortSelectionCellType, languageType: LanguageType, currenyType: CurrencyType) -> String {
+    func createSortSelectionButtonText(sortType type: SortSelectionCellType, languageType: LanguageType, currenyType: CurrencyType) -> String {
         switch type {
         case .symbol:
             return localizedStrProvider.getString(
