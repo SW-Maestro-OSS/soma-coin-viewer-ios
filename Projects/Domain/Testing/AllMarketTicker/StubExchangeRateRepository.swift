@@ -7,14 +7,18 @@
 
 import DomainInterface
 
-public struct StubExchangeRateRepository: ExchangeRateRepository {
+public class StubExchangeRateRepository: ExchangeRateRepository {
     
-    public let fixedRate: Double
+    private var container: [String: Double] = [:]
     
-    public init(fixedRate: Double) {
-        self.fixedRate = fixedRate
+    public init() { }
+    
+    public func set(base: CurrencyType, to: CurrencyType, rate: Double) {
+        container[base.symbol+to.symbol] = rate
     }
     
     public func prepareRates(base: DomainInterface.CurrencyType, to: [DomainInterface.CurrencyType]) async throws { }
-    public func getRate(base: DomainInterface.CurrencyType, to: DomainInterface.CurrencyType) async -> Double? { return fixedRate }
+    public func getRate(base: DomainInterface.CurrencyType, to: DomainInterface.CurrencyType) async -> Double? {
+        container[base.symbol+to.symbol]
+    }
 }
