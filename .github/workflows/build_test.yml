@@ -21,8 +21,12 @@ jobs:
         if: steps.cache-tuist.outputs.cache-hit != 'true'
         run: |
           mise install tuist@${{ env.TUIST_VERSION }}
+
+      - name: activate tuist
+        run: |
           mise use -g tuist@${{ env.TUIST_VERSION }}
           mise where tuist
+      
       - name: check paths
         run: |
           echo "tuist in installed in $(which tuist)"
