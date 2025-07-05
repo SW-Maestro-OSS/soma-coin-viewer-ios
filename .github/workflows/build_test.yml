@@ -66,9 +66,9 @@ jobs:
           cd Tuist
 
           if diff /Users/runner/spm_builds/Package.swift Package.swift > /dev/null; then
-            echo "is_same=true" >> $GITHUB_ENV
+            echo "is_same=true" >> $GITHUB_OUTPUT
           else
-            echo "is_same=false" >> $GITHUB_ENV
+            echo "is_same=false" >> $GITHUB_OUTPUT
           fi
       - name: Check installed Xcode version
         run: |
