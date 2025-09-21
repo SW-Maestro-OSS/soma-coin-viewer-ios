@@ -15,6 +15,7 @@ import AlertShooter
 import I18N
 import WebSocketManagementHelper
 
+@MainActor
 public final class AllMarketTickerBuilder {
 
     public init() { }

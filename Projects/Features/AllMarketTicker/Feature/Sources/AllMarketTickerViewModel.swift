@@ -28,19 +28,20 @@ public protocol AllMarketTickerPageListener: AnyObject {
 }
 
 enum AllMarketTickerAction {
-    // View event
-    case onAppear
-    case onDisappear
-    case sortSelectionButtonTapped(type: SortSelectionCellType)
-    case coinRowIsTapped(coinInfo: TickerCellRO)
-    case enterBackground
-    case getBackToForeground
     
-    
-    // Internal action
+    case view(ViewAction)
     case tickerListFetched(list: TickerList)
     case updateSortSelectionButtons(languageType: LanguageType, currenyType: CurrencyType)
     case updateGridType(type: GridType)
+    
+    enum ViewAction {
+        case onAppear
+        case onDisappear
+        case sortSelectionButtonTapped(type: SortSelectionCellType)
+        case coinRowIsTapped(coinInfo: TickerCellRO)
+        case enterBackground
+        case getBackToForeground
+    }
 }
 
 final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewModelable {
@@ -97,7 +98,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     
     func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
         switch action {
-        case .onAppear:
+        case .view(.onAppear):
             if self.isFirstAppear {
                 self.isFirstAppear = false
                 
@@ -111,13 +112,13 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
             // 변경사항 확인
             checkUpdatedInformation()
             
-        case .onDisappear, .enterBackground:
+        case .view(.onDisappear), .view(.enterBackground):
             webSocketHelper.requestUnsubscribeToStream(streams: [.allMarketTickerChangesIn24h], mustDeliver: false)
             
-        case .getBackToForeground:
+        case .view(.getBackToForeground):
             webSocketHelper.requestSubscribeToStream(streams: [.allMarketTickerChangesIn24h], mustDeliver: true)
             
-        case .coinRowIsTapped(let tickerCellRO):
+        case .view(.coinRowIsTapped(let tickerCellRO)):
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 listener?.request(.presentCoinDetailPage(
@@ -159,7 +160,7 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
                     createTickerCellRO(ticker, currencyType: currencyType)
                 }
             
-        case .sortSelectionButtonTapped(let selectedSortType):
+        case .view(.sortSelectionButtonTapped(let selectedSortType)):
             
             // #1. 리스트 정렬 버튼(라디오 버튼) 업데이트
             newState.sortSelectionCells = state.sortSelectionCells.map { model in

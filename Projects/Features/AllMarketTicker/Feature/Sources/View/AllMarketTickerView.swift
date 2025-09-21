@@ -39,13 +39,13 @@ struct AllMarketTickerView: View {
             sortSelectionTabContent()
             tickerListContent()
         }
-        .onAppear { viewModel.action(.onAppear) }
-        .onDisappear { viewModel.action(.onDisappear) }
+        .onAppear { viewModel.action(.view(.onAppear)) }
+        .onDisappear { viewModel.action(.view(.onDisappear)) }
         .onChange(of: scenePhase) { oldValue, newValue in
             if oldValue == .background && (newValue == .active || newValue == .inactive) {
-                viewModel.action(.getBackToForeground)
+                viewModel.action(.view(.getBackToForeground))
             } else if newValue == .background {
-                viewModel.action(.enterBackground)
+                viewModel.action(.view(.enterBackground))
             }
         }
     }
@@ -57,7 +57,7 @@ struct AllMarketTickerView: View {
                 TickerSortSelectorView(renderObject: ro)
                     .frame(height: 45)
                     .onTapGesture {
-                        viewModel.action(.sortSelectionButtonTapped(type: ro.sortType))
+                        viewModel.action(.view(.sortSelectionButtonTapped(type: ro.sortType)))
                     }
                     .skeleton(presentOrigin: viewModel.state.isLoaded)
             }
@@ -77,7 +77,7 @@ struct AllMarketTickerView: View {
                                 TickerListCellView(renderObject: item)
                                     .frame(height: 50)
                                     .onTapGesture {
-                                        viewModel.action(.coinRowIsTapped(coinInfo: item))
+                                        viewModel.action(.view(.coinRowIsTapped(coinInfo: item)))
                                     }
                                 Rectangle()
                                     .foregroundStyle(.gray)
@@ -91,7 +91,7 @@ struct AllMarketTickerView: View {
                         ForEach(viewModel.state.tickerCellRenderObjects) { item in
                             TickerGridCell(renderObject: item)
                                 .onTapGesture {
-                                    viewModel.action(.coinRowIsTapped(coinInfo: item))
+                                    viewModel.action(.view(.coinRowIsTapped(coinInfo: item)))
                                 }
                         }
                     }
