@@ -223,17 +223,15 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     }
     
     private func checkUpdatedInformation() {
-        Task {
-            let languageType = i18NManager.getLanguageType()
-            let currencyType = i18NManager.getCurrencyType()
-            let gridType = useCase.getGridType()
-            
-            action.send(.updateSortSelectionButtons(
-                languageType: languageType,
-                currenyType: currencyType
-            ))
-            action.send(.updateGridType(type: gridType))
-        }
+        let languageType = i18NManager.getLanguageType()
+        let currencyType = i18NManager.getCurrencyType()
+        let gridType = useCase.getGridType()
+        
+        action.send(.updateSortSelectionButtons(
+            languageType: languageType,
+            currenyType: currencyType
+        ))
+        action.send(.updateGridType(type: gridType))
     }
 }
 

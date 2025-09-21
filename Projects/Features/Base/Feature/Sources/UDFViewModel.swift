@@ -12,6 +12,7 @@ import CoreUtil
 
 public typealias UDFObservableObject = UDFViewModel & ObservableObject
 
+@MainActor
 public protocol UDFViewModel: AnyObject {
     
     associatedtype State
