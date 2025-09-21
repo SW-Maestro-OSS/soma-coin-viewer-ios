@@ -15,7 +15,8 @@ public protocol RootViewModelable {
 
 public typealias RootRoutable = Router<RootViewModelable> & RootRouting
 
-class RootRouter: RootRoutable {
+@MainActor
+final class RootRouter: RootRoutable {
     // Navigation
     private var destination: RootDestination?
     

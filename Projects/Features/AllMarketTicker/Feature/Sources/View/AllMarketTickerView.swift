@@ -39,27 +39,20 @@ struct AllMarketTickerView: View {
             sortSelectionTabContent()
             tickerListContent()
         }
-        .onAppear { viewModel.action(.view(.onAppear)) }
-        .onDisappear { viewModel.action(.view(.onDisappear)) }
-        .onChange(of: scenePhase) { oldValue, newValue in
-            if oldValue == .background && (newValue == .active || newValue == .inactive) {
-                viewModel.action(.view(.getBackToForeground))
-            } else if newValue == .background {
-                viewModel.action(.view(.enterBackground))
-            }
-        }
+        .onAppear { viewModel.send(.view(.onAppear)) }
+        .onDisappear { viewModel.send(.view(.onDisappear)) }
     }
     
     @ViewBuilder
     private func sortSelectionTabContent() -> some View {
         LazyVGrid(columns: sortSelectionViewColumn, spacing: 0) {
-            ForEach(viewModel.state.sortSelectionCells, id: \.sortType) { ro in
-                TickerSortSelectorView(renderObject: ro)
-                    .frame(height: 45)
-                    .onTapGesture {
-                        viewModel.action(.view(.sortSelectionButtonTapped(type: ro.sortType)))
-                    }
-                    .skeleton(presentOrigin: viewModel.state.isLoaded)
+            ForEach(Array(0..<viewModel.state.sortSelectionCount), id: \.self) { index in
+                let item = viewModel.state.sortSelectionModels[index]
+                TickerSortSelectorView(model: item) { [weak viewModel] in
+                    viewModel?.send(.view(.sortSelectionButtonTapped(index: index)))
+                }
+                .frame(height: 45)
+                .skeleton(presentOrigin: viewModel.state.isLoaded)
             }
         }
     }
@@ -72,12 +65,14 @@ struct AllMarketTickerView: View {
                 switch displayType {
                 case .list:
                     LazyVStack(spacing: 0) {
-                        ForEach(viewModel.state.tickerCellRenderObjects) { item in
+                        ForEach(Array(0..<viewModel.state.tickerCellCount), id: \.self) { index in
+                            let item = viewModel.state.tickerCellModels[index]
+                            
                             VStack(spacing: 0) {
                                 TickerListCellView(renderObject: item)
                                     .frame(height: 50)
                                     .onTapGesture {
-                                        viewModel.action(.view(.coinRowIsTapped(coinInfo: item)))
+                                        viewModel.send(.view(.tickerRowTapped(index: index)))
                                     }
                                 Rectangle()
                                     .foregroundStyle(.gray)
@@ -88,10 +83,12 @@ struct AllMarketTickerView: View {
                     }
                 case .twoByTwo:
                     LazyVGrid(columns: tickerGridColumns, spacing: 5) {
-                        ForEach(viewModel.state.tickerCellRenderObjects) { item in
+                        ForEach(Array(0..<viewModel.state.tickerCellCount), id: \.self) { index in
+                            let item = viewModel.state.tickerCellModels[index]
+                            
                             TickerGridCell(renderObject: item)
                                 .onTapGesture {
-                                    viewModel.action(.view(.coinRowIsTapped(coinInfo: item)))
+                                    viewModel.send(.view(.tickerRowTapped(index: index)))
                                 }
                         }
                     }

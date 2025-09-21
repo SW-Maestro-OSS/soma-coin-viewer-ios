@@ -16,6 +16,7 @@ import BaseFeature
 import I18N
 import CoreUtil
 
+@MainActor
 class TabBarBuilder {
     func build() -> TabBarRouter {
         let viewModel = TabBarViewModel(

@@ -28,24 +28,21 @@ public protocol AllMarketTickerPageListener: AnyObject {
 }
 
 enum AllMarketTickerAction {
-    
     case view(ViewAction)
     case tickerListFetched(list: TickerList)
-    case updateSortSelectionButtons(languageType: LanguageType, currenyType: CurrencyType)
+    case updateSortSelectionButtons(LanguageType, CurrencyType)
     case updateGridType(type: GridType)
     
     enum ViewAction {
         case onAppear
         case onDisappear
-        case sortSelectionButtonTapped(type: SortSelectionCellType)
-        case coinRowIsTapped(coinInfo: TickerCellRO)
-        case enterBackground
-        case getBackToForeground
+        case sortSelectionButtonTapped(index: Int)
+        case tickerRowTapped(index: Int)
     }
 }
 
-final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewModelable {
-    
+@MainActor
+final class AllMarketTickerViewModel: ObservableObject, AllMarketTickerViewModelable {
     // Dependency
     private let useCase: AllMarketTickersUseCase
     private let alertShooter: AlertShooter
@@ -53,26 +50,19 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
     private let i18NManager: I18NManager
     private let localizedStrProvider: LocalizedStrProvider
     
-    
-    // Router
     weak var router: AllMarketTickerRouting?
     
-    
-    // Listener
     weak var listener: AllMarketTickerPageListener?
     
-    
-    // State
-    @Published var state: State = .init(sortSelectionCells: [], tickerRowCount: 0)
+    @Published private(set) var state: State = State(
+        sortSelectionCells: [],
+        tickerRowCount: 0
+    )
     private let tickerRowCount: Int = 30
     private var isFirstAppear: Bool = true
     
-    
-    // Action
     typealias Action = AllMarketTickerAction
-    var action: PassthroughSubject<Action, Never> = .init()
-    var store: Set<AnyCancellable> = []
-    
+    private var store: Set<AnyCancellable> = []
     
     init(
         useCase: AllMarketTickersUseCase,
@@ -90,82 +80,52 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
         let sortSelectionCells = createInitialSortSelectonROs()
         let initialState: State = .init(sortSelectionCells: sortSelectionCells, tickerRowCount: Int(tickerRowCount))
         self._state = Published(initialValue: initialState)
-        
-        // Create state stream
-        createStateStream()
     }
     
-    
-    func mutate(_ action: Action) -> AnyPublisher<Action, Never> {
+    @MainActor
+    private func handle(_ action: AllMarketTickerAction) {
         switch action {
         case .view(.onAppear):
             if self.isFirstAppear {
                 self.isFirstAppear = false
                 
-                // 웹소켓 스트림 구독
-                listenToTickerDataStream()
+                bindToAllMarketTickerStream()
+                bindToScenePhase()
             }
             
-            // AllMarketTicker스트림 구독
-            webSocketHelper.requestSubscribeToStream(streams: [.allMarketTickerChangesIn24h], mustDeliver: true)
+            // activate all tickers stream
+            webSocketHelper.requestSubscribeToStream(
+                streams: [.allMarketTickerChangesIn24h],
+                mustDeliver: true
+            )
             
-            // 변경사항 확인
-            checkUpdatedInformation()
+            checkUpdateInI18N()
             
-        case .view(.onDisappear), .view(.enterBackground):
-            webSocketHelper.requestUnsubscribeToStream(streams: [.allMarketTickerChangesIn24h], mustDeliver: false)
+        case .view(.onDisappear):
+            // inactivate all tickers stream
+            webSocketHelper.requestUnsubscribeToStream(
+                streams: [.allMarketTickerChangesIn24h],
+                mustDeliver: false
+            )
             
-        case .view(.getBackToForeground):
-            webSocketHelper.requestSubscribeToStream(streams: [.allMarketTickerChangesIn24h], mustDeliver: true)
-            
-        case .view(.coinRowIsTapped(let tickerCellRO)):
-            DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                listener?.request(.presentCoinDetailPage(
-                    listener: self,
-                    symbolInfo: .init(
-                        firstSymbol: "",
-                        secondSymbol: ""
-                    )
-                ))
-            }
-            
-        default:
+        case .view(.tickerRowTapped(let index)):
+            //            listener?.request(.presentCoinDetailPage(
+            //                listener: self,
+            //                symbolInfo: .init(
+            //                    firstSymbol: "",
+            //                    secondSymbol: ""
+            //                )
+            //            ))
             break
-        }
-        return Just(action).eraseToAnyPublisher()
-    }
-    
-    
-    func reduce(_ action: Action, state: State) -> State {
-        var newState = state
-        switch action {
-        case .tickerListFetched(let list):
             
-            let currencyType = list.currencyType
+        case .view(.sortSelectionButtonTapped(let index)):
+            var newState = state
+            let selectedModel = state.sortSelectionModels[index]
             
-            var tickers = list.tickers
-            if list.tickers.count > tickerRowCount {
-                // 티커의 개수가 tickerRowCount이상인 경우 코인양을 기준으로 감축한다.
-                let slicedTickers = list.tickers.sorted { ticker1, ticker2 in
-                    ticker1.totalTradedQuoteAssetVolume > ticker2.totalTradedQuoteAssetVolume
-                }
-                tickers = Array(slicedTickers.prefix(tickerRowCount))
-            }
-            
-            newState.tickerList = TickerList(currencyType: currencyType, tickers: tickers)
-            newState.tickerCellRenderObjects = tickers
-                .sorted(by: state.currentComparator.compare)
-                .map { ticker in
-                    createTickerCellRO(ticker, currencyType: currencyType)
-                }
-            
-        case .view(.sortSelectionButtonTapped(let selectedSortType)):
-            
-            // #1. 리스트 정렬 버튼(라디오 버튼) 업데이트
-            newState.sortSelectionCells = state.sortSelectionCells.map { model in
+            // set sort ui state
+            newState.sortSelectionModels = state.sortSelectionModels.map { model in
                 var newModel = model
-                if model.sortType == selectedSortType {
+                if model.sortType == selectedModel.sortType {
                     newModel.sortDirection = model.sortDirection.nextDirectionOnTap()
                     return newModel
                 } else {
@@ -174,35 +134,49 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
                 }
             }
             
-            // #2. 선택된 방법으로 리스트 정렬 상태 업데이트
-            guard let selectedCell = state.sortSelectionCells.first(where: { $0.sortType == selectedSortType }) else { break }
-            let nextDirection = selectedCell.sortDirection.nextDirectionOnTap()
-            let comparator = selectedCell.sortType.getComparator(direction: nextDirection)
+            // sort ticker list
+            let nextDirection = selectedModel.sortDirection.nextDirectionOnTap()
+            let comparator = selectedModel.sortType.getComparator(direction: nextDirection)
             newState.currentComparator = comparator
             
-            if let prevList = newState.tickerList {
-                let currencyType = prevList.currencyType
-                newState.tickerCellRenderObjects = prevList.tickers
+            if let oldList = newState.tickerList {
+                let currencyType = oldList.currencyType
+                newState.tickerCellModels = oldList.tickers
                     .sorted(by: comparator.compare)
                     .map { createTickerCellRO($0, currencyType: currencyType) }
             }
+            self.state = newState
+            
+        case .tickerListFetched(let list):
+            var newState = state
+            let currencyType = list.currencyType
+            
+            var tickers = list.tickers
+            if list.tickers.count > tickerRowCount {
+                let slicedTickers = list.tickers.sorted {
+                    $0.totalTradedQuoteAssetVolume > $1.totalTradedQuoteAssetVolume
+                }
+                tickers = Array(slicedTickers.prefix(tickerRowCount))
+            }
+            
+            newState.tickerList = TickerList(currencyType: currencyType, tickers: tickers)
+            newState.tickerCellModels = tickers
+                .sorted(by: state.currentComparator.compare)
+                .map { ticker in
+                    createTickerCellRO(ticker, currencyType: currencyType)
+                }
+            self.state = newState
             
         case .updateSortSelectionButtons(let languageType, let currencyType):
+            var newState = state
             
-            // #1. 가격정보 변경에 따른 티커 리스트 업데이트
-            if let prev_currency_type = newState.tickerList?.currencyType {
-                
-                // 이전 화폐정보가 존재하는 경우
-                if prev_currency_type != currencyType {
-                    
-                    // 이전 정보와 새로운 정보가 다른 경우, 리스트를 비움
-                    newState.tickerCellRenderObjects = []
+            if let prevCurrencyType = newState.tickerList?.currencyType {
+                if prevCurrencyType != currencyType {
+                    newState.tickerCellModels = []
                 }
             }
             
-            
-            // #2. 정렬 버튼 텍스트 업데이트
-            newState.sortSelectionCells = state.sortSelectionCells.map { renderObject in
+            newState.sortSelectionModels = state.sortSelectionModels.map { renderObject in
                 let newText = createSortSelectionButtonText(
                     sortType: renderObject.sortType,
                     languageType: languageType,
@@ -213,70 +187,90 @@ final class AllMarketTickerViewModel: UDFObservableObject, AllMarketTickerViewMo
                 return newObject
             }
             
+            self.state = newState
+            
         case .updateGridType(let gridType):
-            
+            var newState = state
             newState.tickerGridType = gridType
-            
-        default:
-            return state
+            self.state = newState
         }
-        return newState
     }
     
-    private func checkUpdatedInformation() {
+    private func checkUpdateInI18N() {
         let languageType = i18NManager.getLanguageType()
         let currencyType = i18NManager.getCurrencyType()
         let gridType = useCase.getGridType()
         
-        action.send(.updateSortSelectionButtons(
-            languageType: languageType,
-            currenyType: currencyType
-        ))
-        action.send(.updateGridType(type: gridType))
+        send(.updateSortSelectionButtons(languageType, currencyType))
+        send(.updateGridType(type: gridType))
     }
 }
 
 
 // MARK: Public interface
 extension AllMarketTickerViewModel {
-    func action(_ action: Action) {
-        self.action.send(action)
-    }
+    func send(_ action: Action) { handle(action) }
 }
 
 
 // MARK: State & Action
 extension AllMarketTickerViewModel {
     struct State {
-        // Sort selection button
-        var sortSelectionCells: [SortSelectionCellRO]
+        var sortSelectionModels: [SortSelectionCellRO]
+        var sortSelectionCount: Int { sortSelectionModels.count }
         fileprivate var currentComparator: TickerComparator = TickerNoneComparator()
         
-        // Ticker cell
-        fileprivate var tickerList: TickerList?
         let tickerRowCount: Int
         var tickerGridType: GridType = .list
-        var tickerCellRenderObjects: [TickerCellRO] = []
+        var tickerCellModels: [TickerCellRO] = []
+        var tickerCellCount: Int { tickerCellModels.count }
+        fileprivate var tickerList: TickerList?
         
-        var isLoaded: Bool { !tickerCellRenderObjects.isEmpty }
+        var isLoaded: Bool { !tickerCellModels.isEmpty }
         
         init(sortSelectionCells: [SortSelectionCellRO], tickerRowCount: Int) {
-            self.sortSelectionCells = sortSelectionCells
+            self.sortSelectionModels = sortSelectionCells
             self.tickerRowCount = tickerRowCount
         }
     }
 }
 
 
-// MARK: Websocket stream subscription
+// MARK: Bindings
 private extension AllMarketTickerViewModel {
-    func listenToTickerDataStream() {
-        // 스트림 메시지 구독
+    func bindToAllMarketTickerStream() {
         useCase
             .getTickerListStream()
-            .throttle(for: 0.5, scheduler: DispatchQueue.global(), latest: true)
-            .map { Action.tickerListFetched(list: $0) }
-            .subscribe(action)
+            .throttle(for: 0.5, scheduler: DispatchQueue.main, latest: true)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] list in
+                guard let self else { return }
+                send(.tickerListFetched(list: list))
+            })
+            .store(in: &store)
+    }
+    
+    func bindToScenePhase() {
+        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                webSocketHelper.requestSubscribeToStream(
+                    streams: [.allMarketTickerChangesIn24h],
+                    mustDeliver: true
+                )
+            }
+            .store(in: &store)
+        
+        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                webSocketHelper.requestUnsubscribeToStream(
+                    streams: [.allMarketTickerChangesIn24h],
+                    mustDeliver: false
+                )
+            }
             .store(in: &store)
     }
 }

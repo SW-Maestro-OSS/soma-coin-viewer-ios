@@ -13,6 +13,7 @@ public protocol AllMarketTickerViewModelable { }
 
 public typealias AllMarketTickerRoutable = Router<AllMarketTickerViewModelable> & AllMarketTickerRouting
 
+@MainActor
 public final class AllMarketTickerRouter: AllMarketTickerRoutable {
     
     init(view: AllMarketTickerView, viewModel: AllMarketTickerViewModel) {

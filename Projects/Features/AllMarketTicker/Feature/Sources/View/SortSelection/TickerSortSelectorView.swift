@@ -11,21 +11,17 @@ import Combine
 import CommonUI
 
 struct TickerSortSelectorView: View {
-    
-    // RenderObject
-    private let renderObject: SortSelectionCellRO
-    
-    
-    // View state
+    // State
+    private let model: SortSelectionCellRO
     @State private var backgroundOpacity: CGFloat = 0.0
     
+    var onTap: (() -> Void)?
     
-    // Combine
     private var store: Set<AnyCancellable> = []
     
-    init(renderObject: SortSelectionCellRO) {
-        
-        self.renderObject = renderObject
+    init(model: SortSelectionCellRO, onTap: (() -> Void)?) {
+        self.model = model
+        self.onTap = onTap
     }
     
     var body: some View {
@@ -37,12 +33,12 @@ struct TickerSortSelectorView: View {
             
             HStack(spacing: 10) {
                 
-                Image(systemName: renderObject.displayImageName)
+                Image(systemName: model.displayImageName)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 10)
                 
-                Text(renderObject.displayText)
+                Text(model.displayText)
                     .font(.caption)
                     .lineLimit(1)
             }
@@ -58,9 +54,11 @@ struct TickerSortSelectorView: View {
         .simultaneousGesture(
             TapGesture()
                 .onEnded {
-                    // Click animation
+                    // Anim
                     backgroundOpacity = 1.0
                     withAnimation { backgroundOpacity = 0.0 }
+                    
+                    onTap?()
                 }
         )
     }

@@ -9,6 +9,7 @@ import I18N
 import DomainInterface
 import CoreUtil
 
+@MainActor
 public class SettingBuilder {
     
     public init() { }

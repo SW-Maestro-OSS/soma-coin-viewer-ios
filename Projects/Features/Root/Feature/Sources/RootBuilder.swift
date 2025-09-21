@@ -17,6 +17,7 @@ import WebSocketManagementHelper
 import AlertShooter
 import CoreUtil
 
+@MainActor
 public final class RootBuilder {
     public init() { }
     

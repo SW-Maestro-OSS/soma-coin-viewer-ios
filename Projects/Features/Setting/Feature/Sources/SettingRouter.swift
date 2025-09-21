@@ -13,6 +13,7 @@ public protocol SettingViewModelable { }
 
 public typealias SettingRoutable = Router<SettingViewModelable> & SettingPageRouting
 
+@MainActor
 class SettingRouter: SettingRoutable {
     
     init(view: SettingView, viewModel: SettingViewModel) {

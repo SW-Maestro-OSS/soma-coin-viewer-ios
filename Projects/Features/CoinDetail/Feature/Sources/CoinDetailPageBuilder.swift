@@ -9,6 +9,7 @@ import DomainInterface
 import CoreUtil
 import WebSocketManagementHelper
 
+@MainActor
 public final class CoinDetailPageBuilder {
     
     public init() { }

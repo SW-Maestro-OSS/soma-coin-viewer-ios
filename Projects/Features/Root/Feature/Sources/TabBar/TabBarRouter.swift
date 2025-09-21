@@ -16,7 +16,8 @@ protocol TabBarViewModelable: SettingPageListener, AllMarketTickerPageListener {
     func updateDestinationPath(path: NavigationPath)
 }
 
-class TabBarRouter: Router<TabBarViewModelable>, TabBarRouting {
+@MainActor
+final class TabBarRouter: Router<TabBarViewModelable>, TabBarRouting {
     // State
     private var path: NavigationPath = .init()
     

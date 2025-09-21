@@ -32,6 +32,7 @@ enum RootPageAction {
     case updateDestination(RootDestination)
 }
 
+@MainActor
 final class RootViewModel: UDFObservableObject, RootViewModelable {
     // Dependency
     private let useCase: RootPageUseCase
@@ -122,9 +123,11 @@ private extension RootViewModel {
                 )
                 alertModel.add(action: .init(
                     titleKey: .alertKey(contents: .actionTitle(.retry))
-                ) { [weak self] in
-                    guard let self else { return }
-                    prepareExchangeRate()
+                ) {
+                    Task { @MainActor [weak self] in
+                        guard let self else { return }
+                        prepareExchangeRate()
+                    }
                 })
                 alertModel.add(action: .init(
                     titleKey: .alertKey(contents: .actionTitle(.ignore)),
