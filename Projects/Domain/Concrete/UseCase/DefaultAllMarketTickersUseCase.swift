@@ -34,14 +34,7 @@ public extension DefaultAllMarketTickersUseCase {
     func getTickerListStream() -> AnyPublisher<TickerList, Never> {
         // #1. SUFFIX가 USDT인 심볼만 추출
         let only_usdt_tickers = allMarketTickersRepository
-            .getTickers()
-            .unretained(self)
-            .map { uc, tickers in
-                tickers.filter { ticker in
-                    let tickerSymbol = ticker.pairSymbol.uppercased()
-                    return tickerSymbol.hasSuffix("USDT")
-                }
-            }
+            .getStream(baseSymbol: "USDT")
         
         // #2. 가격 정보 적용
         let final_ticker_list = only_usdt_tickers

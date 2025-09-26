@@ -10,5 +10,5 @@ import Combine
 import CoreUtil
 
 public protocol AllMarketTickersRepository {
-    func getTickers() -> AnyPublisher<[Ticker], Never>
+    func getStream(baseSymbol: String) -> AnyPublisher<[Ticker], Never>
 }

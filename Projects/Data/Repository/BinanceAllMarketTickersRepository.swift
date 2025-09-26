@@ -30,14 +30,22 @@ public final class BinanceAllMarketTickersRepository: AllMarketTickersRepository
 
 // MARK: AllMarketTickersRepository
 public extension BinanceAllMarketTickersRepository {
-    func getTickers() -> AnyPublisher<[Ticker], Never> {
+    func getStream(baseSymbol: String) -> AnyPublisher<[Ticker], Never> {
         dataSource
             .getAllMarketTickerList()
             .map { tickerDTOs in
-                tickerDTOs.map { dto in
-                    // DTO를 엔티티로 변환
-                    Ticker(
-                        pairSymbol: dto.symbol,
+                tickerDTOs.compactMap { dto -> Ticker? in
+                    let upperCasedDtoSymbol = dto.symbol.uppercased()
+                    let upperCasedBaseSymbol = baseSymbol.uppercased()
+                    guard upperCasedDtoSymbol.contains(upperCasedBaseSymbol) else { return nil }
+                    let firstSymbol = upperCasedDtoSymbol.replacingOccurrences(
+                        of: upperCasedBaseSymbol,
+                        with: ""
+                    )
+                    let secondSymbol = upperCasedBaseSymbol
+                    let pairSymbol = PairSymbol(firstSymbol: firstSymbol, secondSymbol: secondSymbol)
+                    return Ticker(
+                        pairSymbol: pairSymbol,
                         price: Decimal(string: dto.lastPrice) ?? 0.0,
                         totalTradedQuoteAssetVolume: Decimal(string: dto.quoteAssetVolume) ?? 0.0,
                         changedPercent: Decimal(string: dto.priceChangePercent) ?? 0.0,

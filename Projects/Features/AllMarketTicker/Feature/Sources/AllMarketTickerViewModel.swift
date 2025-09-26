@@ -109,13 +109,16 @@ final class AllMarketTickerViewModel: ObservableObject, AllMarketTickerViewModel
             )
             
         case .view(.tickerRowTapped(let index)):
-            //            listener?.request(.presentCoinDetailPage(
-            //                listener: self,
-            //                symbolInfo: .init(
-            //                    firstSymbol: "",
-            //                    secondSymbol: ""
-            //                )
-            //            ))
+            if let selectedTicker = state.tickerList?.tickers[index] {
+                let pairSymbol = selectedTicker.pairSymbol
+                listener?.request(.presentCoinDetailPage(
+                    listener: self,
+                    symbolInfo: .init(
+                        firstSymbol: pairSymbol.firstSymbol,
+                        secondSymbol: pairSymbol.secondSymbol
+                    )
+                ))
+            }
             break
             
         case .view(.sortSelectionButtonTapped(let index)):
@@ -279,14 +282,12 @@ private extension AllMarketTickerViewModel {
 // MARK: Create ticker cell render object
 private extension AllMarketTickerViewModel {
     func createTickerCellRO(_ ticker: Ticker, currencyType: CurrencyType) -> TickerCellRO {
-        let first_symbol = ticker.pairSymbol
-            .uppercased()
-            .replacingOccurrences(of: "USDT", with: "")
-        let symbolImageURL = createSymbolImageURL(symbol: first_symbol)
+        let symbolText = ticker.pairSymbol.fullSymbol.uppercased()
+        let symbolImageURL = createSymbolImageURL(symbol: ticker.pairSymbol.firstSymbol)
         let priceText = createPriceText(ticker.price, currencyType: currencyType)
         let (cpText, cpTextColor) = createChangePercentTextConfig(ticker.changedPercent)
         return TickerCellRO(
-            symbolText: ticker.pairSymbol.uppercased(),
+            symbolText: symbolText,
             symbolImageURL: symbolImageURL,
             priceText: priceText,
             changePercentText: cpText,

@@ -12,14 +12,14 @@ import DomainInterface
 struct TickerSymbolAscendingComparator: TickerComparator {
     let id: String = String(describing: TickerSymbolAscendingComparator.self)
     func compare(lhs: Ticker, rhs: Ticker) -> Bool {
-        lhs.pairSymbol < rhs.pairSymbol
+        lhs.pairSymbol.fullSymbol.uppercased() < rhs.pairSymbol.fullSymbol.uppercased()
     }
 }
 
 struct TickerSymbolDescendingComparator: TickerComparator {
     let id: String = String(describing: TickerSymbolDescendingComparator.self)
     func compare(lhs: Ticker, rhs: Ticker) -> Bool {
-        lhs.pairSymbol > rhs.pairSymbol
+        lhs.pairSymbol.fullSymbol.uppercased() > rhs.pairSymbol.fullSymbol.uppercased()
     }
 }
 

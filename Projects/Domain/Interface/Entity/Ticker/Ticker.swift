@@ -7,8 +7,19 @@
 
 import Foundation
 
+public struct PairSymbol {
+    public let firstSymbol: String
+    public let secondSymbol: String
+    public var fullSymbol: String { firstSymbol + secondSymbol }
+    
+    public init(firstSymbol: String, secondSymbol: String) {
+        self.firstSymbol = firstSymbol
+        self.secondSymbol = secondSymbol
+    }
+}
+
 public struct Ticker {
-    public let pairSymbol: String
+    public let pairSymbol: PairSymbol
     public var price: Decimal
     public let totalTradedQuoteAssetVolume: Decimal
     public let changedPercent: Decimal
@@ -16,7 +27,7 @@ public struct Ticker {
     public let bestAskPrice: Decimal
     
     public init(
-        pairSymbol: String,
+        pairSymbol: PairSymbol,
         price: Decimal,
         totalTradedQuoteAssetVolume: Decimal,
         changedPercent: Decimal,
