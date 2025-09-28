@@ -27,7 +27,7 @@ struct AllMarketTickerUseCaseTests {
         let tickerRepository = StubAllMarketTickerRepository(
             tickers: [
                 .init(
-                    pairSymbol: "TESTUSDT",
+                    pairSymbol: PairSymbol(firstSymbol: "TEST", secondSymbol: "USDT"),
                     price: 100,
                     totalTradedQuoteAssetVolume: 0.0,
                     changedPercent: 0.0,

@@ -18,7 +18,10 @@ public final class FakeAllMarketTickerUseCase: AllMarketTickersUseCase {
     public func getTickerListStream() -> AnyPublisher<TickerList, Never> {
         let tickers = (0..<500).map { index in
             Ticker(
-                pairSymbol: "BTC\(index)"+"USDT",
+                pairSymbol: PairSymbol(
+                    firstSymbol: "BTC\(index)",
+                    secondSymbol: "USDT"
+                ),
                 price: Decimal(100 * index),
                 totalTradedQuoteAssetVolume: Decimal(100 * index),
                 changedPercent: Decimal(100 * index),

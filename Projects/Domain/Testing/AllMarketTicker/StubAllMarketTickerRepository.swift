@@ -18,11 +18,10 @@ public struct StubAllMarketTickerRepository: AllMarketTickersRepository {
         self.tickers = tickers
     }
     
-    public func getTickers() -> AnyPublisher<[Ticker], Never> {
+    public func getStream(baseSymbol: String) -> AnyPublisher<[Ticker], Never> {
         Future<[Ticker], Never> { promise in
             promise(.success(tickers))
         }
         .eraseToAnyPublisher()
     }
-    
 }
